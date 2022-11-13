@@ -15,6 +15,7 @@ public class Tests
     //todo tdd 2nd dimension
     //todo ASP project
     //todo tdd multidecked ships (what about zigzag ships in 2 dimensions?)
+    //todo console interface
 
     [SetUp]
     public void SetUp()
