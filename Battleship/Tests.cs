@@ -20,6 +20,7 @@ public class Tests
     public void SetUp()
     {
         excludedLocations1 = CreateLocationList();
+        excludedLocations2 = CreateLocationList();
         player1Turn = true;
         win = false;
     }
@@ -45,7 +46,7 @@ public class Tests
 
         Assert.That(player1Turn, Is.False);
         Assert.That(win, Is.False);
-        Assert.That(player2Ships!, Has.Count.EqualTo(1));
+        AssertSingleInt(player2Ships!);
     }
 
     //todo similar for 2nd player
@@ -56,11 +57,9 @@ public class Tests
 
         Attack(144);
 
-        Assert.That(excludedLocations1, Has.Count.EqualTo(1));
-        Assert.That(excludedLocations1.Single(), Is.EqualTo(144));
+        Assert.That(AssertSingleInt(excludedLocations1), Is.EqualTo(144));
     }
 
-    //todo similar for 2nd player
     [Test]
     public void AttackAndWin()
     {
@@ -68,21 +67,37 @@ public class Tests
 
         Attack(2);
 
-        Assert.That(player1Ships, Has.Count.EqualTo(1));
+        AssertSingleInt(excludedLocations1);
         Assert.That(player2Ships!, Is.Empty);
         Assert.That(win);
         Assert.That(player1Turn);
     }
 
+    [Test]
+    public void Player2AttacksAndWins()
+    {
+        CreateShips(1, 2);
+        player1Turn = false;
+
+        Attack(1);
+
+        AssertSingleInt(player2Ships);
+        Assert.That(player1Ships!, Is.Empty);
+        Assert.That(win);
+        Assert.That(player1Turn, Is.False);
+    }
+
     private void Attack(int attackedLocation)
     {
-        if (excludedLocations1.Contains(attackedLocation))
+        var currentExcluded = player1Turn ? excludedLocations1 : excludedLocations2;
+        if (currentExcluded.Contains(attackedLocation))
             throw new Exception(
                 $"Location [{attackedLocation}] is already excluded.");
-        excludedLocations1.Add(attackedLocation);
-        if (player2Ships!.Contains(attackedLocation)) win = true;
+        currentExcluded.Add(attackedLocation);
+        var attackedShips = player1Turn ? player2Ships : player1Ships;
+        if (attackedShips!.Contains(attackedLocation)) win = true;
         else player1Turn = false;
-        player2Ships.Remove(attackedLocation);
+        attackedShips.Remove(attackedLocation);
     }
 
     private void CreateShips(int ship1Location, int ship2Location)
@@ -91,9 +106,16 @@ public class Tests
         player2Ships = CreateLocationList(ship2Location);
     }
 
+    private int AssertSingleInt(List<int> collection)
+    {
+        Assert.That(collection, Has.Count.EqualTo(1));
+        return collection.Single();
+    }
+
     private bool player1Turn;
     private bool win;
     private List<int> excludedLocations1;
+    private List<int> excludedLocations2;
     private List<int>? player1Ships;
     private List<int>? player2Ships;
 
