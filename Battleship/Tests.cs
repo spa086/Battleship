@@ -26,7 +26,6 @@ public class Tests
         SetupSimpleFleets(new[] { 1 }, new[] { 2 });
     }
 
-    //todo tdd this but for 1st player turn
     [Test]
     public void DamagingAMultideckShip()
     {
