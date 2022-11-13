@@ -10,7 +10,9 @@ public class Tests
     [Test]
     public void SimplestHit()
     {
-        var hit = true;
+        var shipLocation = 0;
+        var attackedLocation = 0;
+        var hit = shipLocation == attackedLocation;
         Assert.That(hit);
     }
 }
