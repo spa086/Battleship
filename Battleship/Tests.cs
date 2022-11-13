@@ -24,6 +24,7 @@ public class Tests
         win = false;
     }
 
+    //todo similar for 2nd player
     [Test]
     public void AttackSamePlaceTwice()
     {
