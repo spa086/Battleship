@@ -10,7 +10,7 @@ public class Tests
     //todo tdd throw if any location list is uninitialized
     //todo tdd throw if two ships in same location
     //todo tdd throw if ships are adjacent
-    //todo tdd 2nd player turn
+    //todo tdd game cycle
     //todo tdd field borders (and what is nowhere left to fire?)
     //todo tdd 2nd dimension
     //todo ASP project
@@ -168,6 +168,7 @@ public class Tests
 
     class Deck
     {
+        //todo tdd this
         public Deck(int location, bool destroyed = false)
         {
             Destroyed = destroyed;
