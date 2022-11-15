@@ -11,7 +11,7 @@ public class Tests
     //todo tdd throw if two ships in same location
     //todo tdd throw if ships are adjacent
     //todo tdd game cycle
-    //todo tdd field borders (and what is nowhere left to fire?)
+    //todo tdd field borders (and what if nowhere left to fire?)
     //todo tdd 2nd dimension
     //todo ASP project
     //todo console interface
@@ -24,6 +24,18 @@ public class Tests
         player1Turn = true;
         win = false;
         SetupSimpleFleets(new[] { 1 }, new[] { 2 });
+    }
+
+    [Test]
+    public void CreateShipsSimple()
+    {
+        Assert.DoesNotThrow(() => CreateShips(new ShipsCreationFrontModel
+        {
+            Ships = new[] { new ShipFrontModel
+        {
+            Decks =  new []{1,2}
+           }}
+        }));
     }
 
     [Test]
@@ -124,6 +136,9 @@ public class Tests
         else player1Turn = !player1Turn; //todo tdd this
     }
 
+    private void CreateShips(ShipsCreationFrontModel model) => 
+        throw new NotImplementedException();
+
     private void Exclude(int location)
     {
         var currentExcluded =
@@ -145,7 +160,7 @@ public class Tests
     private bool win;
     private List<int> excludedLocations1 = new();
     private List<int> excludedLocations2 = new();
-    //todo tdd validate ship shape
+    //todo INPRO tdd validate ship shape
     private List<Ship> player1Ships = new();
     private List<Ship> player2Ships = new();
 
@@ -162,6 +177,7 @@ public class Tests
             }
         };
 
+    //test helper
     private static bool IsDestroyed(Ship ship) => 
         ship.Decks.Values.All(x => x.Destroyed);
 
@@ -183,6 +199,16 @@ public class Tests
     {
         public Dictionary<int, Deck> Decks { get; set; } 
             = new Dictionary<int, Deck>();
+    }
+
+    class ShipsCreationFrontModel
+    {
+        public ShipFrontModel[] Ships { get; set; } = Array.Empty<ShipFrontModel>();
+    }
+
+    class ShipFrontModel
+    {
+        public int[] Decks { get; set; } = Array.Empty<int>();
     }
 }
 
