@@ -136,8 +136,10 @@ public class Tests
         else player1Turn = !player1Turn; //todo tdd this
     }
 
-    private void CreateShips(ShipsCreationFrontModel model) => 
-        throw new NotImplementedException();
+    private void CreateShips(ShipsCreationFrontModel model)
+    {
+
+    }
 
     private void Exclude(int location)
     {
