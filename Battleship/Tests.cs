@@ -1,3 +1,5 @@
+using NUnit.Framework;
+
 namespace Battleship;
 
 //lines 80 chars
@@ -16,61 +18,69 @@ public class Tests
     //todo ASP project
     //todo console interface
 
+    private readonly TestableGame game = new();
+
     [SetUp]
     public void SetUp()
     {
-        excludedLocations1 = CreateLocationList();
-        excludedLocations2 = CreateLocationList();
-        player1Turn = true;
-        win = false;
-        SetupSimpleFleets(new[] { 1 }, new[] { 2 });
+        game.StandardSetup();
     }
 
     [Test]
     public void CreateShipsSimple()
     {
-        Assert.DoesNotThrow(() => CreateShips(new ShipsCreationFrontModel
+        game.CreateAndSaveShips(new ShipsCreationFrontModel
         {
-            Ships = new[] { new ShipFrontModel
-        {
-            Decks =  new []{1,2}
-           }}
-        }));
+            Ships = new[] {new ShipFrontModel { Decks =  new []{1,2} }},
+            ForPlayer1 = true
+        });
+
+        //todo use separate collection
+        var ship = game.Player1Ships.AssertSingle();
+        var decks = ship.Decks;
+        Assert.That(decks, Has.Count.EqualTo(2));
+        var orderedDecks = decks.Values.OrderBy(x => x.Location);
+        var deck1 = orderedDecks.First();
+        Assert.That(deck1.Destroyed, Is.False);
+        Assert.That(deck1.Location, Is.EqualTo(1));
+        var deck2 = orderedDecks.Last();
+        Assert.That(deck2.Destroyed, Is.False);
+        Assert.That(deck2.Location, Is.EqualTo(2));
     }
 
     [Test]
     public void DamagingAMultideckShip()
     {
-        SetupSimpleFleets(new[] { 0, 1 }, new[] { 2 });
-        player1Turn = false;
+        game.SetupSimpleFleets(new[] { 0, 1 }, new[] { 2 });
+        game.SetTurn(false);
 
-        Attack(1);
+        game.Attack(1);
 
-        Assert.That(player1Ships.AssertSingle().Decks[1].Destroyed);
+        Assert.That(game.Player1Ships.AssertSingle().Decks[1].Destroyed);
     }
 
     //todo tdd this but for 1st player turn
     [Test]
     public void DestroyingAMultideckShip()
     {
-        SetupSimpleFleets(new[] { 0, 1 }, new[] { 2 });
-        player1Ships.Single().Decks[1].Destroyed = true;
-        player1Turn = false;
+        game.SetupSimpleFleets(new[] { 0, 1 }, new[] { 2 });
+        game.Player1Ships.Single().Decks[1].Destroyed = true;
+        game.SetTurn(false);
 
-        Attack(0);
+        game.Attack(0);
 
-        var destroyedShip = player1Ships.AssertSingle();
+        var destroyedShip = game.Player1Ships.AssertSingle();
         Assert.That(destroyedShip.Decks.Values.All(x => x.Destroyed));
-        Assert.That(IsDestroyed(destroyedShip));
+        Assert.That(Game.IsDestroyed(destroyedShip));
     }
 
     //todo similar for 2nd player
     [Test]
     public void AttackSamePlaceTwice()
     {
-        excludedLocations1 = CreateLocationList(1);
+        game.SetupExcludedLocations(1);
 
-        var exception = Assert.Throws<Exception>(() => Attack(1));
+        var exception = Assert.Throws<Exception>(() => game.Attack(1));
         Assert.That(exception.Message, 
             Is.EqualTo("Location [1] is already excluded."));
     }
@@ -79,138 +89,44 @@ public class Tests
     [Test]
     public void Miss()
     {
-        Attack(0);
+        game.Attack(0);
 
-        Assert.That(player1Turn, Is.False);
-        Assert.That(win, Is.False);
-        player2Ships.AssertSingle();
+        Assert.That(game.Player1Turn, Is.False);
+        Assert.That(game.Win, Is.False);
+        game.Player2Ships.AssertSingle();
     }
 
     //todo similar for 2nd player
     [Test]
     public void Excluding()
     {
-        Attack(144);
+        game.Attack(144);
 
-        Assert.That(excludedLocations1.AssertSingle(), Is.EqualTo(144));
+        Assert.That(game.ExcludedLocations1.AssertSingle(), Is.EqualTo(144));
     }
 
     [Test]
     public void AttackAndWin()
     {
-        Attack(2);
+        game.Attack(2);
 
-        excludedLocations1.AssertSingle();
-        Assert.That(IsDestroyed(player2Ships.AssertSingle()));
-        Assert.That(win);
-        Assert.That(player1Turn);
+        game.ExcludedLocations1.AssertSingle();
+        Assert.That(Game.IsDestroyed(game.Player2Ships.AssertSingle()));
+        Assert.That(game.Win);
+        Assert.That(game.Player1Turn);
     }
 
     [Test]
     public void Player2AttacksAndWins()
     {
-        player1Turn = false;
+        game.SetTurn(false);
 
-        Attack(1);
+        game.Attack(1);
 
-        player2Ships.AssertSingle();
-        Assert.That(IsDestroyed(player1Ships.AssertSingle()));
-        Assert.That(win);
-        Assert.That(player1Turn, Is.False);
-    }
-
-    private void Attack(int attackedLocation)
-    {
-        Exclude(attackedLocation);
-        var attackedShips =
-            //todo tdd this condition
-            player1Turn ? player2Ships.Where(x => !IsDestroyed(x)) 
-            : player1Ships.Where(x => !IsDestroyed(x));
-        //todo tdd this condition
-        var attackedShip = attackedShips.SingleOrDefault(ship => 
-            ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
-        if (attackedShip is not null) 
-            attackedShip.Decks.Values.Single(x =>
-                x.Location == attackedLocation).Destroyed = true;
-        if (attackedShips.All(x => IsDestroyed(x))) win = true;
-        else player1Turn = !player1Turn; //todo tdd this
-    }
-
-    private void CreateShips(ShipsCreationFrontModel model)
-    {
-
-    }
-
-    private void Exclude(int location)
-    {
-        var currentExcluded =
-            player1Turn ? excludedLocations1 : excludedLocations2;
-        if (currentExcluded.Contains(location))
-            throw new Exception(
-                $"Location [{location}] is already excluded.");
-        currentExcluded.Add(location);
-    }
-
-    private void SetupSimpleFleets(int[] deckLocations1, 
-        int[] deckLocations2)
-    {
-        player1Ships = CreateSimpleFleet(deckLocations1);
-        player2Ships = CreateSimpleFleet(deckLocations2);
-    }
-
-    private bool player1Turn;
-    private bool win;
-    private List<int> excludedLocations1 = new();
-    private List<int> excludedLocations2 = new();
-    //todo INPRO tdd validate ship shape
-    private List<Ship> player1Ships = new();
-    private List<Ship> player2Ships = new();
-
-    private static List<int> CreateLocationList(params int[] locations) =>
-        locations.ToList();
-
-    private static List<Ship> CreateSimpleFleet(int[] deckLocations) => 
-        new()
-        {
-            new Ship
-            {
-                Decks = deckLocations.Select(x =>
-                    new Deck(x)).ToDictionary(x => x.Location)
-            }
-        };
-
-    //test helper
-    private static bool IsDestroyed(Ship ship) => 
-        ship.Decks.Values.All(x => x.Destroyed);
-
-    class Deck
-    {
-        //todo tdd this
-        public Deck(int location, bool destroyed = false)
-        {
-            Destroyed = destroyed;
-            Location = location;
-        }   
-
-        public bool Destroyed { get; set; }
-
-        public int Location { get; set; }
-    }
-
-    class Ship
-    {
-        public Dictionary<int, Deck> Decks { get; set; } 
-            = new Dictionary<int, Deck>();
-    }
-
-    class ShipsCreationFrontModel
-    {
-        public ShipFrontModel[] Ships { get; set; } = Array.Empty<ShipFrontModel>();
-    }
-
-    class ShipFrontModel
-    {
-        public int[] Decks { get; set; } = Array.Empty<int>();
+        game.Player2Ships.AssertSingle();
+        Assert.That(Game.IsDestroyed(game.Player1Ships.AssertSingle()));
+        Assert.That(game.Win);
+        Assert.That(game.Player1Turn, Is.False);
     }
 }
 
@@ -223,3 +139,4 @@ public static class Extensions
         return collection.Single();
     }
 }
+
