@@ -39,8 +39,8 @@ public class Game
     {
         var newShips = model.Ships.Select(ship => new Ship
         {
-            Decks = ship.Decks.Select(deckLocation =>
-                new Deck(deckLocation)).ToDictionary(x => x.Location)
+            Decks = ship.Decks.Select(deckLocation => new Deck(deckLocation))
+                .ToDictionary(x => x.Location)
         }).ToList();
         if (model.IsForPlayer1)
             player1Ships = newShips;
@@ -50,27 +50,23 @@ public class Game
     public void Attack(int attackedLocation)
     {
         Exclude(attackedLocation);
-        var attackedShips =
-            //todo tdd this condition
-            player1Turn ? player2Ships.Where(x => !IsDestroyed(x))
-            : player1Ships.Where(x => !IsDestroyed(x));
         //todo tdd this condition
-        var attackedShip = attackedShips.SingleOrDefault(ship =>
-            ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
+        var attackedShips = player1Turn ? 
+            player2Ships.Where(x => !IsDestroyed(x)) : player1Ships.Where(x => !IsDestroyed(x));
+        //todo tdd this condition
+        var attackedShip = attackedShips
+            .SingleOrDefault(ship => ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
         if (attackedShip is not null)
-            attackedShip.Decks.Values.Single(x =>
-                x.Location == attackedLocation).Destroyed = true;
+            attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
         if (attackedShips.All(x => IsDestroyed(x))) win = true;
         else player1Turn = !player1Turn; //todo tdd this
     }
 
     private void Exclude(int location)
     {
-        var currentExcluded =
-            player1Turn ? excludedLocations1 : excludedLocations2;
-        if (currentExcluded.Contains(location))
-            throw new Exception(
-                $"Location [{location}] is already excluded.");
+        var currentExcluded = player1Turn ? excludedLocations1 : excludedLocations2;
+        if (currentExcluded.Contains(location)) 
+            throw new Exception($"Location [{location}] is already excluded.");
         currentExcluded.Add(location);
     }
 
