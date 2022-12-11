@@ -33,18 +33,10 @@ class TestableGame : Game
         player2Ships = CreateSimpleFleet(deckLocations2);
     }
 
-    private static List<Ship> CreateSimpleFleet(int[] deckLocations) =>
-        new()
-        {
-            new Ship
-            {
-                Decks = deckLocations.Select(x =>
-                    new Deck(x)).ToDictionary(x => x.Location)
-            }
-        };
+    private static List<Ship> CreateSimpleFleet(int[] deckLocations) => new()
+            {new Ship {Decks = deckLocations.Select(x => new Deck(x)).ToDictionary(x => x.Location)}};
 
-    private static List<int> CreateLocationList(params int[] locations) =>
-        locations.ToList();
+    private static List<int> CreateLocationList(params int[] locations) => locations.ToList();
 }
 
 
