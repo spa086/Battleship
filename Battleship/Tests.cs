@@ -2,7 +2,8 @@ using NUnit.Framework;
 
 namespace Battleship;
 
-//lines 80 chars
+//lines 105 chars
+//methods 20 lines
 //files 200 lines
 //no partial
 //project 20 files
