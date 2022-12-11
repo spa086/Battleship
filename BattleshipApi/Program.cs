@@ -8,10 +8,7 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         var app = builder.Build();
-
-        var gamePool = new GamePool();
-        app.MapGet("/start", _ => Task.Run(() => gamePool.StartGame()));
-
+        app.MapGet("/start", _ => Task.Run(() => new GamePool().StartGame()));
         app.Run();
     }
 }
