@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using BattleShipLibrary;
 
 namespace Battleship;
 
@@ -30,11 +31,8 @@ public class Tests
     [Test]
     public void CreateShipsSimple()
     {
-        game.CreateAndSaveShips(new ShipsCreationFrontModel
-        {
-            Ships = new[] {new ShipFrontModel { Decks =  new []{1,2} }},
-            ForPlayer1 = true
-        });
+        game.CreateAndSaveShips(new FleetCreationModel
+            { Ships = new[] {new ShipCreationModel { Decks =  new []{1,2} }}, IsForPlayer1 = true});
 
         //todo use separate collection
         var ship = game.Player1Ships.AssertSingle();
