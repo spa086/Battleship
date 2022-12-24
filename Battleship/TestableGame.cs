@@ -2,6 +2,11 @@
 
 namespace Battleship;
 
+class TestableGamePool : GamePool
+{
+    public Game TheGame => game;
+}
+
 class TestableGame : Game
 {
     //todo do we need to expose all these propeties?

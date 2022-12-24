@@ -1,5 +1,10 @@
 ﻿namespace BattleShipLibrary;
 
+public class GamePool
+{
+    protected Game game;
+}
+
 public class FleetCreationModel
 {
     public bool IsForPlayer1 { get; set; }

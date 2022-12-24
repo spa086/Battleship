@@ -30,11 +30,12 @@ public class Tests
     }
 
     [Test]
-    public void CreatingAGame()
+    public void StartingAGame()
     {
         var pool = new GamePool();
 
-        Assert.DoesNotThrow(() => pool.StartGame());
+        var resut = pool.StartGame();
+        Assert.That(resut, Is.False);
     }
 
     [Test]

@@ -9,13 +9,13 @@ public static class MainApi
     {
         var builder = WebApplication.CreateBuilder(args);
         var app = builder.Build();
-        var pool = new GamePool();
-        app.MapGet("/start", _ => Task.Run(() => JsonSerializer.Serialize(pool.StartGame())));
-        app.MapGet("/whatsUp", _ => Task.Run(() => JsonSerializer.Serialize(pool.WhatsUp())));
+        builder.Services.AddSingleton<GamePool>();
+        app.MapGet("/start", (GamePool pool) => Task.Run(() => JsonSerializer.Serialize(new Controller(pool).StartGame())));
+        app.MapGet("/whatsUp", (GamePool pool) => Task.Run(() => JsonSerializer.Serialize(new Controller(pool).WhatsUp())));
         //todo tdd what if model is null
-        MapPost<ShipFrontModel[]>(app, "createFleet", pool.CreateFleet); 
+        MapPost<ShipFrontModel[]>(app, "createFleet", (GamePool pool) => new Controller(pool).CreateFleet()); 
         //todo mb this one should be GET with parameters from query?
-        MapPost<LocationTransportModel>(app, "attack", pool.Attack);
+        MapPost<LocationTransportModel>(app, "attack", (GamePool pool) => new Controller(pool).Attack());
         app.Run();
     }
 
@@ -41,13 +41,19 @@ public class ShipFrontModel
     public int[] Decks { get; set; } = Array.Empty<int>();
 }
 
-public class GamePool
+public class Controller
 {
+    public Controller(GamePool pool)
+    {
+        this.pool = pool;
+    }
+
     //true if game is started, false if we are waiting for second player to join.
     public bool StartGame() => true;
     public WhatsUpResponse WhatsUp() => throw new NotImplementedException();
     public void CreateFleet(ShipFrontModel[] shipsToCreate) => throw new NotImplementedException();
     public void Attack(LocationTransportModel model) => throw new NotImplementedException();
+    private GamePool pool;
 }
 
 public enum WhatsUpResponse
