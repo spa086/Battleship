@@ -33,19 +33,13 @@ public class Tests
     //todo tdd whatsup when nobody connected yet - throw exception?
 
     [Test]
-    public void HeyWhatUpController()
-    {
-        var controller = new Controller();
-
-        Assert.That(controller.WhatsUp(), Is.EqualTo(WhatsUpResponse.WaitingForStart));
-    }
+    public void HeyWhatUpController() => 
+        Assert.That(new Controller().WhatsUp(), Is.EqualTo(WhatsUpResponse.WaitingForStart));
 
     [Test]
     public void ControllerCreatesGame()
     {
-        var controller = new Controller();
-
-        Assert.That(controller.StartGame(), Is.False);
+        Assert.That(new Controller().StartGame(), Is.False);
 
         Assert.That(GamePool.TheGame, Is.Not.Null);
         Assert.That(GamePool.TheGame.Started, Is.False);
