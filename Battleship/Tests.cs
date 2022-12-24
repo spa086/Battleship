@@ -30,6 +30,16 @@ public class Tests
     [SetUp]
     public void SetUp() => game.StandardSetup();
 
+    //todo tdd whatsup when nobody connected yet - throw exception?
+
+    [Test]
+    public void HeyWhatUpController()
+    {
+        var controller = new Controller();
+
+        Assert.That(controller.WhatsUp(), Is.EqualTo(WhatsUpResponse.WaitingForStart));
+    }
+
     [Test]
     public void ControllerCreatesGame()
     {

@@ -50,7 +50,7 @@ public class Controller
 {
     //true if game is started, false if we are waiting for second player to join.
     public bool StartGame() => GamePool.StartPlaying();
-    public WhatsUpResponse WhatsUp() => throw new NotImplementedException();
+    public WhatsUpResponse WhatsUp() => WhatsUpResponse.WaitingForStart;
     public void CreateFleet(ShipFrontModel[] shipsToCreate) => throw new NotImplementedException();
     public void Attack(LocationTransportModel model) => throw new NotImplementedException();
 }
