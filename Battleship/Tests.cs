@@ -30,7 +30,7 @@ public class Tests
     public void SetUp() => game.StandardSetup();
 
     [Test]
-    public void CreateFleet()
+    public void CreateFleetByController()
     {
         GamePool.SetGame(new TestableGame().SetupStarted());
 
@@ -198,14 +198,3 @@ public class Tests
         T expectedValue) =>
         Assert.That(controllerFunction(new Controller()), Is.EqualTo(expectedValue));
 }
-
-public static class Extensions
-{
-    //todo tdd what if it is null
-    public static T AssertSingle<T>(this IEnumerable<T> collection)
-    {
-        Assert.That(collection.Count(), Is.EqualTo(1));
-        return collection.Single();
-    }
-}
-
