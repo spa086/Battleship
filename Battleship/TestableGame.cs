@@ -8,8 +8,10 @@ class TestableGame : Game
     public List<int> ExcludedLocations2 => excludedLocations2;
     public bool Win => win;
     public bool Player1Turn => player1Turn;
-    public List<Ship> Player1Ships => this.player1Ships;
-    public List<Ship> Player2Ships => this.player2Ships;
+    public List<Ship> Player1Ships => player1Ships;
+    public List<Ship> Player2Ships => player2Ships;
+
+    public void SetupStarted() => Started = true;
 
     public void SetupExcludedLocations(params int[] locations) => 
         excludedLocations1 = CreateLocationList(locations);

@@ -29,7 +29,7 @@ public static class MainApi
         }));
 
     private static void MapGet<T>(WebApplication app, string url, Func<Controller, T> action) =>
-        app.MapGet("/start", () => Task.Run(() => JsonSerializer
+        app.MapGet(url, () => Task.Run(() => JsonSerializer
             .Serialize(action(CreateController()))));
 
     private static Controller CreateController() => new();
@@ -50,7 +50,15 @@ public class Controller
 {
     //true if game is started, false if we are waiting for second player to join.
     public bool StartGame() => GamePool.StartPlaying();
-    public WhatsUpResponse WhatsUp() => WhatsUpResponse.WaitingForStart;
+    
+    public WhatsUpResponse WhatsUp()
+    {
+        //todo tdd check for null smh
+        if (GamePool.TheGame!.Started)
+            return WhatsUpResponse.CreatingShips;
+        return WhatsUpResponse.WaitingForStart;
+    }
+
     public void CreateFleet(ShipFrontModel[] shipsToCreate) => throw new NotImplementedException();
     public void Attack(LocationTransportModel model) => throw new NotImplementedException();
 }

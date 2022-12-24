@@ -30,11 +30,25 @@ public class Tests
     [SetUp]
     public void SetUp() => game.StandardSetup();
 
+    [Test]
+    public void WhatsUpAfterSecondPlayerJoins()
+    {
+        var game = new TestableGame();
+        game.SetupStarted();
+        GamePool.TheGame = game;
+
+        Assert.That(new Controller().WhatsUp(), Is.EqualTo(WhatsUpResponse.CreatingShips));
+    }
+
     //todo tdd whatsup when nobody connected yet - throw exception?
 
     [Test]
-    public void HeyWhatUpController() => 
+    public void WhatsUpBeforeSecondPlayerJoins()
+    {
+        GamePool.TheGame = new Game();
+
         Assert.That(new Controller().WhatsUp(), Is.EqualTo(WhatsUpResponse.WaitingForStart));
+    }
 
     [Test]
     public void ControllerCreatesGame()

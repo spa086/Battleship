@@ -9,7 +9,7 @@ public static class GamePool
     public static bool StartPlaying()
     {
         var gameCreated = TheGame is not null;
-        if (gameCreated) TheGame.Start(); 
+        if (gameCreated) TheGame!.Start(); 
         else TheGame = new Game();
         return gameCreated;
     }
@@ -53,7 +53,7 @@ public class Ship
 
 public class Game
 {
-    public bool Started { get; private set; }
+    public bool Started { get; protected set; }
 
     //todo test
     public void Start() => Started = true;
