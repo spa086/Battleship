@@ -55,7 +55,7 @@ public class Controller
     {
         //todo tdd check for null smh
         if (GamePool.TheGame!.Started)
-            return WhatsUpResponse.CreatingShips;
+            return WhatsUpResponse.CreatingFleet;
         return WhatsUpResponse.WaitingForStart;
     }
 
@@ -66,7 +66,7 @@ public class Controller
 public enum WhatsUpResponse
 {
     WaitingForStart,
-    CreatingShips,
+    CreatingFleet,
     YourTurn,
     OpponentsTurn
 }
