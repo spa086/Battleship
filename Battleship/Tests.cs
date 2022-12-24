@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using BattleShipLibrary;
 using BattleshipApi;
+using System.Text.Json;
 
 namespace Battleship;
 
@@ -30,13 +31,23 @@ public class Tests
     public void SetUp() => game.StandardSetup();
 
     [Test]
+    public void ControllerCreatesGame()
+    {
+        var controller = new Controller();
+
+        Assert.That(controller.StartGame(), Is.False);
+
+        Assert.That(GamePool.TheGame, Is.Not.Null);
+        Assert.That(GamePool.TheGame.Started, Is.False);
+    }
+
+    [Test]
     public void SecondPlayerJoins()
     {
         GamePool.TheGame = new Game();
         
-        var result = GamePool.StartPlaying();
+        Assert.That(GamePool.StartPlaying(), Is.True);
 
-        Assert.That(result, Is.True);
         Assert.That(GamePool.TheGame.Started, Is.True);
     }
 
