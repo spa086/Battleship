@@ -4,7 +4,6 @@ namespace Battleship;
 
 class TestableGame : Game
 {
-    //todo do we need to expose all these propeties?
     public List<int> ExcludedLocations1 => excludedLocations1;
     public List<int> ExcludedLocations2 => excludedLocations2;
     public bool Win => win;

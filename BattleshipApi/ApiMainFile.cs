@@ -9,30 +9,30 @@ public static class MainApi
     {
         var builder = WebApplication.CreateBuilder(args);
         var app = builder.Build();
-        app.MapGet("/start", () => Task.Run(() => JsonSerializer
-            .Serialize(CreateController().StartGame())));
-        app.MapGet("/whatsUp", () => Task.Run(() => JsonSerializer
-            .Serialize(CreateController().WhatsUp())));
+        MapGet(app, "/start", c => c.StartGame());
+        MapGet(app, "/whatsUp", c => c.WhatsUp());
         //todo tdd what if model is null
-        MapPost<ShipFrontModel[]>(app, "createFleet", 
-            fleeModel => CreateController().CreateFleet(fleeModel)); 
+        MapPost<ShipFrontModel[]>(app, "createFleet", (m, c) => c.CreateFleet(m));
         //todo mb this one should be GET with parameters from query?
-        MapPost<LocationTransportModel>(app, "attack", 
-            attackModel => CreateController().Attack(attackModel));
+        MapPost<LocationTransportModel>(app, "attack", (m, x) => x.Attack(m));
         app.Run();
     }
 
     private static void MapPost<RequestModelType>(WebApplication app, string url, 
-        Action<RequestModelType> action) =>
+        Action<RequestModelType, Controller> action) =>
         app.MapPost("/" + url, context => Task.Run(() =>
         {
             var reader = new StreamReader(context.Request.Body);
             var requestJson = reader.ReadToEnd();
             var model = JsonSerializer.Deserialize<RequestModelType>(requestJson);
-            action(model!); //todo tdd what if model is null
+            action(model!, CreateController()); //todo tdd what if model is null
         }));
 
-    private static Controller CreateController() => new Controller();
+    private static void MapGet<T>(WebApplication app, string url, Func<Controller, T> action) =>
+        app.MapGet("/start", () => Task.Run(() => JsonSerializer
+            .Serialize(action(CreateController()))));
+
+    private static Controller CreateController() => new();
 }
 
 public class LocationTransportModel

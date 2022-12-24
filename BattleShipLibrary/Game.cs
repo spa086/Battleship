@@ -2,12 +2,19 @@
 
 public static class GamePool
 {
+    //todo make ForTesting attribute
+    //for testing
+    public static void Reset() => TheGame = null;
+
     public static bool StartPlaying()
     {
-        TheGame = new Game();
-        return false;
+        var gameCreated = TheGame is not null;
+        if (gameCreated) TheGame.Start(); 
+        else TheGame = new Game();
+        return gameCreated;
     }
 
+    //todo does it need to be public?
     public static Game? TheGame { get; set; }
 }
 
@@ -47,6 +54,10 @@ public class Ship
 public class Game
 {
     public bool Started { get; private set; }
+
+    //todo test
+    public void Start() => Started = true;
+
 
     public void CreateAndSaveShips(FleetCreationModel model)
     {

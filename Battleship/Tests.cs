@@ -23,10 +23,21 @@ public class Tests
 
     private readonly TestableGame game = new();
 
+    [TearDown]
+    public void TearDown() => GamePool.Reset();
+
     [SetUp]
-    public void SetUp()
+    public void SetUp() => game.StandardSetup();
+
+    [Test]
+    public void SecondPlayerJoins()
     {
-        game.StandardSetup();
+        GamePool.TheGame = new Game();
+        
+        var result = GamePool.StartPlaying();
+
+        Assert.That(result, Is.True);
+        Assert.That(GamePool.TheGame.Started, Is.True);
     }
 
     [Test]
@@ -35,9 +46,8 @@ public class Tests
         var resut = GamePool.StartPlaying();
 
         Assert.That(resut, Is.False);
-        var game = GamePool.TheGame;
-        Assert.That(game, Is.Not.Null);
-        Assert.That(game.Started, Is.False);
+        Assert.That(GamePool.TheGame, Is.Not.Null);
+        Assert.That(GamePool.TheGame.Started, Is.False);
     }
 
     [Test]
