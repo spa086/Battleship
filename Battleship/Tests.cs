@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using BattleShipLibrary;
+using BattleshipApi;
 
 namespace Battleship;
 
@@ -26,6 +27,14 @@ public class Tests
     public void SetUp()
     {
         game.StandardSetup();
+    }
+
+    [Test]
+    public void CreatingAGame()
+    {
+        var pool = new GamePool();
+
+        Assert.DoesNotThrow(() => pool.StartGame());
     }
 
     [Test]

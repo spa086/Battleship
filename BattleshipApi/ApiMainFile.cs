@@ -1,8 +1,9 @@
 using System.Text.Json;
+using BattleShipLibrary;
 
 namespace BattleshipApi;
 
-public static class Program
+public static class MainApi
 {
     public static void Main(string[] args)
     {
@@ -43,7 +44,7 @@ public class ShipFrontModel
 public class GamePool
 {
     //true if game is started, false if we are waiting for second player to join.
-    public bool StartGame() => throw new NotImplementedException();
+    public bool StartGame() => true;
     public WhatsUpResponse WhatsUp() => throw new NotImplementedException();
     public void CreateFleet(ShipFrontModel[] shipsToCreate) => throw new NotImplementedException();
     public void Attack(LocationTransportModel model) => throw new NotImplementedException();
@@ -56,4 +57,3 @@ public enum WhatsUpResponse
     YourTurn,
     OpponentsTurn
 }
-

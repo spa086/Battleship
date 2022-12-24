@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Battleship", "Battleship\Battleship.csproj", "{3A6FE5B3-4096-478C-97C6-F63B7B14A9B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipTests", "Battleship\BattleshipTests.csproj", "{3A6FE5B3-4096-478C-97C6-F63B7B14A9B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BattleshipApi", "BattleshipApi\BattleshipApi.csproj", "{942BB409-14FD-44E6-97BC-5825BB03CF3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipApi", "BattleshipApi\BattleshipApi.csproj", "{942BB409-14FD-44E6-97BC-5825BB03CF3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BattleShipLibrary", "BattleShipLibrary\BattleShipLibrary.csproj", "{DACE502C-4E9F-42A3-A595-B687EE0ABD61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipLibrary", "BattleShipLibrary\BattleshipLibrary.csproj", "{DACE502C-4E9F-42A3-A595-B687EE0ABD61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
