@@ -1,8 +1,14 @@
 ﻿namespace BattleShipLibrary;
 
-public class GamePool
+public static class GamePool
 {
-    protected Game game;
+    public static bool StartPlaying()
+    {
+        TheGame = new Game();
+        return false;
+    }
+
+    public static Game? TheGame { get; set; }
 }
 
 public class FleetCreationModel
@@ -40,6 +46,8 @@ public class Ship
 
 public class Game
 {
+    public bool Started { get; private set; }
+
     public void CreateAndSaveShips(FleetCreationModel model)
     {
         var newShips = model.Ships.Select(ship => new Ship

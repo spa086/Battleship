@@ -9,13 +9,16 @@ public static class MainApi
     {
         var builder = WebApplication.CreateBuilder(args);
         var app = builder.Build();
-        builder.Services.AddSingleton<GamePool>();
-        app.MapGet("/start", (GamePool pool) => Task.Run(() => JsonSerializer.Serialize(new Controller(pool).StartGame())));
-        app.MapGet("/whatsUp", (GamePool pool) => Task.Run(() => JsonSerializer.Serialize(new Controller(pool).WhatsUp())));
+        app.MapGet("/start", () => Task.Run(() => JsonSerializer
+            .Serialize(CreateController().StartGame())));
+        app.MapGet("/whatsUp", () => Task.Run(() => JsonSerializer
+            .Serialize(CreateController().WhatsUp())));
         //todo tdd what if model is null
-        MapPost<ShipFrontModel[]>(app, "createFleet", (GamePool pool) => new Controller(pool).CreateFleet()); 
+        MapPost<ShipFrontModel[]>(app, "createFleet", 
+            fleeModel => CreateController().CreateFleet(fleeModel)); 
         //todo mb this one should be GET with parameters from query?
-        MapPost<LocationTransportModel>(app, "attack", (GamePool pool) => new Controller(pool).Attack());
+        MapPost<LocationTransportModel>(app, "attack", 
+            attackModel => CreateController().Attack(attackModel));
         app.Run();
     }
 
@@ -28,6 +31,8 @@ public static class MainApi
             var model = JsonSerializer.Deserialize<RequestModelType>(requestJson);
             action(model!); //todo tdd what if model is null
         }));
+
+    private static Controller CreateController() => new Controller();
 }
 
 public class LocationTransportModel
@@ -43,17 +48,11 @@ public class ShipFrontModel
 
 public class Controller
 {
-    public Controller(GamePool pool)
-    {
-        this.pool = pool;
-    }
-
     //true if game is started, false if we are waiting for second player to join.
     public bool StartGame() => true;
     public WhatsUpResponse WhatsUp() => throw new NotImplementedException();
     public void CreateFleet(ShipFrontModel[] shipsToCreate) => throw new NotImplementedException();
     public void Attack(LocationTransportModel model) => throw new NotImplementedException();
-    private GamePool pool;
 }
 
 public enum WhatsUpResponse
