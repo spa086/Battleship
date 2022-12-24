@@ -35,6 +35,9 @@ public class Tests
         var resut = GamePool.StartPlaying();
 
         Assert.That(resut, Is.False);
+        var game = GamePool.TheGame;
+        Assert.That(game, Is.Not.Null);
+        Assert.That(game.Started, Is.False);
     }
 
     [Test]
