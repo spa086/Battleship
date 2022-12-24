@@ -11,7 +11,11 @@ class TestableGame : Game
     public List<Ship> Player1Ships => player1Ships;
     public List<Ship> Player2Ships => player2Ships;
 
-    public void SetupStarted() => Started = true;
+    public Game SetupStarted()
+    {
+        Started = true;
+        return this;
+    } 
 
     public void SetupExcludedLocations(params int[] locations) => 
         excludedLocations1 = CreateLocationList(locations);

@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using BattleShipLibrary;
 using BattleshipApi;
-using System.Text.Json;
 
 namespace Battleship;
 
@@ -25,17 +24,33 @@ public class Tests
     private readonly TestableGame game = new();
 
     [TearDown]
-    public void TearDown() => GamePool.Reset();
+    public void TearDown() => GamePool.SetGame(null);
 
     [SetUp]
     public void SetUp() => game.StandardSetup();
+
+    [Test]
+    public void CreateFleet()
+    {
+        GamePool.SetGame(new TestableGame().SetupStarted());
+
+        new Controller().CreateFleet(new[] { new ShipFrontModel { Decks = new[] { 1 } } });
+
+        var ship = game.Player1Ships.AssertSingle();
+        Assert.That(ship, Is.Not.Null);
+        var deck = ship.Decks.AssertSingle();
+        Assert.That(deck.Key, Is.EqualTo(1));
+        Assert.That(deck.Value, Is.Not.Null);
+        Assert.That(deck.Value.Location, Is.EqualTo(1));
+        Assert.That(deck.Value.Destroyed, Is.False);
+    }
 
     [Test]
     public void WhatsUpAfterSecondPlayerJoins()
     {
         var game = new TestableGame();
         game.SetupStarted();
-        GamePool.TheGame = game;
+        GamePool.SetGame(game);
 
         AssertControllerReturnValue(x => x.WhatsUp(), WhatsUpResponse.CreatingFleet);
     }
@@ -45,7 +60,7 @@ public class Tests
     [Test]
     public void WhatsUpBeforeSecondPlayerJoins()
     {
-        GamePool.TheGame = new Game();
+        GamePool.SetGame(new Game());
 
         AssertControllerReturnValue(x => x.WhatsUp(), WhatsUpResponse.WaitingForStart);
     }
@@ -62,11 +77,11 @@ public class Tests
     [Test]
     public void SecondPlayerJoins()
     {
-        GamePool.TheGame = new Game();
+        GamePool.SetGame(new Game());
         
         Assert.That(GamePool.StartPlaying(), Is.True);
 
-        Assert.That(GamePool.TheGame.Started, Is.True);
+        Assert.That(GamePool.TheGame!.Started, Is.True);
     }
 
     [Test]

@@ -54,12 +54,21 @@ public class Controller
     public WhatsUpResponse WhatsUp()
     {
         //todo tdd check for null smh
-        if (GamePool.TheGame!.Started)
-            return WhatsUpResponse.CreatingFleet;
+        if (GamePool.TheGame!.Started) return WhatsUpResponse.CreatingFleet;
         return WhatsUpResponse.WaitingForStart;
     }
 
-    public void CreateFleet(ShipFrontModel[] shipsToCreate) => throw new NotImplementedException();
+    public void CreateFleet(ShipFrontModel[] shipsToCreate)
+    {
+        //todo tdd what if game is null
+        GamePool.TheGame!.CreateAndSaveShips(new FleetCreationModel
+        {
+            IsForPlayer1 = true,
+            Ships = shipsToCreate.Select(ship => 
+                new ShipCreationModel { Decks = ship.Decks.ToArray() }).ToArray()
+        });
+    }
+
     public void Attack(LocationTransportModel model) => throw new NotImplementedException();
 }
 

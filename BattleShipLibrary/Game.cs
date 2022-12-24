@@ -4,7 +4,7 @@ public static class GamePool
 {
     //todo make ForTesting attribute
     //for testing
-    public static void Reset() => TheGame = null;
+    public static void SetGame(Game? game) => TheGame = game;
 
     public static bool StartPlaying()
     {
@@ -15,7 +15,7 @@ public static class GamePool
     }
 
     //todo does it need to be public?
-    public static Game? TheGame { get; set; }
+    public static Game? TheGame { get; private set; }
 }
 
 public class FleetCreationModel
