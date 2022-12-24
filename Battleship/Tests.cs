@@ -179,8 +179,6 @@ public class Tests
         Assert.That(game.Player1Turn, Is.False);
     }
 
-    private static Controller CreateController() => new Controller();
-
     private static void AssertControllerReturnValue<T>(Func<Controller, T> controllerFunction,
         T expectedValue) =>
         Assert.That(controllerFunction(new Controller()), Is.EqualTo(expectedValue));
