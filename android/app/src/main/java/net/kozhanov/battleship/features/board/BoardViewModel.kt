@@ -66,8 +66,8 @@ class BoardViewModel(private val gameRepository: GameRepository) : BaseViewModel
             } else {
                 previousState.copy(
                     state = Result(
-                        "Ошибка сети",
-                        "${event.error.cause}"
+                        "Неизвестная ошибка",
+                        "${event.error.message}"
                     )
                 )
             }

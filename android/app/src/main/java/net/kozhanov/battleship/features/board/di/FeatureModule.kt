@@ -42,8 +42,7 @@ val networkModule = module {
 }
 
 fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-    //https://164.92.225.164/
-    return Retrofit.Builder().baseUrl("http://192.168.1.10:5000/").client(okHttpClient)
+    return Retrofit.Builder().baseUrl(URL).client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create()).build()
 }
 
@@ -52,3 +51,5 @@ fun provideOkHttpClient(): OkHttpClient {
 }
 
 fun provideForecastApi(retrofit: Retrofit): GameApi = retrofit.create(GameApi::class.java)
+
+private const val URL = "https://164.92.225.164/"
