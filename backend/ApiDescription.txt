@@ -1,0 +1,33 @@
+GET "/start"
+No parameters.
+Returns bool. True if game is started, false if we are waiting for second player to join the game.
+
+GET "/whatsUp"
+No parameters.
+Returns enum (converted to string in JSON, obviously):
+enum WhatsUpResponse
+{
+    WaitingForStart,
+    CreatingShips,
+    YourTurn,
+    OpponentsTurn
+}
+
+POST "/createFleet"
+Parameter:
+ShipFrontModel[]
+class ShipFrontModel:
+{
+    int[] Decks
+}
+Returns nothing.
+
+POST "/attack"
+Parameter:
+Object of class LocationTransportModel
+class LocationTransportModel:
+{
+    int X
+	int Y
+}
+Returns nothing.
