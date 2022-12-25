@@ -1,5 +1,6 @@
 using BattleShipLibrary;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BattleshipApi;
 
@@ -8,7 +9,13 @@ public static class MainApi
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.WebHost.UseUrls("http://0.0.0.0:5000");
         var app = builder.Build();
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseHttpsRedirection();
+        }
+
         MapGet(app, "/start", c => c.StartGame());
         MapGet(app, "/whatsUp", c => c.WhatsUp());
         //todo tdd what if model is null
