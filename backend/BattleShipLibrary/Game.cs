@@ -6,11 +6,11 @@ public static class GamePool
     //for testing
     public static void SetGame(Game? game) => TheGame = game;
 
-    public static bool StartPlaying()
+    public static bool StartPlaying(int sessionId)
     {
         var gameCreated = TheGame is not null;
         if (gameCreated) TheGame!.Start(); 
-        else TheGame = new Game();
+        else TheGame = new Game(sessionId);
         return gameCreated;
     }
 
@@ -47,12 +47,18 @@ public class Deck
 public class Ship
 {
     //todo make it a hashset
-    public Dictionary<int, Deck> Decks { get; set; }
-        = new Dictionary<int, Deck>();
+    public Dictionary<int, Deck> Decks { get; set; } = new Dictionary<int, Deck>();
 }
 
 public class Game
 {
+    public Game(int sessionId)
+    {
+        SessionId= sessionId;
+    }
+
+    public int SessionId { get; private set; }
+
     public bool Started { get; protected set; }
 
     //todo test
