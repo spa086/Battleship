@@ -46,6 +46,15 @@ public class Tests
     }
 
     [Test]
+    public void StartingAGameByController()
+    {
+        new Controller().WhatsUp();
+
+        Assert.That(GamePool.TheGame, Is.Not.Null);
+        Assert.That(GamePool.TheGame.Started, Is.False);
+    }
+
+    [Test]
     public void WhatsUpAfterSecondPlayerJoins()
     {
         var game = new TestableGame();
@@ -63,15 +72,6 @@ public class Tests
         GamePool.SetGame(new Game());
 
         AssertControllerReturnValue(x => x.WhatsUp(), WhatsUpResponse.WaitingForStart);
-    }
-
-    [Test]
-    public void ControllerCreatesGame()
-    {
-        AssertControllerReturnValue(x => x.StartGame(), false);
-
-        Assert.That(GamePool.TheGame, Is.Not.Null);
-        Assert.That(GamePool.TheGame.Started, Is.False);
     }
 
     [Test]

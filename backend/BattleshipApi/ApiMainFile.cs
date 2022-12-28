@@ -1,6 +1,5 @@
 using BattleShipLibrary;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
 
 namespace BattleshipApi;
 
@@ -54,13 +53,11 @@ public class ShipFrontModel
 
 public class Controller
 {
-    //true if game is started, false if we are waiting for second player to join.
-    public bool StartGame() => GamePool.StartPlaying();
-    
     public WhatsUpResponse WhatsUp()
     {
         //todo tdd check for null smh
-        if (GamePool.TheGame!.Started) return WhatsUpResponse.CreatingFleet;
+        if (GamePool.TheGame?.Started ?? false) return WhatsUpResponse.CreatingFleet;
+        GamePool.StartPlaying();
         return WhatsUpResponse.WaitingForStart;
     }
 
