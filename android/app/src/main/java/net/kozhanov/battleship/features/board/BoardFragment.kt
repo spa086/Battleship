@@ -8,8 +8,7 @@ import net.kozhanov.battleship.base.core.platform.SingleEvent
 import net.kozhanov.battleship.base.extensions.setThrottledClickListener
 import net.kozhanov.battleship.databinding.FragmentBoardBinding
 import net.kozhanov.battleship.features.board.BoardUIEvent.StartGame
-import net.kozhanov.battleship.features.board.BoardViewState.State.Loading
-import net.kozhanov.battleship.features.board.BoardViewState.State.Result
+import net.kozhanov.battleship.features.board.BoardViewState.State.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class BoardFragment : BaseFragment<BoardViewState>(R.layout.fragment_board) {
@@ -17,7 +16,7 @@ class BoardFragment : BaseFragment<BoardViewState>(R.layout.fragment_board) {
     override val viewModel: BoardViewModel by viewModel()
 
     override fun setupUI() {
-        binding.button.setThrottledClickListener {
+        binding.start.setThrottledClickListener {
             viewModel.processUiEvent(StartGame)
         }
     }
@@ -30,6 +29,7 @@ class BoardFragment : BaseFragment<BoardViewState>(R.layout.fragment_board) {
                     title.text = viewState.state.text
                     subtitle.text = viewState.state.subtitle
                 }
+                Init -> {}
             }
             binding.progressBar.isVisible = viewState.isLoadingVisible
             binding.title.isVisible = viewState.isResultVisible
