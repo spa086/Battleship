@@ -1,6 +1,5 @@
 using BattleShipLibrary;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
 
 namespace BattleshipApi;
 
@@ -16,12 +15,11 @@ public static class MainApi
             app.UseHttpsRedirection();
         }
 
-        MapGet(app, "/start", c => c.StartGame());
-        MapGet(app, "/whatsUp", c => c.WhatsUp());
+        MapPost<WhatsupRequestModel>(app, "whatsUp", (m, c) => c. WhatsUp(m));
         //todo tdd what if model is null
         MapPost<ShipFrontModel[]>(app, "createFleet", (m, c) => c.CreateFleet(m));
         //todo mb this one should be GET with parameters from query?
-        MapPost<LocationTransportModel>(app, "attack", (m, x) => x.Attack(m));
+        MapPost<LocationTransportModel>(app, "attack", (m, c) => c.Attack(m));
         app.Run();
     }
 
@@ -35,10 +33,6 @@ public static class MainApi
             action(model!, CreateController()); //todo tdd what if model is null
         }));
 
-    private static void MapGet<T>(WebApplication app, string url, Func<Controller, T> action) =>
-        app.MapGet(url, () => Task.Run(() => JsonSerializer
-            .Serialize(action(CreateController()))));
-
     private static Controller CreateController() => new();
 }
 
@@ -48,6 +42,11 @@ public class LocationTransportModel
     public int Y { get; set; }
 }
 
+public class WhatsupRequestModel
+{
+    public int SessionId { get; set; }
+}
+
 public class ShipFrontModel
 {
     public int[] Decks { get; set; } = Array.Empty<int>();
@@ -55,13 +54,11 @@ public class ShipFrontModel
 
 public class Controller
 {
-    //true if game is started, false if we are waiting for second player to join.
-    public bool StartGame() => GamePool.StartPlaying();
-    
-    public WhatsUpResponse WhatsUp()
+    public WhatsUpResponse WhatsUp(WhatsupRequestModel request)
     {
         //todo tdd check for null smh
-        if (GamePool.TheGame!.Started) return WhatsUpResponse.CreatingFleet;
+        if (GamePool.TheGame?.Started ?? false) return WhatsUpResponse.CreatingFleet;
+        GamePool.StartPlaying(request.SessionId);
         return WhatsUpResponse.WaitingForStart;
     }
 

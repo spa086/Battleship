@@ -21,7 +21,7 @@ public class Tests
     //todo INPRO ASP project
     //todo console interface
 
-    private readonly TestableGame game = new();
+    private readonly TestableGame game = new(0);
 
     [TearDown]
     public void TearDown() => GamePool.SetGame(null);
@@ -32,7 +32,7 @@ public class Tests
     [Test]
     public void CreateFleetByController()
     {
-        GamePool.SetGame(new TestableGame().SetupStarted());
+        GamePool.SetGame(new TestableGame(0).SetupStarted());
 
         new Controller().CreateFleet(new[] { new ShipFrontModel { Decks = new[] { 1 } } });
 
@@ -46,13 +46,22 @@ public class Tests
     }
 
     [Test]
+    public void StartingAGameByController()
+    {
+        new Controller().WhatsUp(new WhatsupRequestModel { SessionId = 0});
+
+        Assert.That(GamePool.TheGame, Is.Not.Null);
+        Assert.That(GamePool.TheGame.Started, Is.False);
+    }
+
+    [Test]
     public void WhatsUpAfterSecondPlayerJoins()
     {
-        var game = new TestableGame();
+        var game = new TestableGame(0);
         game.SetupStarted();
         GamePool.SetGame(game);
 
-        AssertControllerReturnValue(x => x.WhatsUp(), WhatsUpResponse.CreatingFleet);
+        AssertControllerReturnValue(x => x.WhatsUp(null), WhatsUpResponse.CreatingFleet);
     }
 
     //todo tdd whatsup when nobody connected yet - throw exception?
@@ -60,26 +69,17 @@ public class Tests
     [Test]
     public void WhatsUpBeforeSecondPlayerJoins()
     {
-        GamePool.SetGame(new Game());
+        GamePool.SetGame(new Game(0));
 
-        AssertControllerReturnValue(x => x.WhatsUp(), WhatsUpResponse.WaitingForStart);
-    }
-
-    [Test]
-    public void ControllerCreatesGame()
-    {
-        AssertControllerReturnValue(x => x.StartGame(), false);
-
-        Assert.That(GamePool.TheGame, Is.Not.Null);
-        Assert.That(GamePool.TheGame.Started, Is.False);
+        AssertControllerReturnValue(x => x.WhatsUp(new WhatsupRequestModel { SessionId = 0 }), WhatsUpResponse.WaitingForStart);
     }
 
     [Test]
     public void SecondPlayerJoins()
     {
-        GamePool.SetGame(new Game());
+        GamePool.SetGame(new Game(0));
         
-        Assert.That(GamePool.StartPlaying(), Is.True);
+        Assert.That(GamePool.StartPlaying(0), Is.True);
 
         Assert.That(GamePool.TheGame!.Started, Is.True);
     }
@@ -87,7 +87,7 @@ public class Tests
     [Test]
     public void StartingAGame()
     {
-        var resut = GamePool.StartPlaying();
+        var resut = GamePool.StartPlaying(0);
 
         Assert.That(resut, Is.False);
         Assert.That(GamePool.TheGame, Is.Not.Null);

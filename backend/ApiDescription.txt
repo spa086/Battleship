@@ -1,10 +1,6 @@
-"/start"
-No parameters.
-Returns bool. True if game is started, false if we are waiting for second player to join the game.
-
 "/whatsUp" 
 Int:Id
-Returns enum (converted to string in JSON, obviously):
+Returns enum (converted to string in JSON):
 enum WhatsUpResponse
 {
     WaitingForStart,
@@ -15,8 +11,8 @@ enum WhatsUpResponse
 
 "/createFleet"
 Parameter:
-ShipFrontModel[]
-class ShipFrontModel:
+ShipTransporrModel[]
+class ShipTransporrModel:
 {
     int[] Decks
 }
