@@ -16,7 +16,7 @@ public static class MainApi
             app.UseHttpsRedirection();
         }
 
-        MapGet(app, "/whatsUp", c => c.WhatsUp());
+        MapGet(app, "whatsUp", c => c.WhatsUp());
         //todo tdd what if model is null
         MapPost<ShipFrontModel[]>(app, "createFleet", (m, c) => c.CreateFleet(m));
         //todo mb this one should be GET with parameters from query?
@@ -35,7 +35,7 @@ public static class MainApi
         }));
 
     private static void MapGet<T>(WebApplication app, string url, Func<Controller, T> action) =>
-        app.MapGet(url, () => Task.Run(() => JsonSerializer
+        app.MapGet("/" + url, () => Task.Run(() => JsonSerializer
             .Serialize(action(CreateController()))));
 
     private static Controller CreateController() => new();
