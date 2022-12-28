@@ -16,7 +16,6 @@ public static class MainApi
             app.UseHttpsRedirection();
         }
 
-        MapGet(app, "/start", c => c.StartGame());
         MapGet(app, "/whatsUp", c => c.WhatsUp());
         //todo tdd what if model is null
         MapPost<ShipFrontModel[]>(app, "createFleet", (m, c) => c.CreateFleet(m));
