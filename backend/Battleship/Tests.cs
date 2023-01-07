@@ -22,7 +22,7 @@ public class Tests
     //todo console interface
 
     private readonly TestableGame game = new(0);
-
+     
     [TearDown]
     public void TearDown() => GamePool.SetGame(null);
 
