@@ -10,16 +10,11 @@ public static class MainApi
         var builder = WebApplication.CreateBuilder(args);
         builder.WebHost.UseUrls("http://0.0.0.0:5000");
         var app = builder.Build();
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseHttpsRedirection();
-        }
+        if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
-        MapPost<WhatsupRequestModel>(app, "whatsUp", (m, c) => c. WhatsUp(m));
-        MapGet(app, "/whatsUp", c => c.WhatsUp());
+        MapPost<WhatsupRequestModel>(app, "whatsUp", (m, c) => c.WhatsUp(m));
         //todo tdd what if model is null
         MapPost<ShipFrontModel[]>(app, "createFleet", (m, c) => c.CreateFleet(m));
-        //todo mb this one should be GET with parameters from query?
         MapPost<LocationTransportModel>(app, "attack", (m, c) => c.Attack(m));
         app.Run();
     }
@@ -55,6 +50,8 @@ public class ShipFrontModel
 
 public class Controller
 {
+    //todo abort game
+
     public WhatsUpResponse WhatsUp(WhatsupRequestModel request)
     {
         //todo tdd check for null smh
