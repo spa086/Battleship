@@ -1,8 +1,10 @@
 package net.kozhanov.battleship.base.core.data.models
 
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 
 interface GameApi {
-    @GET("/whatsup")
-    suspend fun getGameState(): Boolean
+    @POST("/whatsup")
+    suspend fun getGameState(@Body id: Int): GameState
 }

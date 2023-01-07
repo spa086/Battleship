@@ -4,6 +4,11 @@ namespace Battleship;
 
 class TestableGame : Game
 {
+    public TestableGame(int sessionId) : base(sessionId)
+    {
+
+    }
+
     public List<int> ExcludedLocations1 => excludedLocations1;
     public List<int> ExcludedLocations2 => excludedLocations2;
     public bool Win => win;

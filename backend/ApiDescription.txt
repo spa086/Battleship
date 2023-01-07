@@ -1,10 +1,6 @@
-GET "/start"
-No parameters.
-Returns bool. True if game is started, false if we are waiting for second player to join the game.
-
-GET "/whatsUp"
-No parameters.
-Returns enum (converted to string in JSON, obviously):
+"/whatsUp" 
+Int:Id
+Returns enum (converted to string in JSON):
 enum WhatsUpResponse
 {
     WaitingForStart,
@@ -13,16 +9,16 @@ enum WhatsUpResponse
     OpponentsTurn
 }
 
-POST "/createFleet"
+"/createFleet"
 Parameter:
-ShipFrontModel[]
-class ShipFrontModel:
+ShipTransporrModel[]
+class ShipTransporrModel:
 {
     int[] Decks
 }
 Returns nothing.
 
-POST "/attack"
+"/attack"
 Parameter:
 Object of class LocationTransportModel
 class LocationTransportModel:
