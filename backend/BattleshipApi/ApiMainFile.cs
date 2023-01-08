@@ -25,23 +25,24 @@ public static class MainApi
     {
         app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context)
         {
+            Console.WriteLine($"Starting to process POST request by URL [{urlWithoutSlash}]...");
             var requestModel = await GetRequestModel<TRequestModel>(context);
-            action(requestModel, CreateController()); ////todo tdd what if model is null
-            Console.WriteLine($"Successfully handled POST action request.");
+            action(requestModel, CreateController());
+            Console.WriteLine("Successfully handled POST action request.");
         });
     }
 
-    private static void MapPostFunction<TRequestModel, TResultModel>(WebApplication app, string urlWithoutSlash,
-        Func<TRequestModel, Controller, TResultModel> function = null)
+    private static void MapPostFunction<TRequestModel, TResultModel>(WebApplication app, 
+        string urlWithoutSlash, Func<TRequestModel, Controller, TResultModel> function)
     {
-
         app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context)
         {
+            Console.WriteLine($"Starting to process POST request by URL [{urlWithoutSlash}]...");
             var requestModel = await GetRequestModel<TRequestModel>(context);
             var resultingModel = function(requestModel, CreateController());
-            var resultingJson = JsonSerializer.Serialize(resultingModel); ////todo tdd what if model is null
+            var resultingJson = JsonSerializer.Serialize(resultingModel); 
             Console.WriteLine($"Resulting JSON is: [{resultingJson}].");
-            Console.WriteLine($"Successfully handled POST function request.");
+            Console.WriteLine("Successfully handled POST function request.");
             return resultingJson;
         });
     }
@@ -52,7 +53,7 @@ public static class MainApi
         var requestBody = await reader.ReadToEndAsync();
         Console.WriteLine($"Input JSON: [{requestBody}].\n");
         var requestModel = JsonSerializer.Deserialize<TRequestModel>(requestBody);
-        return requestModel;
+        return requestModel!;
     }
 
     private static Controller CreateController() => new();
