@@ -2,11 +2,6 @@
 using BattleshipApi;
 using BattleShipLibrary;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BattleshipTests;
 
@@ -48,23 +43,16 @@ public class WebTests
     [Test]
     public void WhatsUpAfterSecondPlayerJoins()
     {
-        var game = new TestableGame(0);
-        game.SetupStarted();
-        GamePool.SetGame(game);
-
-        AssertControllerReturnValue(x => x.WhatsUp(null), WhatsUpResponse.CreatingFleet);
-    }
-
-    //todo tdd whatsup when nobody connected yet - throw exception?
-
-    [Test]
-    public void WhatsUpBeforeSecondPlayerJoins()
-    {
         GamePool.SetGame(new Game(0));
 
         AssertControllerReturnValue(x => x.WhatsUp(new WhatsupRequestModel { SessionId = 0 }), 
-            WhatsUpResponse.WaitingForStart);
+            WhatsUpResponse.CreatingFleet);
     }
+
+    [Test]
+    public void WhatsUpBeforeSecondPlayerJoins() =>
+        AssertControllerReturnValue(x => x.WhatsUp(new WhatsupRequestModel { SessionId = 0 }),
+            WhatsUpResponse.WaitingForStart);
 
     private static void AssertControllerReturnValue<T>(Func<Controller, T> controllerFunction,
         T expectedValue) =>

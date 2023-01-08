@@ -1,5 +1,4 @@
 using BattleShipLibrary;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -82,7 +81,7 @@ public class Controller
     public WhatsUpResponse WhatsUp(WhatsupRequestModel request)
     {
         //todo tdd check for null smh
-        if (GamePool.TheGame?.Started ?? false) return WhatsUpResponse.CreatingFleet;
+        if (GamePool.TheGame is not null) return WhatsUpResponse.CreatingFleet;
         GamePool.StartPlaying(request.SessionId);
         return WhatsUpResponse.WaitingForStart;
     }
