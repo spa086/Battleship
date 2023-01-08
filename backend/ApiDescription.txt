@@ -1,29 +1,30 @@
 "/whatsUp" 
-Int:Id
-Returns enum (converted to string in JSON):
-enum WhatsUpResponse
+Request model:
 {
-    WaitingForStart,
-    CreatingShips,
-    YourTurn,
-    OpponentsTurn
+	SessionId - integer.
 }
+Example request body JSON:
+{"SessionId":144}
+Returns one of the following strings:
+    "WaitingForStart",
+    "CreatingShips",
+    "YourTurn",
+    "OpponentsTurn".
+
 
 "/createFleet"
-Parameter:
-ShipTransporrModel[]
-class ShipTransporrModel:
+Request model:
 {
-    int[] Decks
+	Decks - integer array.
 }
+Example request body JSON:
+{"Decks":[1,4,5]}
 Returns nothing.
 
 "/attack"
-Parameter:
-Object of class LocationTransportModel
-class LocationTransportModel:
+Request model:
 {
-    int X
-	int Y
+	X - integer,
+	Y - integer.
 }
 Returns nothing.

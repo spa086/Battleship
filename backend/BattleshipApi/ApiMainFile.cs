@@ -1,5 +1,7 @@
 using BattleShipLibrary;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace BattleshipApi;
 
@@ -12,22 +14,46 @@ public static class MainApi
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
-        MapPost<WhatsupRequestModel>(app, "whatsUp", (m, c) => c.WhatsUp(m));
-        //todo tdd what if model is null
-        MapPost<ShipFrontModel[]>(app, "createFleet", (m, c) => c.CreateFleet(m));
-        MapPost<LocationTransportModel>(app, "attack", (m, c) => c.Attack(m));
+        MapPostFunction<WhatsupRequestModel, WhatsUpResponse>(app, "whatsUp", (m, c) => c.WhatsUp(m));
+        MapPostAction<ShipFrontModel[]>(app, "createFleet", (m, c) => c.CreateFleet(m));
+        MapPostAction<LocationTransportModel>(app, "attack", (m, c) => c.Attack(m));
         app.Run();
     }
 
-    private static void MapPost<RequestModelType>(WebApplication app, string url, 
-        Action<RequestModelType, Controller> action) =>
-        app.MapPost("/" + url, context => Task.Run(() =>
+    private static void MapPostAction<TRequestModel>(WebApplication app, string urlWithoutSlash,
+        Action<TRequestModel, Controller> action)
+    {
+        app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context)
         {
-            var reader = new StreamReader(context.Request.Body);
-            var requestJson = reader.ReadToEnd();
-            var model = JsonSerializer.Deserialize<RequestModelType>(requestJson);
-            action(model!, CreateController()); //todo tdd what if model is null
-        }));
+            var requestModel = await GetRequestModel<TRequestModel>(context);
+            action(requestModel, CreateController()); ////todo tdd what if model is null
+            Console.WriteLine($"Successfully handled POST action request.");
+        });
+    }
+
+    private static void MapPostFunction<TRequestModel, TResultModel>(WebApplication app, string urlWithoutSlash,
+        Func<TRequestModel, Controller, TResultModel> function = null)
+    {
+
+        app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context)
+        {
+            var requestModel = await GetRequestModel<TRequestModel>(context);
+            var resultingModel = function(requestModel, CreateController());
+            var resultingJson = JsonSerializer.Serialize(resultingModel); ////todo tdd what if model is null
+            Console.WriteLine($"Resulting JSON is: [{resultingJson}].");
+            Console.WriteLine($"Successfully handled POST function request.");
+            return resultingJson;
+        });
+    }
+
+    private static async Task<TRequestModel> GetRequestModel<TRequestModel>(HttpContext context)
+    {
+        var reader = new StreamReader(context.Request.Body);
+        var requestBody = await reader.ReadToEndAsync();
+        Console.WriteLine($"Input JSON: [{requestBody}].\n");
+        var requestModel = JsonSerializer.Deserialize<TRequestModel>(requestBody);
+        return requestModel;
+    }
 
     private static Controller CreateController() => new();
 }
@@ -74,6 +100,7 @@ public class Controller
     public void Attack(LocationTransportModel model) => throw new NotImplementedException();
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum WhatsUpResponse
 {
     WaitingForStart,
