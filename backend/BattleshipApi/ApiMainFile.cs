@@ -14,7 +14,7 @@ public static class MainApi
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
         MapPostFunction<WhatsupRequestModel, WhatsUpResponse>(app, "whatsUp", (m, c) => c.WhatsUp(m));
-        MapPostAction<FleetCreationRequestModel>(app, "createFleet", (m, c) => c.CreateFleet(m));
+        MapPostFunction<FleetCreationRequestModel, bool>(app, "createFleet", (m, c) => c.CreateFleet(m));
         MapPostAction<AttackRequestModel>(app, "attack", (m, c) => c.Attack(m));
         app.Run();
     }
@@ -68,6 +68,8 @@ public class AttackRequestModel
 public class WhatsupRequestModel
 {
     public int SessionId { get; set; }
+
+    public bool? IsFirstPlayer { get; set; }
 }
 
 public class FleetCreationRequestModel
@@ -94,16 +96,18 @@ public class Controller
         return WhatsUpResponse.WaitingForStart;
     }
 
-    public void CreateFleet(FleetCreationRequestModel requestModel)
+    public bool CreateFleet(FleetCreationRequestModel requestModel)
     {
         //todo tdd what if game is null
         var game = GamePool.Games[requestModel.SessionId];
+        var player1 = game.State == GameState.BothPlayersCreateFleets;
         game.CreateAndSaveShips(new FleetCreationModel
         {
-            IsForPlayer1 = game.State == GameState.BothPlayersCreateFleets,
+            IsForPlayer1 = player1,
             Ships = requestModel.Ships.Select(ship => 
                 new ShipCreationModel { Decks = ship.Decks.ToArray() }).ToArray()
         });
+        return player1;
     }
 
     public void Attack(AttackRequestModel model) => throw new NotImplementedException();
