@@ -13,14 +13,14 @@ class TestableGame : Game
     public List<int> ExcludedLocations2 => excludedLocations2;
     public bool Win => win;
     public bool Player1Turn => player1Turn;
-    public List<Ship> Player1Ships => player1Ships;
-    public List<Ship> Player2Ships => player2Ships;
+    public List<Ship>? Player1Ships => player1Ships;
+    public List<Ship>? Player2Ships => player2Ships;
 
-    public Game SetupStarted()
+    public Game SetState(GameState newState)
     {
-        Started = true;
+        State = newState;
         return this;
-    } 
+    }
 
     public void SetupExcludedLocations(params int[] locations) => 
         excludedLocations1 = CreateLocationList(locations);
@@ -37,14 +37,19 @@ class TestableGame : Game
     }
 
     public void SetupSimpleFleets(int[] deckLocations1,
-        int[] deckLocations2)
+        int[]? deckLocations2)
     {
         player1Ships = CreateSimpleFleet(deckLocations1);
         player2Ships = CreateSimpleFleet(deckLocations2);
     }
 
-    private static List<Ship> CreateSimpleFleet(int[] deckLocations) => new()
-            {new Ship {Decks = deckLocations.Select(x => new Deck(x)).ToDictionary(x => x.Location)}};
+    private static List<Ship>? CreateSimpleFleet(int[]? deckLocations)
+    {
+        if (deckLocations is null)
+            return null;
+        var decks = deckLocations.Select(x => new Deck(x)).ToDictionary(x => x.Location);
+        return new() {new Ship {Decks = decks}};
+    }
 
     private static List<int> CreateLocationList(params int[] locations) => locations.ToList();
 }

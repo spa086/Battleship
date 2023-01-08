@@ -37,7 +37,7 @@ public class Tests
 
         GamePool.StartPlaying(0);
 
-        Assert.That(GamePool.Games[0].Started, Is.True);
+        Assert.That(GamePool.Games[0].State, Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
 
     [Test]
@@ -47,7 +47,7 @@ public class Tests
 
         var game = GamePool.Games[0];
         Assert.That(game, Is.Not.Null);
-        Assert.That(game.Started, Is.False);
+        Assert.That(game.State, Is.EqualTo(GameState.WaitingForSecondPlayer));
     }
 
     [Test]
@@ -57,7 +57,7 @@ public class Tests
         { Ships = new[] { new ShipCreationModel { Decks = new[] { 1, 2 } } }, IsForPlayer1 = true });
 
         //todo use separate collection
-        var ship = game.Player1Ships.AssertSingle();
+        var ship = game.Player1Ships!.AssertSingle();
         var decks = ship.Decks;
         Assert.That(decks, Has.Count.EqualTo(2));
         var orderedDecks = decks.Values.OrderBy(x => x.Location);
@@ -67,6 +67,7 @@ public class Tests
         var deck2 = orderedDecks.Last();
         Assert.That(deck2.Destroyed, Is.False);
         Assert.That(deck2.Location, Is.EqualTo(2));
+        Assert.That(game.State, Is.EqualTo(GameState.WaitingForSecondPlayerToCreateFleet));
     }
 
     [Test]
@@ -77,7 +78,7 @@ public class Tests
 
         game.Attack(1);
 
-        Assert.That(game.Player1Ships.AssertSingle().Decks[1].Destroyed);
+        Assert.That(game.Player1Ships!.AssertSingle().Decks[1].Destroyed);
     }
 
     //todo tdd this but for 1st player turn
@@ -85,7 +86,7 @@ public class Tests
     public void DestroyingAMultideckShip()
     {
         game.SetupSimpleFleets(new[] { 0, 1 }, new[] { 2 });
-        game.Player1Ships.Single().Decks[1].Destroyed = true;
+        game.Player1Ships!.Single().Decks[1].Destroyed = true;
         game.SetTurn(false);
 
         game.Attack(0);

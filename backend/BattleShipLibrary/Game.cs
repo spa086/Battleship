@@ -57,19 +57,27 @@ public class Ship
     public Dictionary<int, Deck> Decks { get; set; } = new Dictionary<int, Deck>();
 }
 
+public enum GameState
+{
+    WaitingForSecondPlayer,
+    BothPlayersCreateFleets,
+    WaitingForSecondPlayerToCreateFleet,
+    Started
+}
+
 public class Game
 {
     public Game(int sessionId)
     {
-        UserId= sessionId;
+        UserId = sessionId;
     }
 
     public int UserId { get; private set; }
 
-    public bool Started { get; protected set; }
+    public GameState State { get; protected set; }
 
     //todo test
-    public void Start() => Started = true;
+    public void Start() => State = GameState.BothPlayersCreateFleets;
 
 
     public void CreateAndSaveShips(FleetCreationModel model)
@@ -80,16 +88,25 @@ public class Game
                 .ToDictionary(x => x.Location)
         }).ToList();
         if (model.IsForPlayer1)
+        {
             player1Ships = newShips;
-        //todo test for player 2
+            State = GameState.WaitingForSecondPlayerToCreateFleet;
+        }
+        else 
+        {
+            player2Ships = newShips;
+            State = GameState.Started; 
+        }
+        
     }
 
     public void Attack(int attackedLocation)
     {
+        //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);
         //todo tdd this condition
         var attackedShips = player1Turn ? 
-            player2Ships.Where(x => !IsDestroyed(x)) : player1Ships.Where(x => !IsDestroyed(x));
+            player2Ships!.Where(x => !IsDestroyed(x)) : player1Ships!.Where(x => !IsDestroyed(x));
         //todo tdd this condition
         var attackedShip = attackedShips
             .SingleOrDefault(ship => ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
@@ -110,8 +127,8 @@ public class Game
     protected List<int> excludedLocations1 = new();
     protected List<int> excludedLocations2 = new();
     //todo INPRO tdd validate ship shape
-    protected List<Ship> player1Ships = new();
-    protected List<Ship> player2Ships = new();
+    protected List<Ship>? player1Ships;
+    protected List<Ship>? player2Ships;
     protected bool player1Turn;
     protected bool win;
 

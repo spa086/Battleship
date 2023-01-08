@@ -97,9 +97,10 @@ public class Controller
     public void CreateFleet(FleetCreationRequestModel requestModel)
     {
         //todo tdd what if game is null
-        GamePool.Games[requestModel.SessionId].CreateAndSaveShips(new FleetCreationModel
+        var game = GamePool.Games[requestModel.SessionId];
+        game.CreateAndSaveShips(new FleetCreationModel
         {
-            IsForPlayer1 = true,
+            IsForPlayer1 = game.State == GameState.BothPlayersCreateFleets,
             Ships = requestModel.Ships.Select(ship => 
                 new ShipCreationModel { Decks = ship.Decks.ToArray() }).ToArray()
         });
