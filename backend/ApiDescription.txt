@@ -25,7 +25,7 @@ Returns nothing.
 "/attack"
 Request model:
 {
-	X - integer,
-	Y - integer.
+	SessionId - integer.
+	Location - integer.
 }
 Returns nothing.

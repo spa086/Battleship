@@ -15,7 +15,7 @@ public static class MainApi
 
         MapPostFunction<WhatsupRequestModel, WhatsUpResponse>(app, "whatsUp", (m, c) => c.WhatsUp(m));
         MapPostAction<FleetCreationRequestModel>(app, "createFleet", (m, c) => c.CreateFleet(m));
-        MapPostAction<LocationTransportModel>(app, "attack", (m, c) => c.Attack(m));
+        MapPostAction<AttackRequestModel>(app, "attack", (m, c) => c.Attack(m));
         app.Run();
     }
 
@@ -58,10 +58,11 @@ public static class MainApi
     private static Controller CreateController() => new();
 }
 
-public class LocationTransportModel
+public class AttackRequestModel
 {
-    public int X { get; set; }
-    public int Y { get; set; }
+    public int SessionId { get; set; }
+
+    public int Location { get; set; }
 }
 
 public class WhatsupRequestModel
@@ -104,7 +105,7 @@ public class Controller
         });
     }
 
-    public void Attack(LocationTransportModel model) => throw new NotImplementedException();
+    public void Attack(AttackRequestModel model) => throw new NotImplementedException();
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
