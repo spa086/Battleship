@@ -7,22 +7,22 @@ namespace BattleshipTests;
 
 public class WebTests
 {
-    private readonly TestableGame game = new(0);
-
-    [TearDown]
-    public void TearDown() => GamePool.SetGame(null);
-
     [SetUp]
-    public void SetUp() => game.StandardSetup();
+    public void SetUp() => GamePool.ClearGames();
 
     [Test]
     public void CreateFleetByController()
     {
-        GamePool.SetGame(new TestableGame(0).SetupStarted());
+        GamePool.SetGame(new TestableGame(0).SetupStarted(), 0);
 
-        new Controller().CreateFleet(new[] { new ShipFrontModel { Decks = new[] { 1 } } });
+        new Controller().CreateFleet(new FleetCreationRequestModel
+        {
+            Ships = new[] { new ShipTransportModel { Decks = new[] { 1 } } },
+            SessionId = 0
+        });
 
-        var ship = game.Player1Ships.AssertSingle();
+        var testableGame = GamePool.Games[0] as TestableGame;
+        var ship = testableGame!.Player1Ships.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var deck = ship.Decks.AssertSingle();
         Assert.That(deck.Key, Is.EqualTo(1));
@@ -32,25 +32,25 @@ public class WebTests
     }
 
     [Test]
-    public void StartingAGameByController()
+    public void UserDoesNotJoinButCreatesNewGame()
     {
-        new Controller().WhatsUp(new WhatsupRequestModel { SessionId = 0 });
+        GamePool.SetGame(new Game(0), 0);
 
-        Assert.That(GamePool.TheGame, Is.Not.Null);
-        Assert.That(GamePool.TheGame.Started, Is.False);
+        AssertControllerReturnValue(x => x.WhatsUp(new WhatsupRequestModel { SessionId = 1 }),
+            WhatsUpResponse.WaitingForStart);
     }
 
     [Test]
-    public void WhatsUpAfterSecondPlayerJoins()
+    public void SecondPlayerJoins()
     {
-        GamePool.SetGame(new Game(0));
+        GamePool.SetGame(new Game(0), 0);
 
         AssertControllerReturnValue(x => x.WhatsUp(new WhatsupRequestModel { SessionId = 0 }), 
             WhatsUpResponse.CreatingFleet);
     }
 
     [Test]
-    public void WhatsUpBeforeSecondPlayerJoins() =>
+    public void FirstPlayerStarts() =>
         AssertControllerReturnValue(x => x.WhatsUp(new WhatsupRequestModel { SessionId = 0 }),
             WhatsUpResponse.WaitingForStart);
 

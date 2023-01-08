@@ -15,10 +15,11 @@ Returns one of the following strings:
 "/createFleet"
 Request model:
 {
+	SessionId - integer.
 	Decks - integer array.
 }
 Example request body JSON:
-{"Decks":[1,4,5]}
+{"SessionId":144,"Decks":[1,4,5]}
 Returns nothing.
 
 "/attack"

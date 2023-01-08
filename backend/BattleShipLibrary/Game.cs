@@ -4,18 +4,25 @@ public static class GamePool
 {
     //todo make ForTesting attribute
     //for testing
-    public static void SetGame(Game? game) => TheGame = game;
+    public static void ClearGames() => Games.Clear();
 
-    public static bool StartPlaying(int sessionId)
+    //for testing
+    public static void SetGame(Game game, int sessionId) => Games[sessionId] = game;
+
+    public static void StartPlaying(int sessionId)
     {
-        var gameCreated = TheGame is not null;
-        if (gameCreated) TheGame!.Start(); 
-        else TheGame = new Game(sessionId);
-        return gameCreated;
+#pragma warning disable CA1854 
+        if (Games.ContainsKey(sessionId))
+        {
+            var game = Games[sessionId];
+            game.Start();
+        }
+        else Games[sessionId] = new Game(sessionId);
+#pragma warning restore CA1854 
     }
 
     //todo does it need to be public?
-    public static Game? TheGame { get; private set; }
+    public static Dictionary<int, Game> Games { get; private set; } = new Dictionary<int, Game>();
 }
 
 public class FleetCreationModel
@@ -54,10 +61,10 @@ public class Game
 {
     public Game(int sessionId)
     {
-        SessionId= sessionId;
+        UserId= sessionId;
     }
 
-    public int SessionId { get; private set; }
+    public int UserId { get; private set; }
 
     public bool Started { get; protected set; }
 

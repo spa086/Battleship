@@ -22,31 +22,32 @@ public class Tests
     //todo console interface
 
     private readonly TestableGame game = new(0);
-     
-    [TearDown]
-    public void TearDown() => GamePool.SetGame(null);
 
     [SetUp]
-    public void SetUp() => game.StandardSetup();
+    public void SetUp()
+    {
+        GamePool.ClearGames();
+        game.StandardSetup();
+    }
 
     [Test]
     public void SecondPlayerJoins()
     {
-        GamePool.SetGame(new Game(0));
-        
-        Assert.That(GamePool.StartPlaying(0), Is.True);
+        GamePool.SetGame(new Game(0), 0);
 
-        Assert.That(GamePool.TheGame!.Started, Is.True);
+        GamePool.StartPlaying(0);
+
+        Assert.That(GamePool.Games[0].Started, Is.True);
     }
 
     [Test]
     public void StartingAGame()
     {
-        var resut = GamePool.StartPlaying(0);
+        GamePool.StartPlaying(0);
 
-        Assert.That(resut, Is.False);
-        Assert.That(GamePool.TheGame, Is.Not.Null);
-        Assert.That(GamePool.TheGame.Started, Is.False);
+        var game = GamePool.Games[0];
+        Assert.That(game, Is.Not.Null);
+        Assert.That(game.Started, Is.False);
     }
 
     [Test]

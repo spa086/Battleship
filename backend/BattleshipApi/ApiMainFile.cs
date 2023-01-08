@@ -14,7 +14,7 @@ public static class MainApi
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
         MapPostFunction<WhatsupRequestModel, WhatsUpResponse>(app, "whatsUp", (m, c) => c.WhatsUp(m));
-        MapPostAction<ShipFrontModel[]>(app, "createFleet", (m, c) => c.CreateFleet(m));
+        MapPostAction<FleetCreationRequestModel>(app, "createFleet", (m, c) => c.CreateFleet(m));
         MapPostAction<LocationTransportModel>(app, "attack", (m, c) => c.Attack(m));
         app.Run();
     }
@@ -69,7 +69,14 @@ public class WhatsupRequestModel
     public int SessionId { get; set; }
 }
 
-public class ShipFrontModel
+public class FleetCreationRequestModel
+{
+    public int SessionId { get; set; }
+
+    public ShipTransportModel[] Ships { get; set; } = Array.Empty<ShipTransportModel>();
+}
+
+public class ShipTransportModel
 {
     public int[] Decks { get; set; } = Array.Empty<int>();
 }
@@ -81,18 +88,18 @@ public class Controller
     public WhatsUpResponse WhatsUp(WhatsupRequestModel request)
     {
         //todo tdd check for null smh
-        if (GamePool.TheGame is not null) return WhatsUpResponse.CreatingFleet;
+        if (GamePool.Games.ContainsKey(request.SessionId)) return WhatsUpResponse.CreatingFleet;
         GamePool.StartPlaying(request.SessionId);
         return WhatsUpResponse.WaitingForStart;
     }
 
-    public void CreateFleet(ShipFrontModel[] shipsToCreate)
+    public void CreateFleet(FleetCreationRequestModel requestModel)
     {
         //todo tdd what if game is null
-        GamePool.TheGame!.CreateAndSaveShips(new FleetCreationModel
+        GamePool.Games[requestModel.SessionId].CreateAndSaveShips(new FleetCreationModel
         {
             IsForPlayer1 = true,
-            Ships = shipsToCreate.Select(ship => 
+            Ships = requestModel.Ships.Select(ship => 
                 new ShipCreationModel { Decks = ship.Decks.ToArray() }).ToArray()
         });
     }
