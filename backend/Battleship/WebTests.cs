@@ -133,5 +133,4 @@ public class WebTests
     {
         return new WhatsupRequestModel { SessionId = sessionId, IsFirstPlayer = isFirstPlayer };
     }
-
 }
