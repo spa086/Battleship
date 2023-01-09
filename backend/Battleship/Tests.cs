@@ -34,16 +34,14 @@ public class Tests
     {
         GamePool.SetGame(new Game(0), 0);
 
-        GamePool.StartPlaying(0);
-
+        Assert.That(GamePool.StartPlaying(0), Is.True);
         Assert.That(GamePool.Games[0].State, Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
 
     [Test]
     public void StartingAGame()
     {
-        GamePool.StartPlaying(0);
-
+        Assert.That(GamePool.StartPlaying(0), Is.False);
         var game = GamePool.Games[0];
         Assert.That(game, Is.Not.Null);
         Assert.That(game.State, Is.EqualTo(GameState.WaitingForSecondPlayer));

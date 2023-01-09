@@ -17,7 +17,7 @@ public static class MainApi
         MapPostFunction<FleetCreationRequestModel, bool>(app, "createFleet", 
             (m, c) => c.CreateFleet(m));
         MapPostAction<AttackRequestModel>(app, "attack", (m, c) => c.Attack(m));
-        MapPostAction<GameAbortionRequestModel>(app, "attack", (m, c) => c.AbortGame(m));
+        MapPostAction<GameAbortionRequestModel>(app, "abort", (m, c) => c.AbortGame(m));
         app.Run();
     }
 

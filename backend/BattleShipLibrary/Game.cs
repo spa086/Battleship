@@ -9,7 +9,6 @@ public static class GamePool
     //for testing
     public static void SetGame(Game game, int sessionId) => Games[sessionId] = game;
 
-    //todo assert returned value
     public static bool StartPlaying(int sessionId)
     {
         var gameAlreadyExisted = Games.ContainsKey(sessionId);
