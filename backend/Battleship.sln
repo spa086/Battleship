@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipApi", "Battleship
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipLibrary", "BattleShipLibrary\BattleshipLibrary.csproj", "{DACE502C-4E9F-42A3-A595-B687EE0ABD61}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleInterface", "ConsoleInterface\ConsoleInterface.csproj", "{9CFB2230-ED39-4A2D-BD33-472FDDCE878D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{DACE502C-4E9F-42A3-A595-B687EE0ABD61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DACE502C-4E9F-42A3-A595-B687EE0ABD61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DACE502C-4E9F-42A3-A595-B687EE0ABD61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CFB2230-ED39-4A2D-BD33-472FDDCE878D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CFB2230-ED39-4A2D-BD33-472FDDCE878D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CFB2230-ED39-4A2D-BD33-472FDDCE878D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CFB2230-ED39-4A2D-BD33-472FDDCE878D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
