@@ -22,7 +22,7 @@ Request model:
 }
 Example request body JSON:
 {"SessionId":144,"Decks":[1,4,5]}
-Returns bool - false if player is the 1st, true if he's the 2nd.
+Returns bool - true if player is the 1st, false if he's the 2nd.
 
 "/attack"
 Request model:
