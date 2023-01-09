@@ -14,7 +14,8 @@ public static class MainApi
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
         MapPostFunction<WhatsupRequestModel, WhatsUpResponse>(app, "whatsUp", (m, c) => c.WhatsUp(m));
-        MapPostFunction<FleetCreationRequestModel, bool>(app, "createFleet", (m, c) => c.CreateFleet(m));
+        MapPostFunction<FleetCreationRequestModel, bool>(app, "createFleet", 
+            (m, c) => c.CreateFleet(m));
         MapPostAction<AttackRequestModel>(app, "attack", (m, c) => c.Attack(m));
         MapPostAction<GameAbortionRequestModel>(app, "attack", (m, c) => c.AbortGame(m));
         app.Run();
