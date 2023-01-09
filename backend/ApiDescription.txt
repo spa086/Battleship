@@ -2,9 +2,11 @@
 Request model:
 {
 	SessionId - integer.
+	IsFirstPlayer - boolean (optional).
 }
-Example request body JSON:
+JSON Request body examples:
 {"SessionId":144}
+{"SessionId":144, "IsFirstPlayer":true}
 Returns one of the following strings:
     "WaitingForStart",
     "CreatingShips",
@@ -20,7 +22,7 @@ Request model:
 }
 Example request body JSON:
 {"SessionId":144,"Decks":[1,4,5]}
-Returns nothing.
+Returns bool - false if player is the 1st, true if he's the 2nd.
 
 "/attack"
 Request model:
