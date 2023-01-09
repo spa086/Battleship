@@ -88,10 +88,12 @@ public class WebTests
     [Test]
     public void SecondPlayerJoins()
     {
-        CreateAndGetNewTestableGame();
+        var game = CreateAndGetNewTestableGame();
 
         AssertControllerReturnValue(x => x.WhatsUp(new WhatsupRequestModel { SessionId = 0 }), 
             WhatsUpResponse.CreatingFleet);
+
+        Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
 
     [Test]

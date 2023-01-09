@@ -9,16 +9,17 @@ public static class GamePool
     //for testing
     public static void SetGame(Game game, int sessionId) => Games[sessionId] = game;
 
-    public static void StartPlaying(int sessionId)
+    //todo assert returned value
+    public static bool StartPlaying(int sessionId)
     {
-#pragma warning disable CA1854 
-        if (Games.ContainsKey(sessionId))
+        var gameAlreadyExisted = Games.ContainsKey(sessionId);
+        if (gameAlreadyExisted)
         {
             var game = Games[sessionId];
             game.Start();
         }
         else Games[sessionId] = new Game(sessionId);
-#pragma warning restore CA1854 
+        return gameAlreadyExisted;
     }
 
     //todo does it need to be public?

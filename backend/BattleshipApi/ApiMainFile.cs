@@ -90,15 +90,20 @@ public class Controller
 
     public WhatsUpResponse WhatsUp(WhatsupRequestModel request)
     {
-        //todo tdd check for null smh
-        if (GamePool.Games.ContainsKey(request.SessionId)) return WhatsUpResponse.CreatingFleet;
-        GamePool.StartPlaying(request.SessionId);
-        return WhatsUpResponse.WaitingForStart;
+        //todo tdd did not find game
+        if (GamePool.Games.TryGetValue(request.SessionId, out var game) &&
+            game.State == GameState.Started)
+            //todo tdd what if IsFirstPlayer is not set?
+            if (request.IsFirstPlayer!.Value) return WhatsUpResponse.YourTurn;
+            else return WhatsUpResponse.OpponentsTurn;
+        var secondPlayerJoined = GamePool.StartPlaying(request.SessionId);
+        if (secondPlayerJoined) return WhatsUpResponse.CreatingFleet;
+        else return WhatsUpResponse.WaitingForStart;
     }
 
     public bool CreateFleet(FleetCreationRequestModel requestModel)
     {
-        //todo tdd what if game is null
+        //todo tdd what if did not find game
         var game = GamePool.Games[requestModel.SessionId];
         var player1 = game.State == GameState.BothPlayersCreateFleets;
         game.CreateAndSaveShips(new FleetCreationModel
