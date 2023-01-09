@@ -31,3 +31,10 @@ Request model:
 	Location - integer.
 }
 Returns nothing.
+
+"/abort"
+Request model:
+{
+	SessionId - integer.
+}
+Returns nothing.

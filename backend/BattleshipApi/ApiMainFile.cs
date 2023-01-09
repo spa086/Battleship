@@ -93,10 +93,8 @@ public class GameAbortionRequestModel
 
 public class Controller
 {
-    //todo INPRO abort game
-    public void AbortGame(GameAbortionRequestModel request)
-    {
-    }
+    public void AbortGame(GameAbortionRequestModel request) =>
+        GamePool.Games.Remove(request.SessionId);
 
     public WhatsUpResponse WhatsUp(WhatsupRequestModel request)
     {

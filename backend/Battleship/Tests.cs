@@ -18,7 +18,6 @@ public class Tests
     //todo tdd game cycle
     //todo tdd field borders (and what if nowhere left to fire?)
     //todo tdd 2nd dimension
-    //todo INPRO ASP project
     //todo console interface
 
     private readonly TestableGame game = new(0);

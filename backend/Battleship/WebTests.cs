@@ -13,8 +13,12 @@ public class WebTests
     [Test]
     public void GameAbortion()
     {
-        Assert.DoesNotThrow(() => CreateController().AbortGame(
-            new GameAbortionRequestModel { SessionId = 0 }));
+        CreateAndGetNewTestableGame();
+
+        CreateController().AbortGame(new GameAbortionRequestModel { SessionId = 0});
+
+        var count = GamePool.Games.Count;
+        Assert.That(count, Is.EqualTo(0));
     }
 
     [Test]
