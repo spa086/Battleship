@@ -16,6 +16,7 @@ public static class MainApi
         MapPostFunction<WhatsupRequestModel, WhatsUpResponse>(app, "whatsUp", (m, c) => c.WhatsUp(m));
         MapPostFunction<FleetCreationRequestModel, bool>(app, "createFleet", (m, c) => c.CreateFleet(m));
         MapPostAction<AttackRequestModel>(app, "attack", (m, c) => c.Attack(m));
+        MapPostAction<GameAbortionRequestModel>(app, "attack", (m, c) => c.AbortGame(m));
         app.Run();
     }
 
@@ -84,9 +85,17 @@ public class ShipTransportModel
     public int[] Decks { get; set; } = Array.Empty<int>();
 }
 
+public class GameAbortionRequestModel
+{
+    public int SessionId { get; set; }
+}
+
 public class Controller
 {
-    //todo abort game
+    //todo INPRO abort game
+    public void AbortGame(GameAbortionRequestModel request)
+    {
+    }
 
     public WhatsUpResponse WhatsUp(WhatsupRequestModel request)
     {

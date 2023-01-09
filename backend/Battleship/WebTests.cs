@@ -11,6 +11,12 @@ public class WebTests
     public void SetUp() => GamePool.ClearGames();
 
     [Test]
+    public void GameAbortion()
+    {
+        Assert.DoesNotThrow(() => new Controller().AbortGame(new GameAbortionRequestModel { SessionId = 0}));
+    }
+
+    [Test]
     public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
     {
         CreateAndGetNewTestableGame(GameState.Started);
