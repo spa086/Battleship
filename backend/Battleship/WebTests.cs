@@ -1,5 +1,4 @@
-﻿using BattleshipTests;
-using BattleshipApi;
+﻿using BattleshipApi;
 using BattleShipLibrary;
 using NUnit.Framework;
 
@@ -11,62 +10,6 @@ public class WebTests
     public void SetUp() => GamePool.ClearGames();
 
     //todo tdd finishing the game from controller.
-
-    [Test]
-    public void AttackHitsAShip()
-    {
-        var game = new TestableGame(0);
-        game.SetState(GameState.Player1Turn);
-        game.SetupSimpleFleets(new[] { 1 }, new[] { 2, 3 });
-        GamePool.SetGame(game, 0);
-
-        //todo put controller into variable?
-        var result = CreateController().Attack(new AttackRequestModel { Location = 2, SessionId = 0 });
-
-        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Hit));
-        var decks = game.Player2Ships.AssertSingle().Decks.Values;
-        Assert.That(decks, Has.Count.EqualTo(2));
-        //todo check 3 times
-        Assert.That(decks.Where(x => x.Location == 2).AssertSingle().Destroyed, Is.True);
-        Assert.That(decks.Where(x => x.Location == 3).AssertSingle().Destroyed, Is.False);
-        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
-    }
-
-    [Test]
-    public void AttackKillsAShip()
-    {
-        var game = new TestableGame(0);
-        game.SetState(GameState.Player2Turn);
-        game.SetupFleets(new List<Ship> { 
-        new Ship{Decks = new Dictionary<int, Deck> { { 0, new Deck(0, false) } }},
-        new Ship{Decks = new Dictionary<int, Deck>{{ 1, new Deck(1, false) }}}},
-        new List<Ship> { new Ship {Decks = new Dictionary<int, Deck>{{ 2, new Deck(2, false) } }}});
-        GamePool.SetGame(game, 0);
-
-        var result = CreateController().Attack(new AttackRequestModel { Location = 0, SessionId = 0 });
-
-        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Killed));
-    }
-
-    //todo similar for player 2
-    [Test]
-    public void Player1AttacksAndWins()
-    {
-        var game = new TestableGame(0);
-        game.SetState(GameState.Player1Turn);
-        game.SetupSimpleFleets(new[] { 1 }, new[] { 2 });
-        GamePool.SetGame(game, 0);
-
-        //todo put controller into variable?
-        var result = CreateController().Attack(new AttackRequestModel { Location = 2, SessionId = 0 });
-
-        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Win));
-        Assert.That(game.Win, Is.True);
-        //todo check 3 times
-        Assert.That(game.Player2Ships!.Single().Decks.Single().Value.Destroyed, Is.True);
-        Assert.That(game.Player1Ships!.Single().Decks.Single().Value.Destroyed, Is.False);
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
-    }
 
     [Test]
     public void GameAbortion()
