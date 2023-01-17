@@ -82,22 +82,29 @@ public class Game
 
     public void CreateAndSaveShips(FleetCreationModel model)
     {
+        if ((player1Ships ?? Array.Empty<Ship>().ToList()).ToHashSet().Union(
+            (player2Ships ?? Array.Empty<Ship>().ToList()).ToHashSet()).Any())
+            throw new Exception("Two ships at the same location.");
         var newShips = model.Ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Select(deckLocation => new Deck(deckLocation))
                 .ToDictionary(x => x.Location)
         }).ToList();
+        UpdateState(model, newShips);
+    }
+
+    private void UpdateState(FleetCreationModel model, List<Ship> newShips)
+    {
         if (model.IsForPlayer1)
         {
             player1Ships = newShips;
             State = GameState.WaitingForSecondPlayerToCreateFleet;
         }
-        else 
+        else
         {
             player2Ships = newShips;
-            State = GameState.Started; 
+            State = GameState.Started;
         }
-        
     }
 
     public void Attack(int attackedLocation)
@@ -126,7 +133,7 @@ public class Game
 
     protected List<int> excludedLocations1 = new();
     protected List<int> excludedLocations2 = new();
-    //todo INPRO tdd validate ship shape
+    //todo tdd validate ship shape
     protected List<Ship>? player1Ships;
     protected List<Ship>? player2Ships;
     protected bool player1Turn;

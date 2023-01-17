@@ -13,7 +13,6 @@ namespace Battleship;
 public class Tests
 {
     //todo tdd throw if any location list is uninitialized
-    //todo tdd throw if two ships in same location
     //todo tdd throw if ships are adjacent
     //todo tdd game cycle
     //todo tdd field borders (and what if nowhere left to fire?)
@@ -25,6 +24,20 @@ public class Tests
     {
         GamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void TwoShipsInTheSameLocation()
+    {
+        game.SetupSimpleFleets(new[] { 1, 2 }, null);
+
+        var exception = Assert.Throws<Exception>(() => game.CreateAndSaveShips(new FleetCreationModel
+        {
+            IsForPlayer1 = false, 
+            Ships = new[] { new ShipCreationModel { Decks = new int[] { 2, 3 } } } 
+        }));
+
+        Assert.That(exception.Message, Is.EqualTo("Two ships at the same location."));
     }
 
     [Test]
@@ -48,6 +61,7 @@ public class Tests
     [Test]
     public void CreateShipsSimple()
     {
+        game.SetupSimpleFleets(null, null);
         game.CreateAndSaveShips(new FleetCreationModel
         { Ships = new[] { new ShipCreationModel { Decks = new[] { 1, 2 } } }, IsForPlayer1 = true });
 
