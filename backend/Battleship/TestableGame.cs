@@ -48,5 +48,3 @@ public class TestableGame : Game
 
     private static List<int> CreateLocationList(params int[] locations) => locations.ToList();
 }
-
-
