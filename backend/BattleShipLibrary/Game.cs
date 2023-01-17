@@ -154,6 +154,7 @@ public class Game
         {
             attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
             if (attackedShip.Decks.All(x => x.Value.Destroyed)) result = AttackResult.Killed;
+            else result = AttackResult.Hit;
         }
     }
 

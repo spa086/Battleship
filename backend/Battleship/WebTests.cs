@@ -13,6 +13,26 @@ public class WebTests
     //todo tdd finishing the game from controller.
 
     [Test]
+    public void AttackHitsAShip()
+    {
+        var game = new TestableGame(0);
+        game.SetState(GameState.Player1Turn);
+        game.SetupSimpleFleets(new[] { 1 }, new[] { 2, 3 });
+        GamePool.SetGame(game, 0);
+
+        //todo put controller into variable?
+        var result = CreateController().Attack(new AttackRequestModel { Location = 2, SessionId = 0 });
+
+        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Hit));
+        var decks = game.Player2Ships.AssertSingle().Decks.Values;
+        Assert.That(decks, Has.Count.EqualTo(2));
+        //todo check 3 times
+        Assert.That(decks.Where(x => x.Location == 2).AssertSingle().Destroyed, Is.True);
+        Assert.That(decks.Where(x => x.Location == 3).AssertSingle().Destroyed, Is.False);
+        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
+    }
+
+    [Test]
     public void AttackKillsAShip()
     {
         var game = new TestableGame(0);
