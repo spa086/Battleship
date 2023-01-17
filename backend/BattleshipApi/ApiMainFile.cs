@@ -123,7 +123,6 @@ public class Controller
         return player1;
     }
 
-    //todo tdd returned value
     public AttackResponse Attack(AttackRequestModel model)
     {
         //todo tdd what if did not find game

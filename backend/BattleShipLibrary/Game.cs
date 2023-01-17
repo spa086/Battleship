@@ -137,7 +137,7 @@ public class Game
         var newState = player1Turn ? GameState.Player2Turn : GameState.Player1Turn;
         if (attackedShips.All(x => IsDestroyed(x))) win = true;
         else State = newState; //todo tdd this
-        return AttackResult.Hit; //todo tdd correct result
+        return AttackResult.Win; //todo tdd correct result
     }
 
     private void Exclude(int location)

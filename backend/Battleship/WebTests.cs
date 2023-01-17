@@ -22,8 +22,9 @@ public class WebTests
         GamePool.SetGame(game, 0);
 
         //todo put controller into variable?
-        CreateController().Attack(new AttackRequestModel { Location = 2, SessionId = 0 });
+        var result = CreateController().Attack(new AttackRequestModel { Location = 2, SessionId = 0 });
 
+        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Win));
         Assert.That(game.Win, Is.True);
         //todo check 3 times
         Assert.That(game.Player2Ships!.Single().Decks.Single().Value.Destroyed, Is.True);
