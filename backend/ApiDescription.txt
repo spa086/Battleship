@@ -30,7 +30,11 @@ Request model:
 	SessionId - integer.
 	Location - integer.
 }
-Returns nothing.
+Returns one of the following strings:
+    "Hit",
+    "Killed",
+    "Missed",
+    "Win".
 
 "/abort"
 Request model:
