@@ -129,20 +129,41 @@ public class Controller
         //todo tdd what if did not find game
         //todo check 3 times
         var attackResult = GamePool.Games[model.SessionId].Attack(model.Location);
-        var result = attackResult switch
+        var attackResultTransportModel = attackResult switch
         {
-            AttackResult.Win => AttackResponse.Win,
-            AttackResult.Killed => AttackResponse.Killed,
-            AttackResult.Missed => AttackResponse.Missed,
-            AttackResult.Hit => AttackResponse.Hit,
+            AttackResult.Win => AttackResultTransportModel.Win,
+            AttackResult.Killed => AttackResultTransportModel.Killed,
+            AttackResult.Missed => AttackResultTransportModel.Missed,
+            AttackResult.Hit => AttackResultTransportModel.Hit,
             _ => throw new Exception($"Unknown attack result [{attackResult}].")
         };
+        var result = new AttackResponse { Result = attackResultTransportModel };
         return result;
     } 
 }
 
+public class DeckStateTransportModel
+{
+    public int Location { get; set; }
+    public bool Destroyed { get; set; }
+}
+
+public class ShipStateTransportModel
+{
+    public DeckStateTransportModel[] Decks { get; set; } = Array.Empty<DeckStateTransportModel>();
+}
+
+public class AttackResponse
+{
+    public AttackResultTransportModel Result { get; set; }
+    //todo tdd filling
+    public ShipStateTransportModel[] Player1Fleet { get; set; } = Array.Empty<ShipStateTransportModel>();
+    //todo tdd filling
+    public ShipStateTransportModel[] Player2Fleet { get; set; } = Array.Empty<ShipStateTransportModel>();
+}
+
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum AttackResponse
+public enum AttackResultTransportModel
 {
     Hit,
     Killed,

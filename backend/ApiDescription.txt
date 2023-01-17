@@ -30,7 +30,27 @@ Request model:
 	SessionId - integer.
 	Location - integer.
 }
-Returns one of the following strings:
+Returns object:
+{
+	Result - string,
+	Player1Fleet - array of objects:
+	{
+		Decks - array of objects: 
+		{
+			Location - integer.
+			Destroyed - boolean.
+		}
+	}
+	Player2Fleet - array of objects:
+	{
+		Decks - array of objects: 
+		{
+			Location - integer.
+			Destroyed - boolean.
+		}
+	}
+}
+"Result" property can be one of the following strings:
     "Hit",
     "Killed",
     "Missed",
