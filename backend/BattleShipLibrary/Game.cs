@@ -1,5 +1,6 @@
 ﻿namespace BattleShipLibrary;
 
+//todo use DI instead
 public static class GamePool
 {
     //todo make ForTesting attribute

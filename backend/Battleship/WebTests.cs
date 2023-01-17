@@ -10,6 +10,25 @@ public class WebTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
+    //todo similar for player 2
+    [Test]
+    public void Player1AttacksAndWins()
+    {
+        var game = new TestableGame(0);
+        game.SetState(GameState.Player1Turn);
+        game.SetupSimpleFleets(new[] { 1 }, new[] { 2 });
+        GamePool.SetGame(game, 0);
+
+        //todo put controller into variable?
+        CreateController().Attack(new AttackRequestModel { Location = 2, SessionId = 0 });
+
+        Assert.That(game.Win, Is.True);
+        //todo check 3 times
+        Assert.That(game.Player2Ships!.Single().Decks.Single().Value.Destroyed, Is.True);
+        Assert.That(game.Player1Ships!.Single().Decks.Single().Value.Destroyed, Is.False);
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+    }
+
     [Test]
     public void GameAbortion()
     {

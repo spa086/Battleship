@@ -117,13 +117,16 @@ public class Controller
         game.CreateAndSaveShips(new FleetCreationModel
         {
             IsForPlayer1 = player1,
-            Ships = requestModel.Ships.Select(ship => 
+            Ships = requestModel.Ships.Select(ship =>
                 new ShipCreationModel { Decks = ship.Decks.ToArray() }).ToArray()
         });
         return player1;
     }
 
-    public void Attack(AttackRequestModel model) => throw new NotImplementedException();
+    public void Attack(AttackRequestModel model) =>
+        //todo tdd what if did not find game
+        //todo check 3 times
+        GamePool.Games[model.SessionId].Attack(model.Location);
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
