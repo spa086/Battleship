@@ -100,7 +100,7 @@ public class Controller
     {
         //todo tdd did not find game
         if (GamePool.Games.TryGetValue(request.SessionId, out var game) &&
-            game.State == GameState.Started)
+            game.State == GameState.Player1Turn)
             //todo tdd what if IsFirstPlayer is not set?
             if (request.IsFirstPlayer!.Value) return WhatsUpResponse.YourTurn;
             else return WhatsUpResponse.OpponentsTurn;

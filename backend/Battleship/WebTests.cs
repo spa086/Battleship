@@ -24,7 +24,7 @@ public class WebTests
     [Test]
     public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        CreateAndGetNewTestableGame(GameState.Started);
+        CreateAndGetNewTestableGame(GameState.Player1Turn);
 
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0, false));
 
@@ -34,7 +34,7 @@ public class WebTests
     [Test]
     public void Player1WhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        CreateAndGetNewTestableGame(GameState.Started);
+        CreateAndGetNewTestableGame(GameState.Player1Turn);
 
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0, true));
 
@@ -44,7 +44,7 @@ public class WebTests
     [Test]
     public void SecondPlayerCreatesFleet()
     {
-        var testableGame = CreateAndGetNewTestableGame(GameState.WaitingForSecondPlayerToCreateFleet);
+        var testableGame = CreateAndGetNewTestableGame(GameState.WaitingForPlayer2ToCreateFleet);
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel
         {
@@ -60,7 +60,7 @@ public class WebTests
         Assert.That(pair.Value, Is.Not.Null);
         Assert.That(pair.Value.Location, Is.EqualTo(5));
         Assert.That(pair.Value.Destroyed, Is.False);
-        Assert.That(testableGame.State, Is.EqualTo(GameState.Started));
+        Assert.That(testableGame.State, Is.EqualTo(GameState.Player1Turn));
     }
 
     [Test]
@@ -82,7 +82,7 @@ public class WebTests
         Assert.That(deck.Value, Is.Not.Null);
         Assert.That(deck.Value.Location, Is.EqualTo(1));
         Assert.That(deck.Value.Destroyed, Is.False);
-        Assert.That(testableGame.State, Is.EqualTo(GameState.WaitingForSecondPlayerToCreateFleet));
+        Assert.That(testableGame.State, Is.EqualTo(GameState.WaitingForPlayer2ToCreateFleet));
     }
 
     [Test]
@@ -115,11 +115,11 @@ public class WebTests
         Assert.That(controllerFunction(CreateController()), Is.EqualTo(expectedValue));
 
     private static TestableGame CreateAndGetNewTestableGame(
-        GameState state = GameState.WaitingForSecondPlayer)
+        GameState state = GameState.WaitingForPlayer2)
     {
         GamePool.SetGame(new TestableGame(0).SetState(state), 0);
         var testableGame = (GamePool.Games[0] as TestableGame)!;
-        if(state == GameState.Started)
+        if(state == GameState.Player1Turn)
         {
             testableGame.SetupSimpleFleets(new[] { 1 }, new[] { 2 });
         }

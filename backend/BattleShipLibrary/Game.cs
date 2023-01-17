@@ -59,10 +59,11 @@ public class Ship
 
 public enum GameState
 {
-    WaitingForSecondPlayer,
+    WaitingForPlayer2,
     BothPlayersCreateFleets,
-    WaitingForSecondPlayerToCreateFleet,
-    Started
+    WaitingForPlayer2ToCreateFleet,
+    Player1Turn,
+    Player2Turn
 }
 
 public class Game
@@ -98,12 +99,12 @@ public class Game
         if (model.IsForPlayer1)
         {
             player1Ships = newShips;
-            State = GameState.WaitingForSecondPlayerToCreateFleet;
+            State = GameState.WaitingForPlayer2ToCreateFleet;
         }
         else
         {
             player2Ships = newShips;
-            State = GameState.Started;
+            State = GameState.Player1Turn;
         }
     }
 
@@ -112,6 +113,8 @@ public class Game
         //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);
         //todo tdd this condition
+        //todo check for 3 times
+        var player1Turn = State == GameState.Player1Turn;
         var attackedShips = player1Turn ? 
             player2Ships!.Where(x => !IsDestroyed(x)) : player1Ships!.Where(x => !IsDestroyed(x));
         //todo tdd this condition
@@ -119,13 +122,15 @@ public class Game
             .SingleOrDefault(ship => ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
         if (attackedShip is not null)
             attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
+        var newState = player1Turn ? GameState.Player2Turn : GameState.Player1Turn;
         if (attackedShips.All(x => IsDestroyed(x))) win = true;
-        else player1Turn = !player1Turn; //todo tdd this
+        else State = newState; //todo tdd this
     }
 
     private void Exclude(int location)
     {
-        var currentExcluded = player1Turn ? excludedLocations1 : excludedLocations2;
+        //todo check for 3 times
+        var currentExcluded = State == GameState.Player1Turn ? excludedLocations1 : excludedLocations2;
         if (currentExcluded.Contains(location)) 
             throw new Exception($"Location [{location}] is already excluded.");
         currentExcluded.Add(location);
@@ -136,7 +141,6 @@ public class Game
     //todo tdd validate ship shape
     protected List<Ship>? player1Ships;
     protected List<Ship>? player2Ships;
-    protected bool player1Turn;
     protected bool win;
 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);

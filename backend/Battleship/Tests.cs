@@ -55,7 +55,7 @@ public class Tests
         Assert.That(GamePool.StartPlaying(0), Is.False);
         var game = GamePool.Games[0];
         Assert.That(game, Is.Not.Null);
-        Assert.That(game.State, Is.EqualTo(GameState.WaitingForSecondPlayer));
+        Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2));
     }
 
     [Test]
@@ -76,7 +76,7 @@ public class Tests
         var deck2 = orderedDecks.Last();
         Assert.That(deck2.Destroyed, Is.False);
         Assert.That(deck2.Location, Is.EqualTo(2));
-        Assert.That(game.State, Is.EqualTo(GameState.WaitingForSecondPlayerToCreateFleet));
+        Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2ToCreateFleet));
     }
 
     [Test]
@@ -116,15 +116,28 @@ public class Tests
             Is.EqualTo("Location [1] is already excluded."));
     }
 
-    //todo similar for 2nd player
+    [Test]
+    public void SecondPlayerMisses()
+    {
+        game.SetState(GameState.Player2Turn);
+
+        game.Attack(0);
+
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        Assert.That(game.Win, Is.False);
+        //todo tdd player ship desctruction
+        //todo check 3 times
+        game.Player1Ships!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle(); 
+    }
+
     [Test]
     public void Miss()
     {
         game.Attack(0);
 
-        Assert.That(game.Player1Turn, Is.False);
+        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
         Assert.That(game.Win, Is.False);
-        game.Player2Ships.AssertSingle();
+        game.Player2Ships!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
     }
 
     //todo similar for 2nd player
@@ -133,7 +146,7 @@ public class Tests
     {
         game.Attack(144);
 
-        //Assert.That(game.ExcludedLocations1.AssertSingle(), Is.EqualTo(144));
+        Assert.That(game.ExcludedLocations1.AssertSingle(), Is.EqualTo(144));
     }
 
     [Test]
@@ -144,7 +157,7 @@ public class Tests
         game.ExcludedLocations1.AssertSingle();
         Assert.That(Game.IsDestroyed(game.Player2Ships.AssertSingle()));
         Assert.That(game.Win);
-        Assert.That(game.Player1Turn);
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
     }
 
     [Test]
@@ -157,6 +170,6 @@ public class Tests
         game.Player2Ships.AssertSingle();
         Assert.That(Game.IsDestroyed(game.Player1Ships.AssertSingle()));
         Assert.That(game.Win);
-        Assert.That(game.Player1Turn, Is.False);
+        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
     }
 }

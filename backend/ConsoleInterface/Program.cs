@@ -48,8 +48,8 @@ void ProcessCreateShipsDecision()
     var id = int.Parse(idStr!);
     Console.WriteLine("Enter ships in format \"[d1,d2,..];[e1,e2,..];..\" " +
                 "where di, ei etc. are deck coordinates...");
-    var decksArrays = Console.ReadLine().Split(",")
-        .Select(x => x.Substring(1, x.Length - 2)).ToArray()
+    var decksArrays = Console.ReadLine()!.Split(",")
+        .Select(x => x[1..^1]).ToArray()
         .Select(shipString =>
         {
             var decksStrings = shipString.Split(',');
