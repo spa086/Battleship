@@ -14,7 +14,8 @@ do
         else if (choice == ConsoleKey.J) ProcessJoinGameDecision();
         else if (choice == ConsoleKey.S) ProcessCreateShipsDecision();
         else if (choice == ConsoleKey.A) ProcessAttackDecision();
-    } while (choice != ConsoleKey.G && choice != ConsoleKey.J && choice != ConsoleKey.S);
+    } while (choice != ConsoleKey.G && choice != ConsoleKey.J && 
+        choice != ConsoleKey.S && choice != ConsoleKey.A);
 } while (true);
 
 int ReadInt() => int.Parse(Console.ReadLine()!);

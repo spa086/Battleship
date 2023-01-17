@@ -16,7 +16,7 @@ public static class MainApi
         MapPostFunction<WhatsupRequestModel, WhatsUpResponse>(app, "whatsUp", (m, c) => c.WhatsUp(m));
         MapPostFunction<FleetCreationRequestModel, bool>(app, "createFleet", 
             (m, c) => c.CreateFleet(m));
-        MapPostAction<AttackRequestModel>(app, "attack", (m, c) => c.Attack(m));
+        MapPostFunction<AttackRequestModel, AttackResponse>(app, "attack", (m, c) => c.Attack(m));
         MapPostAction<GameAbortionRequestModel>(app, "abort", (m, c) => c.AbortGame(m));
         app.Run();
     }
@@ -123,10 +123,31 @@ public class Controller
         return player1;
     }
 
-    public void Attack(AttackRequestModel model) =>
+    //todo tdd returned value
+    public AttackResponse Attack(AttackRequestModel model)
+    {
         //todo tdd what if did not find game
         //todo check 3 times
-        GamePool.Games[model.SessionId].Attack(model.Location);
+        var attackResult = GamePool.Games[model.SessionId].Attack(model.Location);
+        var result = attackResult switch
+        {
+            AttackResult.Win => AttackResponse.Win,
+            AttackResult.Killed => AttackResponse.Killed,
+            AttackResult.Missed => AttackResponse.Missed,
+            AttackResult.Hit => AttackResponse.Hit,
+            _ => throw new Exception($"Unknown attack result [{attackResult}].")
+        };
+        return result;
+    } 
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum AttackResponse
+{
+    Hit,
+    Killed,
+    Missed,
+    Win
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

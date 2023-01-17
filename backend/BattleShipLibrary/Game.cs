@@ -120,7 +120,7 @@ public class Game
         }
     }
 
-    public void Attack(int attackedLocation)
+    public AttackResult Attack(int attackedLocation)
     {
         //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);
@@ -137,6 +137,7 @@ public class Game
         var newState = player1Turn ? GameState.Player2Turn : GameState.Player1Turn;
         if (attackedShips.All(x => IsDestroyed(x))) win = true;
         else State = newState; //todo tdd this
+        return AttackResult.Hit; //todo tdd correct result
     }
 
     private void Exclude(int location)
@@ -156,4 +157,12 @@ public class Game
     protected bool win;
 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);
+}
+
+public enum AttackResult
+{
+    Hit,
+    Killed,
+    Missed,
+    Win
 }

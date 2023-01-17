@@ -10,6 +10,8 @@ public class WebTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
+    //todo tdd finishing the game from controller.
+
     //todo similar for player 2
     [Test]
     public void Player1AttacksAndWins()
