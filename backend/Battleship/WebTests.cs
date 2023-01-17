@@ -12,6 +12,22 @@ public class WebTests
 
     //todo tdd finishing the game from controller.
 
+    [Test]
+    public void AttackKillsAShip()
+    {
+        var game = new TestableGame(0);
+        game.SetState(GameState.Player2Turn);
+        game.SetupFleets(new List<Ship> { 
+        new Ship{Decks = new Dictionary<int, Deck> { { 0, new Deck(0, false) } }},
+        new Ship{Decks = new Dictionary<int, Deck>{{ 1, new Deck(1, false) }}}},
+        new List<Ship> { new Ship {Decks = new Dictionary<int, Deck>{{ 2, new Deck(2, false) } }}});
+        GamePool.SetGame(game, 0);
+
+        var result = CreateController().Attack(new AttackRequestModel { Location = 0, SessionId = 0 });
+
+        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Killed));
+    }
+
     //todo similar for player 2
     [Test]
     public void Player1AttacksAndWins()

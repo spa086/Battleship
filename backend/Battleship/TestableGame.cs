@@ -31,6 +31,12 @@ public class TestableGame : Game
         SetupSimpleFleets(new[] { 1 }, new[] { 2 });
     }
 
+    public void SetupFleets(List<Ship> fleet1, List<Ship> fleet2)
+    {
+        player1Ships = fleet1;
+        player2Ships = fleet2;
+    }
+
     public void SetupSimpleFleets(int[]? deckLocations1,
         int[]? deckLocations2)
     {

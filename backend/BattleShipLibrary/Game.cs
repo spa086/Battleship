@@ -1,4 +1,6 @@
-﻿namespace BattleShipLibrary;
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace BattleShipLibrary;
 
 //todo use DI instead
 public static class GamePool
@@ -127,18 +129,38 @@ public class Game
         //todo tdd this condition
         //todo check for 3 times
         var player1Turn = State == GameState.Player1Turn;
-        var attackedShips = player1Turn ? 
+        var attackedShips = player1Turn ?
             player2Ships!.Where(x => !IsDestroyed(x)) : player1Ships!.Where(x => !IsDestroyed(x));
-        //todo tdd this condition
-        var attackedShip = attackedShips
-            .SingleOrDefault(ship => ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
-        if (attackedShip is not null)
-            attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
-        var newState = player1Turn ? GameState.Player2Turn : GameState.Player1Turn;
-        if (attackedShips.All(x => IsDestroyed(x))) win = true;
-        else State = newState; //todo tdd this
-        return AttackResult.Win; //todo tdd correct result
+        var result = AttackResult.Missed;
+        var attackedShip = GetAttackedShip(attackedLocation, attackedShips);
+        ProcessHit(attackedLocation, attackedShip, ref result);
+        ProcessWin(player1Turn, attackedShips, ref result);
+        return result; //todo tdd correct result
     }
+
+    private void ProcessWin(bool player1Turn, IEnumerable<Ship> attackedShips, ref AttackResult result)
+    {
+        if (attackedShips.All(x => IsDestroyed(x)))
+        {
+            win = true;
+            result = AttackResult.Win;
+        }
+        else State = player1Turn ? GameState.Player2Turn : GameState.Player1Turn; //todo tdd this
+    }
+
+    private static void ProcessHit(int attackedLocation, Ship? attackedShip, ref AttackResult result)
+    {
+        if (attackedShip is not null)
+        {
+            attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
+            if (attackedShip.Decks.All(x => x.Value.Destroyed)) result = AttackResult.Killed;
+        }
+    }
+
+    private static Ship? GetAttackedShip(int attackedLocation, IEnumerable<Ship> attackedShips) =>
+        //todo tdd this condition
+        attackedShips.SingleOrDefault(ship => 
+            ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
 
     private void Exclude(int location)
     {
