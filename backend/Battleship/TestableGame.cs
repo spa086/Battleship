@@ -1,19 +1,13 @@
 ﻿using BattleShipLibrary;
 
-namespace Battleship;
+namespace BattleshipTests;
 
-class TestableGame : Game
+public class TestableGame : Game
 {
     public TestableGame(int sessionId) : base(sessionId)
     {
 
     }
-
-    public List<int> ExcludedLocations1 => excludedLocations1;
-    public List<int> ExcludedLocations2 => excludedLocations2;
-    public bool Win => win;
-    public List<Ship>? Player1Ships => player1Ships;
-    public List<Ship>? Player2Ships => player2Ships;
 
     public Game SetState(GameState newState)
     {

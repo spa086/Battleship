@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace Battleship;
+namespace BattleshipTests;
 
 public static class Extensions
 {

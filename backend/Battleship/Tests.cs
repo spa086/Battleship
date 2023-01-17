@@ -2,7 +2,7 @@ using NUnit.Framework;
 using BattleShipLibrary;
 using BattleshipApi;
 
-namespace Battleship;
+namespace BattleshipTests;
 
 //lines 105 chars
 //methods 20 lines
@@ -24,6 +24,24 @@ public class Tests
     {
         GamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void Player2CreatesShips()
+    {
+        game.SetupSimpleFleets(new[] { 1 }, null);
+
+        game.CreateAndSaveShips(new FleetCreationModel
+        {
+            IsForPlayer1 = false,
+            Ships = new[] { new ShipCreationModel { Decks = new int[] { 2 } } }
+        });
+
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        var deck = game.Player2Ships.AssertSingle().Decks.AssertSingle();
+        Assert.That(deck.Key, Is.EqualTo(2));
+        Assert.That(deck.Value.Destroyed, Is.False);
+        Assert.That(deck.Value.Location, Is.EqualTo(2));
     }
 
     [Test]

@@ -1,4 +1,4 @@
-﻿using Battleship;
+﻿using BattleshipTests;
 using BattleshipApi;
 using BattleShipLibrary;
 using NUnit.Framework;

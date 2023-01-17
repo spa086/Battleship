@@ -78,20 +78,31 @@ public class Game
 
     public GameState State { get; protected set; }
 
+    public List<int> ExcludedLocations1 => excludedLocations1;
+    public List<int> ExcludedLocations2 => excludedLocations2;
+    public bool Win => win;
+    public List<Ship>? Player1Ships => player1Ships;
+    public List<Ship>? Player2Ships => player2Ships;
+
     //todo test
     public void Start() => State = GameState.BothPlayersCreateFleets;
 
 
     public void CreateAndSaveShips(FleetCreationModel model)
     {
-        if ((player1Ships ?? Array.Empty<Ship>().ToList()).ToHashSet().Union(
-            (player2Ships ?? Array.Empty<Ship>().ToList()).ToHashSet()).Any())
-            throw new Exception("Two ships at the same location.");
         var newShips = model.Ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Select(deckLocation => new Deck(deckLocation))
                 .ToDictionary(x => x.Location)
         }).ToList();
+        var tempPlayer1Ships = model.IsForPlayer1 ? newShips : player1Ships;
+        var tempPlayer2Ships = model.IsForPlayer1 ? player2Ships : newShips;
+        var player1Decks = (tempPlayer1Ships ?? Array.Empty<Ship>().ToList())
+            .SelectMany(x => x.Decks.Keys).ToHashSet();
+        var player2Decks = (tempPlayer2Ships ?? Array.Empty<Ship>().ToList())
+            .SelectMany(x => x.Decks.Keys).ToHashSet();
+        if (player1Decks.Intersect(player2Decks).Any())
+            throw new Exception("Two ships at the same location.");
         UpdateState(model, newShips);
     }
 
