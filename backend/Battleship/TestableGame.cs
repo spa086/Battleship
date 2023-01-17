@@ -25,7 +25,8 @@ class TestableGame : Game
         excludedLocations1 = CreateLocationList(locations);
 
     //todo check for 3 times
-    public void SetTurn(bool setPlayer1Turn) => State = setPlayer1Turn ? GameState.Player1Turn : GameState.Player2Turn;
+    public void SetTurn(bool setPlayer1Turn) => 
+        State = setPlayer1Turn ? GameState.Player1Turn : GameState.Player2Turn;
 
     public void StandardSetup()
     {
