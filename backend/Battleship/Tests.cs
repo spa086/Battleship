@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using BattleShipLibrary;
-using BattleshipApi;
 
 namespace BattleshipTests;
 

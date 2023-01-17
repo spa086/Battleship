@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace BattleShipLibrary;
+﻿namespace BattleShipLibrary;
 
 //todo use DI instead
 public static class GamePool
