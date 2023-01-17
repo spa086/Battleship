@@ -26,8 +26,8 @@ void ProcessAttackDecision()
     var sessionId = ReadInt();
     Console.WriteLine("Where to attack? Enter location: ");
     var location = ReadInt();
-    controller.Attack(new AttackRequestModel { Location= location, SessionId = sessionId });
-    Console.WriteLine($"Attacked location [{location}]. Game id = [{sessionId}].");
+    var result = controller.Attack(new AttackRequestModel { Location= location, SessionId = sessionId });
+    Console.WriteLine($"Attacked location [{location}]. Result: [{result.Result}]. Game id = [{sessionId}].");
 }
 
 string GetBoolString(bool isDestroyed) => isDestroyed ? "t" : "F";
