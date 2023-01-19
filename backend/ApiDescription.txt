@@ -1,27 +1,25 @@
 "/whatsUp" 
 Request model:
 {
-	SessionId - integer.
-	IsFirstPlayer - boolean (optional).
+	userId - int.
 }
 JSON Request body examples:
-{"SessionId":144}
-{"SessionId":144, "IsFirstPlayer":true}
-Returns one of the following strings:
-    "WaitingForStart",
-    "CreatingShips",
-    "YourTurn",
-    "OpponentsTurn".
+{"userId":144}
+Returns object: 
+{
+    state - string enum { "WaitingForStart", "CreatingShips", "YourTurn", "OpponentsTurn" }
+	userId - int optional
+}
 
 
 "/createFleet"
 Request model:
 {
-	SessionId - integer.
-	Decks - integer array.
+	userId - integer.
+	decks - integer array.
 }
 Example request body JSON:
-{"SessionId":144,"Decks":[1,4,5]}
+{"userId":144,"decks":[1,4,5]}
 Returns bool - true if player is the 1st, false if he's the 2nd.
 
 "/attack"
