@@ -19,8 +19,7 @@ Request model:
 	decks - integer array.
 }
 Example request body JSON:
-{"userId":144,"decks":[1,4,5]}
-Returns bool - true if player is the 1st, false if he's the 2nd.
+{"userId":144,"ships":[]}
 
 "/attack"
 Request model:
