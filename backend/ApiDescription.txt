@@ -3,8 +3,6 @@ Request model:
 {
 	userId - int.
 }
-JSON Request body examples:
-{"userId":144}
 Returns object: 
 {
     state - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn" }
@@ -18,23 +16,20 @@ Request model:
 	userId - integer.
 	ships - array of objects:
 	{
-		decks - integer array.
+		decks - array of objects:
+		{
+			"x" - integer,
+			"y" - integer.
+		}
 	}
-}
-Example request body JSON:
-{
-	"userId":144,
-	"ships":
-	[{
-		"decks":[1,2,3]
-	}]
 }
 
 "/attack"
 Request model:
 {
-	userId - integer.
-	location - integer.
+	userId - integer,
+	x - integer,
+	y - integer.
 }
 Returns object:
 {
@@ -44,7 +39,8 @@ Returns object:
 		userId - integer.
 		decks - array of objects: 
 		{
-			location - integer.
+			x - integer,
+			y - integer,
 			destroyed - boolean.
 		}
 	}
@@ -53,7 +49,8 @@ Returns object:
 		userId - integer.
 		decks - array of objects: 
 		{
-			location - integer.
+			x - integer,
+			y - integer,
 			destroyed - boolean.
 		}
 	}
