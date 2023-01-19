@@ -26,8 +26,8 @@ void ProcessAttackDecision()
     var sessionId = ReadInt();
     Console.WriteLine("Where to attack? Enter location: ");
     var location = ReadInt();
-    var result = controller.Attack(new AttackRequestModel { Location= location, SessionId = sessionId });
-    Console.WriteLine($"Attacked location [{location}]. Result: [{result.Result}]. Game id = [{sessionId}].");
+    var result = controller.Attack(new AttackRequestModel { Location= location, userId = sessionId });
+    Console.WriteLine($"Attacked location [{location}]. Result: [{result.result}]. Game id = [{sessionId}].");
 }
 
 string GetBoolString(bool isDestroyed) => isDestroyed ? "t" : "F";
@@ -91,10 +91,10 @@ void ProcessCreateShipsDecision()
         {
             var decksStrings = shipString.Split(',');
             var decks = decksStrings.Select(deckString => int.Parse(deckString)).ToArray();
-            return new ShipTransportModel { Decks = decks };
+            return new ShipTransportModel { decks = decks };
         }).ToArray();
     var response = controller.CreateFleet(new FleetCreationRequestModel
-        { SessionId = id, Ships = decksArrays });
+        { userId = id, ships = decksArrays });
     Console.WriteLine($"Ships created with game id = [{id}]. Response: [{response}].");
 }
 
@@ -104,7 +104,7 @@ void ProcessJoinGameDecision()
     //todo check 3 times
     var idStr = Console.ReadLine();
     var id = int.Parse(idStr!);
-    var response = controller.WhatsUp(new WhatsupRequestModel { SessionId = id });
+    var response = controller.WhatsUp(new WhatsupRequestModel { userId = id });
     lastSessionId = id;
     Console.WriteLine($"Joined game with id = [{id}]. Response: [{response}].");
 }
@@ -112,7 +112,7 @@ void ProcessJoinGameDecision()
 void ProcessCreateGameDecision()
 {
     var sessionId = new Random().Next(100);
-    var response = controller.WhatsUp(new WhatsupRequestModel { SessionId = sessionId });
+    var response = controller.WhatsUp(new WhatsupRequestModel { userId = sessionId });
     lastSessionId = sessionId;
     Console.WriteLine($"Game created with id = [{sessionId}]. Response: [{response}].");
 }

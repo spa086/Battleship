@@ -3,26 +3,22 @@ Request model:
 {
 	userId - int.
 }
-Returns object: 
-{
-    state - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn" }
-	userId - int optional
-}
-
+Returns string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn" }.
 
 "/createFleet"
 Request model:
 {
-	userId - integer.
+	userId - integer,
 	ships - array of objects:
 	{
 		decks - array of objects:
 		{
-			"x" - integer,
-			"y" - integer.
+			x - integer,
+			y - integer.
 		}
 	}
 }
+Returns nothing.
 
 "/attack"
 Request model:

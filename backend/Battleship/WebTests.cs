@@ -49,8 +49,8 @@ public class WebTests
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel
         {
-            Ships = new[] { new ShipTransportModel { Decks = new[] { 5 } } },
-            SessionId = 0
+            ships = new[] { new ShipTransportModel { decks = new[] { 5 } } },
+            userId = 0
         });
 
         Assert.That(result, Is.False);
@@ -71,8 +71,8 @@ public class WebTests
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel
         {
-            Ships = new[] { new ShipTransportModel { Decks = new[] { 1 } } },
-            SessionId = 0
+            ships = new[] { new ShipTransportModel { decks = new[] { 1 } } },
+            userId = 0
         });
 
         Assert.That(result, Is.True);
@@ -132,6 +132,6 @@ public class WebTests
     private static WhatsupRequestModel CreateWhatsUpRequestModel(int sessionId = 0, 
         bool? isFirstPlayer = null)
     {
-        return new WhatsupRequestModel { SessionId = sessionId, IsFirstPlayer = isFirstPlayer };
+        return new WhatsupRequestModel { userId = sessionId, IsFirstPlayer = isFirstPlayer };
     }
 }

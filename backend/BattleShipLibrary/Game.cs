@@ -3,27 +3,25 @@
 //todo use DI instead
 public static class GamePool
 {
-    //todo make ForTesting attribute
     //for testing
-    public static void ClearGames() => Games.Clear();
+    public static void SetGame(Game game, int sessionId) => TheGame = game;
 
-    //for testing
-    public static void SetGame(Game game, int sessionId) => Games[sessionId] = game;
-
-    public static bool StartPlaying(int sessionId)
+    public static bool StartPlaying(int userId)
     {
-        var gameAlreadyExisted = Games.ContainsKey(sessionId);
-        if (gameAlreadyExisted)
+        if (TheGame is null)
         {
-            var game = Games[sessionId];
-            game.Start();
+            TheGame = new Game(user1Id);
         }
-        else Games[sessionId] = new Game(sessionId);
-        return gameAlreadyExisted;
+        else
+        {
+            TheGame.Start();
+        }
+
+        return TheGame is not null;
     }
 
     //todo does it need to be public?
-    public static Dictionary<int, Game> Games { get; private set; } = new Dictionary<int, Game>();
+    public static Game TheGame { get; private set; }
 }
 
 public class FleetCreationModel
@@ -33,9 +31,15 @@ public class FleetCreationModel
     public ShipCreationModel[] Ships { get; set; } = Array.Empty<ShipCreationModel>();
 }
 
+public class Location
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+}
+
 public class ShipCreationModel
 {
-    public int[] Decks { get; set; } = Array.Empty<int>();
+    public Location[] Decks { get; set; } = Array.Empty<Location>();
 }
 
 public class Deck
@@ -69,12 +73,13 @@ public enum GameState
 
 public class Game
 {
-    public Game(int sessionId)
+    public Game(int user1Id)
     {
-        UserId = sessionId;
+        OlgaUserId = user1Id;
     }
 
-    public int UserId { get; private set; }
+    public int? OlgaUserId { get; private set; }
+    public int? StasUserId { get; private set; }
 
     public GameState State { get; protected set; }
 

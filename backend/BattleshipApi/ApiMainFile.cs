@@ -13,11 +13,10 @@ public static class MainApi
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
-        MapPostFunction<WhatsupRequestModel, WhatsUpResponse>(app, "whatsUp", (m, c) => c.WhatsUp(m));
+        MapPostFunction<WhatsupRequestModel, GameStateModel>(app, "whatsUp", (m, c) => c.WhatsUp(m));
         MapPostFunction<FleetCreationRequestModel, bool>(app, "createFleet", 
             (m, c) => c.CreateFleet(m));
         MapPostFunction<AttackRequestModel, AttackResponse>(app, "attack", (m, c) => c.Attack(m));
-        MapPostAction<GameAbortionRequestModel>(app, "abort", (m, c) => c.AbortGame(m));
         app.Run();
     }
 
@@ -62,28 +61,33 @@ public static class MainApi
 
 public class AttackRequestModel
 {
-    public int SessionId { get; set; }
+    public int userId { get; set; }
 
-    public int Location { get; set; }
+    public int x { get; set; }
+    public int y { get; set; }
 }
 
 public class WhatsupRequestModel
 {
-    public int SessionId { get; set; }
-
-    public bool? IsFirstPlayer { get; set; }
+    public int userId { get; set; }
 }
 
 public class FleetCreationRequestModel
 {
-    public int SessionId { get; set; }
+    public int userId { get; set; }
 
-    public ShipTransportModel[] Ships { get; set; } = Array.Empty<ShipTransportModel>();
+    public ShipTransportModel[] ships { get; set; } = Array.Empty<ShipTransportModel>();
+}
+
+public class Location
+{
+    public int x { get; set; }
+    public int y { get; set; }
 }
 
 public class ShipTransportModel
 {
-    public int[] Decks { get; set; } = Array.Empty<int>();
+    public Location[] decks { get; set; } = Array.Empty<Location>();
 }
 
 public class GameAbortionRequestModel
@@ -93,32 +97,40 @@ public class GameAbortionRequestModel
 
 public class Controller
 {
-    public void AbortGame(GameAbortionRequestModel request) =>
-        GamePool.Games.Remove(request.SessionId);
-
-    public WhatsUpResponse WhatsUp(WhatsupRequestModel request)
+    public GameStateModel WhatsUp(WhatsupRequestModel request)
     {
-        //todo tdd did not find game
-        if (GamePool.Games.TryGetValue(request.SessionId, out var game) &&
-            game.State == GameState.Player1Turn)
-            //todo tdd what if IsFirstPlayer is not set?
-            if (request.IsFirstPlayer!.Value) return WhatsUpResponse.YourTurn;
-            else return WhatsUpResponse.OpponentsTurn;
-        var secondPlayerJoined = GamePool.StartPlaying(request.SessionId);
-        if (secondPlayerJoined) return WhatsUpResponse.CreatingFleet;
-        else return WhatsUpResponse.WaitingForStart;
+        var olgaIsPresent = GamePool.TheGame.OlgaUserId.HasValue;
+        var stasIsPresent = GamePool.TheGame.StasUserId.HasValue;
+        if(olgaIsPresent || stasIsPresent)
+        {
+            if (olgaIsPresent)
+            {
+                if (GamePool.TheGame.OlgaUserId == request.userId)
+                    return GameStateModel.YourTurn;
+            }
+            if (stasIsPresent)
+            {
+                if (GamePool.TheGame.StasUserId == request.userId)
+                    return GameStateModel.YourTurn;
+            }
+            return GameStateModel.OpponentsTurn;
+        }
+
+        var secondPlayerJoined = GamePool.StartPlaying(request.userId);
+        if (secondPlayerJoined) return GameStateModel.CreatingFleet;
+        else return GameStateModel.WaitingForStart;
     }
 
     public bool CreateFleet(FleetCreationRequestModel requestModel)
     {
         //todo tdd what if did not find game
-        var game = GamePool.Games[requestModel.SessionId];
+        var game = GamePool.TheGame;
         var player1 = game.State == GameState.BothPlayersCreateFleets;
         game.CreateAndSaveShips(new FleetCreationModel
         {
             IsForPlayer1 = player1,
-            Ships = requestModel.Ships.Select(ship =>
-                new ShipCreationModel { Decks = ship.Decks.ToArray() }).ToArray()
+            Ships = requestModel.ships.Select(ship =>
+                new ShipCreationModel { Decks = ship.decks.ToArray() }).ToArray()
         });
         return player1;
     }
@@ -127,7 +139,7 @@ public class Controller
     {
         //todo tdd what if did not find game
         //todo check 3 times
-        var attackResult = GamePool.Games[model.SessionId].Attack(model.Location);
+        var attackResult = GamePool.Games[model.userId].Attack(model.Location);
         var attackResultTransportModel = attackResult switch
         {
             AttackResult.Win => AttackResultTransportModel.Win,
@@ -136,29 +148,32 @@ public class Controller
             AttackResult.Hit => AttackResultTransportModel.Hit,
             _ => throw new Exception($"Unknown attack result [{attackResult}].")
         };
-        var result = new AttackResponse { Result = attackResultTransportModel };
+        var result = new AttackResponse { result = attackResultTransportModel };
         return result;
     } 
 }
 
-public class DeckStateTransportModel
+internal enum UserRole { Olga, Dmitry }
+
+public class DeckStateModel
 {
-    public int Location { get; set; }
-    public bool Destroyed { get; set; }
+    public int x { get; set; }
+    public int y { get; set; }
+    public bool destroyed { get; set; }
 }
 
-public class ShipStateTransportModel
+public class ShipStateModel
 {
-    public DeckStateTransportModel[] Decks { get; set; } = Array.Empty<DeckStateTransportModel>();
+    public DeckStateModel[] decks { get; set; } = Array.Empty<DeckStateModel>();
 }
 
 public class AttackResponse
 {
-    public AttackResultTransportModel Result { get; set; }
+    public AttackResultTransportModel result { get; set; }
     //todo tdd filling
-    public ShipStateTransportModel[] Player1Fleet { get; set; } = Array.Empty<ShipStateTransportModel>();
+    public ShipStateModel[] fleet1 { get; set; } = Array.Empty<ShipStateModel>();
     //todo tdd filling
-    public ShipStateTransportModel[] Player2Fleet { get; set; } = Array.Empty<ShipStateTransportModel>();
+    public ShipStateModel[] fleet2 { get; set; } = Array.Empty<ShipStateModel>();
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -171,7 +186,7 @@ public enum AttackResultTransportModel
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum WhatsUpResponse
+public enum GameStateModel
 {
     WaitingForStart,
     CreatingFleet,

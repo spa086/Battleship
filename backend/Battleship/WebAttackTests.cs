@@ -12,9 +12,9 @@ public class WebAttackTests
         var game = SetupGameInPoolWithState(GameState.Player2Turn, 0,
             game => game.SetupSimpleFleets(new[] { 1 }, new[] { 2 }));
 
-        var result = CreateController().Attack(new AttackRequestModel { Location = 22, SessionId = 0 });
+        var result = CreateController().Attack(new AttackRequestModel { Location = 22, userId = 0 });
 
-        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Missed));
+        Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Missed));
         Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
     }
 
@@ -25,9 +25,9 @@ public class WebAttackTests
             game => game.SetupSimpleFleets(new[] { 1 }, new[] { 2, 3 }));
 
         //todo put controller into variable?
-        var result = CreateController().Attack(new AttackRequestModel { Location = 2, SessionId = 0 });
+        var result = CreateController().Attack(new AttackRequestModel { Location = 2, userId = 0 });
 
-        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Hit));
+        Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Hit));
         var decks = game.Player2Ships.AssertSingle().Decks.Values;
         Assert.That(decks, Has.Count.EqualTo(2));
         //todo check 3 times
@@ -50,9 +50,9 @@ public class WebAttackTests
                 }
             }));
 
-        var result = CreateController().Attack(new AttackRequestModel { Location = 0, SessionId = 0 });
+        var result = CreateController().Attack(new AttackRequestModel { Location = 0, userId = 0 });
 
-        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Killed));
+        Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Killed));
     }
 
     //todo similar for player 2
@@ -63,9 +63,9 @@ public class WebAttackTests
             game => game.SetupSimpleFleets(new[] { 1 }, new[] { 2 }));
 
         //todo put controller into variable?
-        var result = CreateController().Attack(new AttackRequestModel { Location = 2, SessionId = 0 });
+        var result = CreateController().Attack(new AttackRequestModel { Location = 2, userId = 0 });
 
-        Assert.That(result.Result, Is.EqualTo(AttackResultTransportModel.Win));
+        Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
         Assert.That(game.Win, Is.True);
         //todo check 3 times
         Assert.That(game.Player2Ships!.Single().Decks.Single().Value.Destroyed, Is.True);
