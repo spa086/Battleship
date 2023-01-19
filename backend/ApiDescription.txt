@@ -7,7 +7,7 @@ JSON Request body examples:
 {"userId":144}
 Returns object: 
 {
-    state - string enum { "WaitingForStart", "CreatingShips", "YourTurn", "OpponentsTurn" }
+    state - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn" }
 	userId - int optional
 }
 
