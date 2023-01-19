@@ -16,46 +16,45 @@ Returns object:
 Request model:
 {
 	userId - integer.
-	decks - integer array.
+	ships - array of objects:
+	{
+		decks - integer array.
+	}
 }
 Example request body JSON:
-{"userId":144,"ships":[]}
+{
+	"userId":144,
+	"ships":
+	[{
+		"decks":[1,2,3]
+	}]
+}
 
 "/attack"
 Request model:
 {
-	SessionId - integer.
-	Location - integer.
+	userId - integer.
+	location - integer.
 }
 Returns object:
 {
-	Result - string,
-	Player1Fleet - array of objects:
+	result - enum string { "Hit","Killed","Missed","Win" },
+	fleet1 - array of objects:
 	{
-		Decks - array of objects: 
+		userId - integer.
+		decks - array of objects: 
 		{
-			Location - integer.
-			Destroyed - boolean.
+			location - integer.
+			destroyed - boolean.
 		}
 	}
-	Player2Fleet - array of objects:
+	fleet2 - array of objects:
 	{
-		Decks - array of objects: 
+		userId - integer.
+		decks - array of objects: 
 		{
-			Location - integer.
-			Destroyed - boolean.
+			location - integer.
+			destroyed - boolean.
 		}
 	}
 }
-"Result" property can be one of the following strings:
-    "Hit",
-    "Killed",
-    "Missed",
-    "Win".
-
-"/abort"
-Request model:
-{
-	SessionId - integer.
-}
-Returns nothing.
