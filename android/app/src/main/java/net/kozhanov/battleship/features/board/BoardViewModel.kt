@@ -1,19 +1,19 @@
 package net.kozhanov.battleship.features.board
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kozhanov.battleship.base.core.data.GameRepository
-import net.kozhanov.battleship.base.core.data.models.GameState.*
+import net.kozhanov.battleship.base.core.data.models.GameState
+import net.kozhanov.battleship.base.core.data.models.Ship.Deck
 import net.kozhanov.battleship.base.core.platform.BaseViewModel
 import net.kozhanov.battleship.base.core.platform.ErrorEvent
 import net.kozhanov.battleship.base.core.platform.Event
-import net.kozhanov.battleship.features.board.BoardDataEvent.OnNewText
-import net.kozhanov.battleship.features.board.BoardDataEvent.RefreshGameState
+import net.kozhanov.battleship.features.board.BoardDataEvent.*
 import net.kozhanov.battleship.features.board.BoardErrorEvent.OnConnectError
+import net.kozhanov.battleship.features.board.BoardUIEvent.OnBoardTap
 import net.kozhanov.battleship.features.board.BoardUIEvent.StartGame
-import net.kozhanov.battleship.features.board.BoardViewState.State.Loading
-import net.kozhanov.battleship.features.board.BoardViewState.State.Result
+import net.kozhanov.battleship.features.board.BoardViewState.State.*
+import net.kozhanov.battleship.features.board.BoardViewState.State.CreatingShip
 import retrofit2.HttpException
 import ru.openbank.accept.base.extensions.fold
 
@@ -23,17 +23,17 @@ class BoardViewModel(private val gameRepository: GameRepository) : BaseViewModel
     private suspend fun refreshGameState() {
         gameRepository.getGameState().fold(onSuccess = {
             when (it) {
-                WaitingForStart -> {
-
+                GameState.WaitingForStart -> {
+                    processDataEvent(OnCreateShip)
                 }
-                CreatingShips -> {
-                    processDataEvent(OnNewText("Build you own ship, destroy the enemy!"))
-                }
-                YourTurn -> {
+                GameState.YourTurn -> {
                     processDataEvent(OnNewText("You turn"))
                 }
-                OpponentsTurn -> {
+                GameState.OpponentsTurn -> {
                     processDataEvent(OnNewText("Waiting for opponent turn"))
+                }
+                GameState.CreatingFleet -> {
+                    processDataEvent(OnNewText("Build you own ship, destroy the enemy!"))
                 }
             }
         }, onError = {
@@ -49,18 +49,39 @@ class BoardViewModel(private val gameRepository: GameRepository) : BaseViewModel
 
     private fun dispatchUIEvent(event: BoardUIEvent) = when (event) {
         StartGame -> {
-            processDataEvent(RefreshGameState)
-            previousState.copy(state = Loading)
+            //processDataEvent(OnRefreshState)
+            //previousState.copy(state = Loading)
+            processDataEvent(OnCreateShip)
+            previousState
+        }
+        is OnBoardTap -> when (val currState = previousState.state) {
+            is Board -> previousState
+            Init -> previousState
+            Loading -> previousState
+            is Message -> previousState
+            is CreatingShip -> {
+                if (currState.isShipFull.not()) {
+                    val newDecks = currState.decks.toMutableList()
+                    newDecks.add(Deck(event.x, event.y, false))
+                    previousState.copy(state = currState.copy(decks = newDecks))
+                } else {
+                    previousState
+                }
+            }
         }
     }
 
     private fun dispatchDataEvent(event: BoardDataEvent) = when (event) {
-        is OnNewText -> previousState.copy(state = Result(event.text, ""))
-        RefreshGameState -> {
+        is OnNewText -> previousState.copy(state = Message("", event.text))
+        OnRefreshState -> {
             viewModelScope.launch {
                 refreshGameState()
             }
             previousState
+        }
+        OnCreateShip -> {
+            
+            previousState.copy(state = CreatingShip(emptyList(), 3))
         }
     }
 
@@ -69,14 +90,14 @@ class BoardViewModel(private val gameRepository: GameRepository) : BaseViewModel
             val ev = event.error
             if (ev is HttpException) {
                 previousState.copy(
-                    state = Result(
+                    state = Message(
                         "Ошибка Сервера",
                         "${ev.code()}, ${ev.message}"
                     )
                 )
             } else {
                 previousState.copy(
-                    state = Result(
+                    state = Message(
                         "Неизвестная ошибка",
                         "${event.error.message}"
                     )
