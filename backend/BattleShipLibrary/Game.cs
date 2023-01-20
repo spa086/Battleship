@@ -1,16 +1,18 @@
-﻿namespace BattleShipLibrary;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace BattleShipLibrary;
 
 //todo use DI instead
 public static class GamePool
 {
     //for testing
-    public static void SetGame(Game game, int sessionId) => TheGame = game;
+    public static void SetGame(Game? game) => TheGame = game;
 
     public static bool StartPlaying(int userId)
     {
         if (TheGame is null)
         {
-            TheGame = new Game(user1Id);
+            TheGame = new Game(userId);
         }
         else
         {
@@ -31,35 +33,63 @@ public class FleetCreationModel
     public ShipCreationModel[] Ships { get; set; } = Array.Empty<ShipCreationModel>();
 }
 
-public class Location
+public struct Cell
 {
-    public int X { get; set; }
-    public int Y { get; set; }
+    public Cell(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    public Cell()
+    {
+
+    }
+
+    public readonly int x;
+    public readonly int y;
+
+    public override bool Equals([NotNullWhen(true)] object? obj)
+    {
+        var otherLocation = (Cell)obj!;
+        return otherLocation.x == x && otherLocation.y == y;
+    }
+
+    public override int GetHashCode()
+    {
+        return x * 100 + y;
+    }
+
+    public static bool operator ==(Cell cell1, Cell cell2)
+    {
+        var result = cell1.Equals(cell2);
+        return result;
+    }
 }
 
 public class ShipCreationModel
 {
-    public Location[] Decks { get; set; } = Array.Empty<Location>();
+    public Cell[] Decks { get; set; } = Array.Empty<Cell>();
 }
 
 public class Deck
 {
     //todo tdd this
-    public Deck(int location, bool destroyed = false)
+    public Deck(int x, int y, bool destroyed = false)
     {
         Destroyed = destroyed;
-        Location = location;
+        Location = new Cell(x, y);
     }
 
     public bool Destroyed { get; set; }
 
-    public int Location { get; set; }
+    public Cell Location { get; set; }
 }
 
 public class Ship
 {
     //todo make it a hashset
-    public Dictionary<int, Deck> Decks { get; set; } = new Dictionary<int, Deck>();
+    public Dictionary<Cell, Deck> Decks { get; set; } = new Dictionary<Cell, Deck>();
 }
 
 public enum GameState
@@ -75,11 +105,11 @@ public class Game
 {
     public Game(int user1Id)
     {
-        OlgaUserId = user1Id;
+        FirstUserId = user1Id;
     }
 
-    public int? OlgaUserId { get; private set; }
-    public int? StasUserId { get; private set; }
+    public int? FirstUserId { get; private set; }
+    public int? SecondUserId { get; private set; }
 
     public GameState State { get; protected set; }
 
@@ -97,7 +127,7 @@ public class Game
     {
         var newShips = model.Ships.Select(ship => new Ship
         {
-            Decks = ship.Decks.Select(deckLocation => new Deck(deckLocation))
+            Decks = ship.Decks.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
                 .ToDictionary(x => x.Location)
         }).ToList();
         var tempPlayer1Ships = model.IsForPlayer1 ? newShips : player1Ships;
@@ -125,7 +155,7 @@ public class Game
         }
     }
 
-    public AttackResult Attack(int attackedLocation)
+    public AttackResult Attack(Cell attackedLocation)
     {
         //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);
@@ -151,7 +181,7 @@ public class Game
         else State = player1Turn ? GameState.Player2Turn : GameState.Player1Turn; //todo tdd this
     }
 
-    private static void ProcessHit(int attackedLocation, Ship? attackedShip, ref AttackResult result)
+    private static void ProcessHit(Cell attackedLocation, Ship? attackedShip, ref AttackResult result)
     {
         if (attackedShip is not null)
         {
@@ -161,12 +191,12 @@ public class Game
         }
     }
 
-    private static Ship? GetAttackedShip(int attackedLocation, IEnumerable<Ship> attackedShips) =>
+    private static Ship? GetAttackedShip(Cell attackedLocation, IEnumerable<Ship> attackedShips) =>
         //todo tdd this condition
         attackedShips.SingleOrDefault(ship => 
             ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
 
-    private void Exclude(int location)
+    private void Exclude(Cell location)
     {
         //todo check for 3 times
         var currentExcluded = State == GameState.Player1Turn ? excludedLocations1 : excludedLocations2;
@@ -175,8 +205,8 @@ public class Game
         currentExcluded.Add(location);
     }
 
-    protected List<int> excludedLocations1 = new();
-    protected List<int> excludedLocations2 = new();
+    protected List<Cell> excludedLocations1 = new();
+    protected List<Cell> excludedLocations2 = new();
     //todo tdd validate ship shape
     protected List<Ship>? player1Ships;
     protected List<Ship>? player2Ships;

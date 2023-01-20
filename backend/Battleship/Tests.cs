@@ -21,7 +21,7 @@ public class Tests
     [SetUp]
     public void SetUp()
     {
-        GamePool.ClearGames();
+        GamePool.SetGame(null);
         game.StandardSetup();
     }
 

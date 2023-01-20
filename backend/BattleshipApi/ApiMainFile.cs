@@ -63,8 +63,7 @@ public class AttackRequestModel
 {
     public int userId { get; set; }
 
-    public int x { get; set; }
-    public int y { get; set; }
+    public LocationModel location { get; set; }
 }
 
 public class WhatsupRequestModel
@@ -79,7 +78,7 @@ public class FleetCreationRequestModel
     public ShipTransportModel[] ships { get; set; } = Array.Empty<ShipTransportModel>();
 }
 
-public class Location
+public class LocationModel
 {
     public int x { get; set; }
     public int y { get; set; }
@@ -87,7 +86,7 @@ public class Location
 
 public class ShipTransportModel
 {
-    public Location[] decks { get; set; } = Array.Empty<Location>();
+    public LocationModel[] decks { get; set; } = Array.Empty<LocationModel>();
 }
 
 public class GameAbortionRequestModel
@@ -99,18 +98,18 @@ public class Controller
 {
     public GameStateModel WhatsUp(WhatsupRequestModel request)
     {
-        var olgaIsPresent = GamePool.TheGame.OlgaUserId.HasValue;
-        var stasIsPresent = GamePool.TheGame.StasUserId.HasValue;
+        var olgaIsPresent = GamePool.TheGame.FirstUserId.HasValue;
+        var stasIsPresent = GamePool.TheGame.SecondUserId.HasValue;
         if(olgaIsPresent || stasIsPresent)
         {
             if (olgaIsPresent)
             {
-                if (GamePool.TheGame.OlgaUserId == request.userId)
+                if (GamePool.TheGame.FirstUserId == request.userId)
                     return GameStateModel.YourTurn;
             }
             if (stasIsPresent)
             {
-                if (GamePool.TheGame.StasUserId == request.userId)
+                if (GamePool.TheGame.SecondUserId == request.userId)
                     return GameStateModel.YourTurn;
             }
             return GameStateModel.OpponentsTurn;
@@ -130,16 +129,21 @@ public class Controller
         {
             IsForPlayer1 = player1,
             Ships = requestModel.ships.Select(ship =>
-                new ShipCreationModel { Decks = ship.decks.ToArray() }).ToArray()
+                new ShipCreationModel { Decks = ship.decks.Select(x => ToInternalModel(x)).ToArray() }).ToArray()
         });
         return player1;
+    }
+
+    public Cell ToInternalModel(LocationModel model)
+    {
+        return new Cell { x = model.x, y = model.y };
     }
 
     public AttackResponse Attack(AttackRequestModel model)
     {
         //todo tdd what if did not find game
         //todo check 3 times
-        var attackResult = GamePool.Games[model.userId].Attack(model.Location);
+        var attackResult = GamePool.TheGame.Attack(ToInternalModel(model.location));
         var attackResultTransportModel = attackResult switch
         {
             AttackResult.Win => AttackResultTransportModel.Win,
@@ -152,8 +156,6 @@ public class Controller
         return result;
     } 
 }
-
-internal enum UserRole { Olga, Dmitry }
 
 public class DeckStateModel
 {
