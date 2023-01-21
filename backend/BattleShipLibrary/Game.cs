@@ -10,6 +10,7 @@ public static class GamePool
 
     public static bool StartPlaying(int userId)
     {
+        var result = TheGame is not null;
         if (TheGame is null)
         {
             TheGame = new Game(userId);
@@ -19,7 +20,7 @@ public static class GamePool
             TheGame.Start();
         }
 
-        return TheGame is not null;
+        return result;
     }
 
     //todo does it need to be public?
@@ -103,16 +104,16 @@ public class Game
         FirstUserId = user1Id;
     }
 
-    public int? FirstUserId { get; private set; }
-    public int? SecondUserId { get; private set; }
+    public int? FirstUserId { get; protected set; }
+    public int? SecondUserId { get; protected set; }
 
     public GameState State { get; protected set; }
 
     public List<Cell> ExcludedLocations1 => excludedLocations1;
     public List<Cell> ExcludedLocations2 => excludedLocations2;
     public bool Win => win;
-    public List<Ship>? Player1Ships => player1Ships;
-    public List<Ship>? Player2Ships => player2Ships;
+    public List<Ship>? FirstFleet => firstFleet;
+    public List<Ship>? SecondFleet => secondFleet;
 
     //todo test
     public void Start() => State = GameState.BothPlayersCreateFleets;
@@ -125,8 +126,8 @@ public class Game
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
                 .ToDictionary(x => x.Location)
         }).ToList();
-        var tempPlayer1Ships = userId == FirstUserId ? newShips : player1Ships;
-        var tempPlayer2Ships = userId == FirstUserId ? player2Ships : newShips;
+        var tempPlayer1Ships = userId == FirstUserId ? newShips : firstFleet;
+        var tempPlayer2Ships = userId == FirstUserId ? secondFleet : newShips;
         var player1Decks = (tempPlayer1Ships ?? Array.Empty<Ship>().ToList())
             .SelectMany(x => x.Decks.Keys).ToHashSet();
         var player2Decks = (tempPlayer2Ships ?? Array.Empty<Ship>().ToList())
@@ -140,16 +141,17 @@ public class Game
     {
         if (userId == FirstUserId)
         {
-            player1Ships = newShips;
+            firstFleet = newShips;
             State = GameState.WaitingForPlayer2ToCreateFleet;
         }
         else
         {
-            player2Ships = newShips;
+            secondFleet = newShips;
             State = GameState.Player1Turn;
         }
     }
 
+    //todo tdd userId field
     public AttackResult Attack(int userId, Cell attackedLocation)
     {
         //todo tdd that we can't get here with playerNShips == null
@@ -158,7 +160,7 @@ public class Game
         //todo check for 3 times
         var player1Turn = State == GameState.Player1Turn;
         var attackedShips = player1Turn ?
-            player2Ships!.Where(x => !IsDestroyed(x)) : player1Ships!.Where(x => !IsDestroyed(x));
+            secondFleet!.Where(x => !IsDestroyed(x)) : firstFleet!.Where(x => !IsDestroyed(x));
         var result = AttackResult.Missed;
         var attackedShip = GetAttackedShip(attackedLocation, attackedShips);
         ProcessHit(attackedLocation, attackedShip, ref result);
@@ -203,8 +205,8 @@ public class Game
     protected List<Cell> excludedLocations1 = new();
     protected List<Cell> excludedLocations2 = new();
     //todo tdd validate ship shape
-    protected List<Ship>? player1Ships;
-    protected List<Ship>? player2Ships;
+    protected List<Ship>? firstFleet;
+    protected List<Ship>? secondFleet;
     protected bool win;
 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);

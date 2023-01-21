@@ -28,20 +28,23 @@ public class TestableGame : Game
         excludedLocations2 = CreateLocationList();
         State = GameState.Player1Turn;
         win = false;
-        SetupSimpleFleets(new[] { new Cell(1,1) }, new[] { new Cell(3, 3) });
+        SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  
+            new[] { new Cell(3, 3) }, 2);
     }
 
     public void SetupFleets(IEnumerable<Ship> fleet1, IEnumerable<Ship> fleet2)
     {
-        player1Ships = fleet1.ToList();
-        player2Ships = fleet2.ToList();
+        firstFleet = fleet1.ToList();
+        secondFleet = fleet2.ToList();
     }
 
-    public void SetupSimpleFleets(Cell[]? deckLocations1,
-        Cell[]? deckLocations2)
+    public void SetupSimpleFleets(Cell[]? deckLocations1, int? firstUserId,
+        Cell[]? deckLocations2, int? secondUserId)
     {
-        player1Ships = CreateSimpleFleet(deckLocations1);
-        player2Ships = CreateSimpleFleet(deckLocations2);
+        firstFleet = CreateSimpleFleet(deckLocations1);
+        FirstUserId = firstUserId;
+        secondFleet = CreateSimpleFleet(deckLocations2);
+        SecondUserId = secondUserId;
     }
 
     private static List<Ship>? CreateSimpleFleet(Cell[]? deckLocations)

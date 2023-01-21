@@ -17,7 +17,7 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0, false));
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0));
 
         Assert.That(result, Is.EqualTo(GameStateModel.OpponentsTurn));
     }
@@ -27,7 +27,7 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0, true));
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0));
 
         Assert.That(result, Is.EqualTo(GameStateModel.YourTurn));
     }
@@ -47,7 +47,7 @@ public class WebTests
         });
 
         Assert.That(result, Is.False);
-        var ship = testableGame!.Player2Ships.AssertSingle();
+        var ship = testableGame!.SecondFleet.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var pair = ship.Decks.AssertSingle();
         Assert.That(pair.Key, Is.EqualTo(new Cell(5,5)));
@@ -69,7 +69,7 @@ public class WebTests
         });
 
         Assert.That(result, Is.True);
-        var ship = testableGame!.Player1Ships.AssertSingle();
+        var ship = testableGame!.FirstFleet.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var deck = ship.Decks.AssertSingle();
         Assert.That(deck.Key, Is.EqualTo(new Cell(1, 1)));
@@ -115,16 +115,16 @@ public class WebTests
         var testableGame = (GamePool.TheGame as TestableGame)!;
         if(state == GameState.Player1Turn)
         {
-            testableGame.SetupSimpleFleets(new[] { new Cell(1, 1) }, new[] { new Cell(2, 2) });
+            testableGame.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
+                new[] { new Cell(2, 2) }, 2);
         }
         return testableGame;
     }
 
     private static Controller CreateController() => new();
 
-    private static WhatsupRequestModel CreateWhatsUpRequestModel(int sessionId = 0, 
-        bool? isFirstPlayer = null)
+    private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0)
     {
-        return new WhatsupRequestModel { userId = sessionId };
+        return new WhatsupRequestModel { userId = userIdParam };
     }
 }
