@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using BattleShipLibrary;
+using NUnit.Framework.Constraints;
 
 namespace BattleshipTests;
 
@@ -28,31 +29,33 @@ public class Tests
     [Test]
     public void Player2CreatesShips()
     {
-        game.SetupSimpleFleets(new[] { 1 }, null);
+        game.SetupSimpleFleets(new[] { new Cell(1,1) }, null);
 
-        game.CreateAndSaveShips(new FleetCreationModel
-        {
-            IsForPlayer1 = false,
-            Ships = new[] { new ShipCreationModel { Decks = new int[] { 2 } } }
+        game.CreateAndSaveShips(0, new[] 
+        { 
+            new Ship 
+            {
+                Decks = new [] 
+                { 
+                    new Deck(2,2)
+                }.ToDictionary(x => x.Location)
+            } 
         });
 
         Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
         var deck = game.Player2Ships.AssertSingle().Decks.AssertSingle();
-        Assert.That(deck.Key, Is.EqualTo(2));
+        Assert.That(deck.Key, Is.EqualTo(new Cell(2,2)));
         Assert.That(deck.Value.Destroyed, Is.False);
-        Assert.That(deck.Value.Location, Is.EqualTo(2));
+        Assert.That(deck.Value.Location, Is.EqualTo(new Cell(2,2)));
     }
 
     [Test]
     public void TwoShipsInTheSameLocation()
     {
-        game.SetupSimpleFleets(new[] { 1, 2 }, null);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1), new Cell(3, 3) }, null);
 
-        var exception = Assert.Throws<Exception>(() => game.CreateAndSaveShips(new FleetCreationModel
-        {
-            IsForPlayer1 = false, 
-            Ships = new[] { new ShipCreationModel { Decks = new int[] { 2, 3 } } } 
-        }));
+        var exception = Assert.Throws<Exception>(() => game.CreateAndSaveShips(0,
+            new[] { new Ship { Decks = new[] { new Deck(1, 1), new Deck(3, 3) }.ToDictionary(x => x.Location) } }));
 
         Assert.That(exception.Message, Is.EqualTo("Two ships at the same location."));
     }
@@ -60,17 +63,17 @@ public class Tests
     [Test]
     public void SecondPlayerJoins()
     {
-        GamePool.SetGame(new Game(0), 0);
+        GamePool.SetGame(new Game(0));
 
         Assert.That(GamePool.StartPlaying(0), Is.True);
-        Assert.That(GamePool.Games[0].State, Is.EqualTo(GameState.BothPlayersCreateFleets));
+        Assert.That(GamePool.TheGame.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
 
     [Test]
     public void StartingAGame()
     {
         Assert.That(GamePool.StartPlaying(0), Is.False);
-        var game = GamePool.Games[0];
+        var game = GamePool.TheGame;
         Assert.That(game, Is.Not.Null);
         Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2));
     }
@@ -79,8 +82,16 @@ public class Tests
     public void CreateShipsSimple()
     {
         game.SetupSimpleFleets(null, null);
-        game.CreateAndSaveShips(new FleetCreationModel
-        { Ships = new[] { new ShipCreationModel { Decks = new[] { 1, 2 } } }, IsForPlayer1 = true });
+        game.CreateAndSaveShips(0, new[]
+        {
+                new Ship
+                {
+                    Decks = new[]
+                    {
+                        new Deck(1, 1)
+                    }.ToDictionary(x => x.Location)
+                 }
+        });
 
         //todo use separate collection
         var ship = game.Player1Ships!.AssertSingle();
@@ -89,33 +100,33 @@ public class Tests
         var orderedDecks = decks.Values.OrderBy(x => x.Location);
         var deck1 = orderedDecks.First();
         Assert.That(deck1.Destroyed, Is.False);
-        Assert.That(deck1.Location, Is.EqualTo(1));
+        Assert.That(deck1.Location, Is.EqualTo(new Cell(1, 1)));
         var deck2 = orderedDecks.Last();
         Assert.That(deck2.Destroyed, Is.False);
-        Assert.That(deck2.Location, Is.EqualTo(2));
+        Assert.That(deck2.Location, Is.EqualTo(new Cell(2, 2)));
         Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2ToCreateFleet));
     }
 
     [Test]
     public void DamagingAMultideckShip()
     {
-        game.SetupSimpleFleets(new[] { 0, 1 }, new[] { 2 });
+        game.SetupSimpleFleets(new[] { new Cell(0, 2), new Cell(0, 0) }, new[] { new Cell(2, 2) });
         game.SetTurn(false);
 
-        game.Attack(1);
+        game.Attack(new Cell(1, 1));
 
-        Assert.That(game.Player1Ships!.AssertSingle().Decks[1].Destroyed);
+        Assert.That(game.Player1Ships!.AssertSingle().Decks[new Cell(1, 1)].Destroyed);
     }
 
     //todo tdd this but for 1st player turn
     [Test]
     public void DestroyingAMultideckShip()
     {
-        game.SetupSimpleFleets(new[] { 0, 1 }, new[] { 2 });
-        game.Player1Ships!.Single().Decks[1].Destroyed = true;
+        game.SetupSimpleFleets(new[] { new Cell(0, 2), new Cell(0, 0) }, new[] { new Cell(2, 2)});
+        game.Player1Ships!.Single().Decks[new Cell(0,0)].Destroyed = true;
         game.SetTurn(false);
 
-        game.Attack(0);
+        game.Attack(new Cell(0, 0));
 
         var destroyedShip = game.Player1Ships.AssertSingle();
         Assert.That(destroyedShip.Decks.Values.All(x => x.Destroyed));
@@ -126,9 +137,9 @@ public class Tests
     [Test]
     public void AttackSamePlaceTwice()
     {
-        game.SetupExcludedLocations(1);
+        game.SetupExcludedLocations(new Cell(0, 0));
 
-        var exception = Assert.Throws<Exception>(() => game.Attack(1));
+        var exception = Assert.Throws<Exception>(() => game.Attack(new Cell(0,1)));
         Assert.That(exception.Message,
             Is.EqualTo("Location [1] is already excluded."));
     }
@@ -138,7 +149,7 @@ public class Tests
     {
         game.SetState(GameState.Player2Turn);
 
-        game.Attack(0);
+        game.Attack(new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
         Assert.That(game.Win, Is.False);
@@ -150,7 +161,7 @@ public class Tests
     [Test]
     public void Miss()
     {
-        game.Attack(0);
+        game.Attack(new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
         Assert.That(game.Win, Is.False);
@@ -161,15 +172,15 @@ public class Tests
     [Test]
     public void Excluding()
     {
-        game.Attack(144);
+        game.Attack(new Cell(144, 144));
 
-        Assert.That(game.ExcludedLocations1.AssertSingle(), Is.EqualTo(144));
+        Assert.That(game.ExcludedLocations1.AssertSingle(), Is.EqualTo(new Cell(144, 144)));
     }
 
     [Test]
     public void AttackAndWin()
     {
-        game.Attack(2);
+        game.Attack(new Cell(2, 2));
 
         game.ExcludedLocations1.AssertSingle();
         Assert.That(Game.IsDestroyed(game.Player2Ships.AssertSingle()));
@@ -182,7 +193,7 @@ public class Tests
     {
         game.SetTurn(false);
 
-        game.Attack(1);
+        game.Attack(new Cell(0, 0));
 
         game.Player2Ships.AssertSingle();
         Assert.That(Game.IsDestroyed(game.Player1Ships.AssertSingle()));

@@ -15,7 +15,7 @@ public class TestableGame : Game
         return this;
     }
 
-    public void SetupExcludedLocations(params int[] locations) => 
+    public void SetupExcludedLocations(params Cell[] locations) => 
         excludedLocations1 = CreateLocationList(locations);
 
     //todo check for 3 times
@@ -28,7 +28,7 @@ public class TestableGame : Game
         excludedLocations2 = CreateLocationList();
         State = GameState.Player1Turn;
         win = false;
-        SetupSimpleFleets(new[] { 1 }, new[] { 2 });
+        SetupSimpleFleets(new[] { new Cell(1,1) }, new[] { new Cell(3, 3) });
     }
 
     public void SetupFleets(List<Ship> fleet1, List<Ship> fleet2)
@@ -37,20 +37,21 @@ public class TestableGame : Game
         player2Ships = fleet2;
     }
 
-    public void SetupSimpleFleets(int[]? deckLocations1,
-        int[]? deckLocations2)
+    public void SetupSimpleFleets(Cell[]? deckLocations1,
+        Cell[]? deckLocations2)
     {
         player1Ships = CreateSimpleFleet(deckLocations1);
         player2Ships = CreateSimpleFleet(deckLocations2);
     }
 
-    private static List<Ship>? CreateSimpleFleet(int[]? deckLocations)
+    private static List<Ship>? CreateSimpleFleet(Cell[]? deckLocations)
     {
         if (deckLocations is null)
             return null;
-        var decks = deckLocations.Select(x => new Deck(x)).ToDictionary(x => x.Location);
+        var decks = deckLocations.Select(location => new Deck(location.x, location.y))
+            .ToDictionary(x => x.Location);
         return new() {new Ship {Decks = decks}};
     }
 
-    private static List<int> CreateLocationList(params int[] locations) => locations.ToList();
+    private static List<Cell> CreateLocationList(params Cell[] locations) => locations.ToList();
 }

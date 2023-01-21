@@ -1,5 +1,6 @@
 ﻿using BattleshipApi;
 using BattleShipLibrary;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using NUnit.Framework;
 
 namespace BattleshipTests;
@@ -7,20 +8,9 @@ namespace BattleshipTests;
 public class WebTests
 {
     [SetUp]
-    public void SetUp() => GamePool.ClearGames();
+    public void SetUp() => GamePool.SetGame(null);
 
     //todo tdd finishing the game from controller.
-
-    [Test]
-    public void GameAbortion()
-    {
-        CreateAndGetNewTestableGame();
-
-        CreateController().AbortGame(new GameAbortionRequestModel { SessionId = 0});
-
-        var count = GamePool.Games.Count;
-        Assert.That(count, Is.EqualTo(0));
-    }
 
     [Test]
     public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
@@ -29,7 +19,7 @@ public class WebTests
 
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0, false));
 
-        Assert.That(result, Is.EqualTo(WhatsUpResponse.OpponentsTurn));
+        Assert.That(result, Is.EqualTo(GameStateModel.OpponentsTurn));
     }
 
     [Test]
@@ -39,7 +29,7 @@ public class WebTests
 
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0, true));
 
-        Assert.That(result, Is.EqualTo(WhatsUpResponse.YourTurn));
+        Assert.That(result, Is.EqualTo(GameStateModel.YourTurn));
     }
 
     [Test]
@@ -49,7 +39,10 @@ public class WebTests
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel
         {
-            ships = new[] { new ShipTransportModel { decks = new[] { 5 } } },
+            ships = new[]
+            {
+                new ShipTransportModel { decks = new[] { new LocationModel{x=5, y=5 } } },
+            },
             userId = 0
         });
 
@@ -57,9 +50,9 @@ public class WebTests
         var ship = testableGame!.Player2Ships.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var pair = ship.Decks.AssertSingle();
-        Assert.That(pair.Key, Is.EqualTo(5));
+        Assert.That(pair.Key, Is.EqualTo(new Cell(5,5)));
         Assert.That(pair.Value, Is.Not.Null);
-        Assert.That(pair.Value.Location, Is.EqualTo(5));
+        Assert.That(pair.Value.Location, Is.EqualTo(new Cell(5, 5)));
         Assert.That(pair.Value.Destroyed, Is.False);
         Assert.That(testableGame.State, Is.EqualTo(GameState.Player1Turn));
     }
@@ -71,7 +64,7 @@ public class WebTests
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel
         {
-            ships = new[] { new ShipTransportModel { decks = new[] { 1 } } },
+            ships = new[] { new ShipTransportModel { decks = new[] { new LocationModel { x=1, y=1 } } } },
             userId = 0
         });
 
@@ -79,9 +72,9 @@ public class WebTests
         var ship = testableGame!.Player1Ships.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var deck = ship.Decks.AssertSingle();
-        Assert.That(deck.Key, Is.EqualTo(1));
+        Assert.That(deck.Key, Is.EqualTo(new Cell(1, 1)));
         Assert.That(deck.Value, Is.Not.Null);
-        Assert.That(deck.Value.Location, Is.EqualTo(1));
+        Assert.That(deck.Value.Location, Is.EqualTo(new Cell(1, 1)));
         Assert.That(deck.Value.Destroyed, Is.False);
         Assert.That(testableGame.State, Is.EqualTo(GameState.WaitingForPlayer2ToCreateFleet));
     }
@@ -92,7 +85,7 @@ public class WebTests
         CreateAndGetNewTestableGame();
 
         AssertControllerReturnValue(x => x.WhatsUp(CreateWhatsUpRequestModel(1)),
-            WhatsUpResponse.WaitingForStart);
+            GameStateModel.WaitingForStart);
     }
 
     [Test]
@@ -101,7 +94,7 @@ public class WebTests
         var game = CreateAndGetNewTestableGame();
 
         AssertControllerReturnValue(x => x.WhatsUp(CreateWhatsUpRequestModel()), 
-            WhatsUpResponse.CreatingFleet);
+            GameStateModel.CreatingFleet);
 
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
@@ -109,7 +102,7 @@ public class WebTests
     [Test]
     public void FirstPlayerStarts() =>
         AssertControllerReturnValue(x => x.WhatsUp(CreateWhatsUpRequestModel()),
-            WhatsUpResponse.WaitingForStart);
+            GameStateModel.WaitingForStart);
 
     private static void AssertControllerReturnValue<T>(Func<Controller, T> controllerFunction,
         T expectedValue) =>
@@ -118,11 +111,11 @@ public class WebTests
     private static TestableGame CreateAndGetNewTestableGame(
         GameState state = GameState.WaitingForPlayer2)
     {
-        GamePool.SetGame(new TestableGame(0).SetState(state), 0);
-        var testableGame = (GamePool.Games[0] as TestableGame)!;
+        GamePool.SetGame(new TestableGame(0).SetState(state));
+        var testableGame = (GamePool.TheGame as TestableGame)!;
         if(state == GameState.Player1Turn)
         {
-            testableGame.SetupSimpleFleets(new[] { 1 }, new[] { 2 });
+            testableGame.SetupSimpleFleets(new[] { new Cell(1, 1) }, new[] { new Cell(2, 2) });
         }
         return testableGame;
     }
@@ -132,6 +125,6 @@ public class WebTests
     private static WhatsupRequestModel CreateWhatsUpRequestModel(int sessionId = 0, 
         bool? isFirstPlayer = null)
     {
-        return new WhatsupRequestModel { userId = sessionId, IsFirstPlayer = isFirstPlayer };
+        return new WhatsupRequestModel { userId = sessionId };
     }
 }

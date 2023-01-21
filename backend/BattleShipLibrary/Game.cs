@@ -26,24 +26,12 @@ public static class GamePool
     public static Game TheGame { get; private set; }
 }
 
-public class FleetCreationModel
-{
-    public bool IsForPlayer1 { get; set; }
-
-    public ShipCreationModel[] Ships { get; set; } = Array.Empty<ShipCreationModel>();
-}
-
 public struct Cell
 {
     public Cell(int x, int y)
     {
         this.x = x;
         this.y = y;
-    }
-
-    public Cell()
-    {
-
     }
 
     public readonly int x;
@@ -65,11 +53,12 @@ public struct Cell
         var result = cell1.Equals(cell2);
         return result;
     }
-}
 
-public class ShipCreationModel
-{
-    public Cell[] Decks { get; set; } = Array.Empty<Cell>();
+    public static bool operator !=(Cell cell1, Cell cell2)
+    {
+        var result = cell1.Equals(cell2);
+        return result;
+    }
 }
 
 public class Deck
@@ -113,8 +102,8 @@ public class Game
 
     public GameState State { get; protected set; }
 
-    public List<int> ExcludedLocations1 => excludedLocations1;
-    public List<int> ExcludedLocations2 => excludedLocations2;
+    public List<Cell> ExcludedLocations1 => excludedLocations1;
+    public List<Cell> ExcludedLocations2 => excludedLocations2;
     public bool Win => win;
     public List<Ship>? Player1Ships => player1Ships;
     public List<Ship>? Player2Ships => player2Ships;
@@ -123,27 +112,27 @@ public class Game
     public void Start() => State = GameState.BothPlayersCreateFleets;
 
 
-    public void CreateAndSaveShips(FleetCreationModel model)
+    public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
-        var newShips = model.Ships.Select(ship => new Ship
+        var newShips = ships.Select(ship => new Ship
         {
-            Decks = ship.Decks.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
+            Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
                 .ToDictionary(x => x.Location)
         }).ToList();
-        var tempPlayer1Ships = model.IsForPlayer1 ? newShips : player1Ships;
-        var tempPlayer2Ships = model.IsForPlayer1 ? player2Ships : newShips;
+        var tempPlayer1Ships = userId == FirstUserId ? newShips : player1Ships;
+        var tempPlayer2Ships = userId == FirstUserId ? player2Ships : newShips;
         var player1Decks = (tempPlayer1Ships ?? Array.Empty<Ship>().ToList())
             .SelectMany(x => x.Decks.Keys).ToHashSet();
         var player2Decks = (tempPlayer2Ships ?? Array.Empty<Ship>().ToList())
             .SelectMany(x => x.Decks.Keys).ToHashSet();
         if (player1Decks.Intersect(player2Decks).Any())
             throw new Exception("Two ships at the same location.");
-        UpdateState(model, newShips);
+        UpdateState(userId, newShips);
     }
 
-    private void UpdateState(FleetCreationModel model, List<Ship> newShips)
+    private void UpdateState(int userId, List<Ship> newShips)
     {
-        if (model.IsForPlayer1)
+        if (userId == FirstUserId)
         {
             player1Ships = newShips;
             State = GameState.WaitingForPlayer2ToCreateFleet;

@@ -125,25 +125,22 @@ public class Controller
         //todo tdd what if did not find game
         var game = GamePool.TheGame;
         var player1 = game.State == GameState.BothPlayersCreateFleets;
-        game.CreateAndSaveShips(new FleetCreationModel
-        {
-            IsForPlayer1 = player1,
-            Ships = requestModel.ships.Select(ship =>
-                new ShipCreationModel { Decks = ship.decks.Select(x => ToInternalModel(x)).ToArray() }).ToArray()
-        });
+        game.CreateAndSaveShips(requestModel.userId, requestModel.ships.Select(ship =>
+                new Ship { Decks = ship.decks.ToDictionary(x => ToCell(x),
+                deckModel => new Deck(deckModel.x, deckModel.y))}).ToArray());
         return player1;
     }
 
-    public Cell ToInternalModel(LocationModel model)
+    public Cell ToCell(LocationModel model)
     {
-        return new Cell { x = model.x, y = model.y };
+        return new Cell(model.x, model.y);
     }
 
     public AttackResponse Attack(AttackRequestModel model)
     {
         //todo tdd what if did not find game
         //todo check 3 times
-        var attackResult = GamePool.TheGame.Attack(ToInternalModel(model.location));
+        var attackResult = GamePool.TheGame.Attack(ToCell(model.location));
         var attackResultTransportModel = attackResult switch
         {
             AttackResult.Win => AttackResultTransportModel.Win,
