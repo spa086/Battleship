@@ -31,10 +31,10 @@ public class TestableGame : Game
         SetupSimpleFleets(new[] { new Cell(1,1) }, new[] { new Cell(3, 3) });
     }
 
-    public void SetupFleets(List<Ship> fleet1, List<Ship> fleet2)
+    public void SetupFleets(IEnumerable<Ship> fleet1, IEnumerable<Ship> fleet2)
     {
-        player1Ships = fleet1;
-        player2Ships = fleet2;
+        player1Ships = fleet1.ToList();
+        player2Ships = fleet2.ToList();
     }
 
     public void SetupSimpleFleets(Cell[]? deckLocations1,

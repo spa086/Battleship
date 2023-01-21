@@ -37,6 +37,12 @@ public readonly struct Cell
     public readonly int x;
     public readonly int y;
 
+    public override string ToString()
+    {
+        var result = $"{x},{y}";
+        return result;
+    }
+
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
         var otherLocation = (Cell)obj!;
@@ -144,7 +150,7 @@ public class Game
         }
     }
 
-    public AttackResult Attack(Cell attackedLocation)
+    public AttackResult Attack(int userId, Cell attackedLocation)
     {
         //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);

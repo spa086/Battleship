@@ -20,7 +20,9 @@ public static class MainApi
         app.Run();
     }
 
+#pragma warning disable IDE0051 // Удалите неиспользуемые закрытые члены
     private static void MapPostAction<TRequestModel>(WebApplication app, string urlWithoutSlash,
+#pragma warning restore IDE0051 // Удалите неиспользуемые закрытые члены
         Action<TRequestModel, Controller> action)
     {
         app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context)
@@ -61,23 +63,28 @@ public static class MainApi
 
 public class AttackRequestModel
 {
+#pragma warning disable IDE1006 // Стили именования
     public int userId { get; set; }
-
-#pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
-    public LocationModel location { get; set; }
-#pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
+    public LocationModel location { get; set; } = new LocationModel();
+#pragma warning restore IDE1006 // Стили именования
 }
 
 public class WhatsupRequestModel
 {
+#pragma warning disable IDE1006 // Стили именования
     public int userId { get; set; }
+#pragma warning restore IDE1006 // Стили именования
 }
 
 public class FleetCreationRequestModel
 {
+#pragma warning disable IDE1006 // Стили именования
     public int userId { get; set; }
+#pragma warning restore IDE1006 // Стили именования
 
+#pragma warning disable IDE1006 // Стили именования
     public ShipTransportModel[] ships { get; set; } = Array.Empty<ShipTransportModel>();
+#pragma warning restore IDE1006 // Стили именования
 }
 
 public class LocationModel
@@ -88,28 +95,25 @@ public class LocationModel
 
 public class ShipTransportModel
 {
+#pragma warning disable IDE1006 // Стили именования
     public LocationModel[] decks { get; set; } = Array.Empty<LocationModel>();
-}
-
-public class GameAbortionRequestModel
-{
-    public int SessionId { get; set; }
+#pragma warning restore IDE1006 // Стили именования
 }
 
 public class Controller
 {
     public GameStateModel WhatsUp(WhatsupRequestModel request)
     {
-        var olgaIsPresent = GamePool.TheGame!.FirstUserId.HasValue;
-        var stasIsPresent = GamePool.TheGame.SecondUserId.HasValue;
-        if(olgaIsPresent || stasIsPresent)
+        var firstUserIsPresent = GamePool.TheGame!.FirstUserId.HasValue;
+        var secondUserIsPresent = GamePool.TheGame.SecondUserId.HasValue;
+        if(firstUserIsPresent || secondUserIsPresent)
         {
-            if (olgaIsPresent)
+            if (firstUserIsPresent)
             {
                 if (GamePool.TheGame.FirstUserId == request.userId)
                     return GameStateModel.YourTurn;
             }
-            if (stasIsPresent)
+            if (secondUserIsPresent)
             {
                 if (GamePool.TheGame.SecondUserId == request.userId)
                     return GameStateModel.YourTurn;
@@ -142,7 +146,7 @@ public class Controller
     {
         //todo tdd what if did not find game
         //todo check 3 times
-        var attackResult = GamePool.TheGame!.Attack(ToCell(model.location));
+        var attackResult = GamePool.TheGame!.Attack(model.userId, ToCell(model.location));
         var attackResultTransportModel = attackResult switch
         {
             AttackResult.Win => AttackResultTransportModel.Win,
@@ -158,23 +162,37 @@ public class Controller
 
 public class DeckStateModel
 {
+#pragma warning disable IDE1006 // Стили именования
     public int x { get; set; }
+#pragma warning restore IDE1006 // Стили именования
+#pragma warning disable IDE1006 // Стили именования
     public int y { get; set; }
+#pragma warning restore IDE1006 // Стили именования
+#pragma warning disable IDE1006 // Стили именования
     public bool destroyed { get; set; }
+#pragma warning restore IDE1006 // Стили именования
 }
 
 public class ShipStateModel
 {
+#pragma warning disable IDE1006 // Стили именования
     public DeckStateModel[] decks { get; set; } = Array.Empty<DeckStateModel>();
+#pragma warning restore IDE1006 // Стили именования
 }
 
 public class AttackResponse
 {
+#pragma warning disable IDE1006 // Стили именования
     public AttackResultTransportModel result { get; set; }
+#pragma warning restore IDE1006 // Стили именования
     //todo tdd filling
+#pragma warning disable IDE1006 // Стили именования
     public ShipStateModel[] fleet1 { get; set; } = Array.Empty<ShipStateModel>();
+#pragma warning restore IDE1006 // Стили именования
     //todo tdd filling
+#pragma warning disable IDE1006 // Стили именования
     public ShipStateModel[] fleet2 { get; set; } = Array.Empty<ShipStateModel>();
+#pragma warning restore IDE1006 // Стили именования
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
