@@ -66,7 +66,7 @@ public class Tests
         GamePool.SetGame(new Game(0));
 
         Assert.That(GamePool.StartPlaying(0), Is.True);
-        Assert.That(GamePool.TheGame.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
+        Assert.That(GamePool.TheGame!.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
 
     [Test]

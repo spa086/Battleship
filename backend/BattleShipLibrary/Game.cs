@@ -23,10 +23,10 @@ public static class GamePool
     }
 
     //todo does it need to be public?
-    public static Game TheGame { get; private set; }
+    public static Game? TheGame { get; private set; }
 }
 
-public struct Cell
+public readonly struct Cell
 {
     public Cell(int x, int y)
     {

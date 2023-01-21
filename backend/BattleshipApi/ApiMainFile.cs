@@ -63,7 +63,9 @@ public class AttackRequestModel
 {
     public int userId { get; set; }
 
+#pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
     public LocationModel location { get; set; }
+#pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
 }
 
 public class WhatsupRequestModel
@@ -98,7 +100,7 @@ public class Controller
 {
     public GameStateModel WhatsUp(WhatsupRequestModel request)
     {
-        var olgaIsPresent = GamePool.TheGame.FirstUserId.HasValue;
+        var olgaIsPresent = GamePool.TheGame!.FirstUserId.HasValue;
         var stasIsPresent = GamePool.TheGame.SecondUserId.HasValue;
         if(olgaIsPresent || stasIsPresent)
         {
@@ -123,7 +125,7 @@ public class Controller
     public bool CreateFleet(FleetCreationRequestModel requestModel)
     {
         //todo tdd what if did not find game
-        var game = GamePool.TheGame;
+        var game = GamePool.TheGame!;
         var player1 = game.State == GameState.BothPlayersCreateFleets;
         game.CreateAndSaveShips(requestModel.userId, requestModel.ships.Select(ship =>
                 new Ship { Decks = ship.decks.ToDictionary(x => ToCell(x),
@@ -140,7 +142,7 @@ public class Controller
     {
         //todo tdd what if did not find game
         //todo check 3 times
-        var attackResult = GamePool.TheGame.Attack(ToCell(model.location));
+        var attackResult = GamePool.TheGame!.Attack(ToCell(model.location));
         var attackResultTransportModel = attackResult switch
         {
             AttackResult.Win => AttackResultTransportModel.Win,

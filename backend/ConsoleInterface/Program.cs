@@ -39,6 +39,7 @@ void ProcessAttackDecision()
 
 string GetBoolString(bool isDestroyed) => isDestroyed ? "t" : "F";
 
+#pragma warning disable CS8321 // Локальная функция объявлена, но не используется
 string GetFleetString(IEnumerable<Ship> fleet) => 
     string.Join("; ", fleet.Select(ship =>
     {
@@ -46,6 +47,7 @@ string GetFleetString(IEnumerable<Ship> fleet) =>
             ship.Decks.Select(deck => $"{deck.Key}{GetBoolString(deck.Value.Destroyed)}"));
         return $"[{shipStr}]";
     }));
+#pragma warning restore CS8321 // Локальная функция объявлена, но не используется
 
 void PrepareConsole()
 {
@@ -68,6 +70,7 @@ void PrepareConsole()
     //Console.WriteLine(optionsDescription);
 }
 
+#pragma warning disable CS8321 // Локальная функция объявлена, но не используется
 void ShowLastSessionIfExists(int? lastSessionId)
 {
     throw new NotImplementedException();
@@ -85,6 +88,7 @@ void ShowLastSessionIfExists(int? lastSessionId)
     //    }
     //}
 }
+#pragma warning restore CS8321 // Локальная функция объявлена, но не используется
 
 void ProcessCreateShipsDecision()
 {
