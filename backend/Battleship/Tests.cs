@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using BattleShipLibrary;
-using NUnit.Framework.Constraints;
 
 namespace BattleshipTests;
 
