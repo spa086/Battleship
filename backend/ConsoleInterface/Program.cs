@@ -29,8 +29,8 @@ Cell ReadCell()
 
 void ProcessAttackDecision()
 {
-    Console.WriteLine("Please enter session id: ");
-    var sessionId = ReadCell();
+    Console.WriteLine("Please enter your user id: ");
+    var userId = int.Parse(Console.ReadLine()!);
     Console.WriteLine("Where to attack? Enter location: ");
     var attackocation = ReadCell();
     var result = controller.Attack(
@@ -38,7 +38,7 @@ void ProcessAttackDecision()
         { 
             location = new LocationModel { x = attackocation.x, y = attackocation.y } 
         });
-    Console.WriteLine($"Attacked location [{attackocation}]. Result: [{result.result}]. Game id = [{sessionId}].");
+    Console.WriteLine($"User id=[{userId}] has attacked location [{attackocation}]. Result: [{result.result}].");
 }
 
 string GetBoolString(bool isDestroyed) => isDestroyed ? "t" : "F";
