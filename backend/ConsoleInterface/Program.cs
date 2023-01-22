@@ -38,7 +38,8 @@ void ProcessAttackDecision()
         { 
             location = new LocationModel { x = attackocation.x, y = attackocation.y } 
         });
-    Console.WriteLine($"User id=[{userId}] has attacked location [{attackocation}]. Result: [{result.result}].");
+    Console.WriteLine($"User id=[{userId}] has attacked location [{attackocation}]. " +
+        $"Result: [{result.result}].");
 }
 
 string GetBoolString(bool isDestroyed) => isDestroyed ? "t" : "F";
@@ -77,52 +78,24 @@ void ShowCurrentGameIfExists()
     var game = GamePool.TheGame;
     if(game is null) return;
     if(game.FirstUserId is not null)
-    {
         Console.WriteLine($"First user id = [{game.FirstUserId}].");
-    }
     if (game.SecondUserId is not null)
-    {
         Console.WriteLine($"Second user id = [{game.SecondUserId}].");
-    }
     if (game.FirstFleet is not null)
-    {
-        var player1FleetStr = GetFleetString(game!.FirstFleet!);
         //todo check 3 times
-        Console.WriteLine($"Player 1 ships: {{{player1FleetStr}}}.");
-    }
+        Console.WriteLine($"Player 1 ships: {{{GetFleetString(game!.FirstFleet!)}}}.");
     if (game.SecondFleet is not null)
-    {
-        var player2FleetStr = GetFleetString(game!.SecondFleet!);
-        //todo check 3 times
-        Console.WriteLine($"Player 2 ships: {{{player2FleetStr}}}.");
-    }
+        Console.WriteLine($"Player 2 ships: {{{GetFleetString(game!.SecondFleet!)}}}.");
 }
 
 void ProcessCreateShipsDecision()
 {
     Console.WriteLine("Enter your user id: ");
-    var idStr = Console.ReadLine();
-    var id = int.Parse(idStr!);
+    var id = int.Parse(Console.ReadLine()!);
     Console.WriteLine("Enter ships in format \"[d1;d2;..]-[e1;e2;..];..\" " +
                 "where di, ei are deck coordinates di=xi,yi.");
-    var decksArrays = Console.ReadLine()!.Split("-")
-        .Select(x => x[1..^1]).ToArray()
-        .Select(shipString =>
-        {
-            var decksStrings = shipString.Split(';');
-            var decks = decksStrings.Select(deckString =>
-            {
-                var parts = deckString.Split(',');
-                return new LocationModel
-                {
-                    x = int.Parse(parts[0]),
-                    y = int.Parse(parts[1])
-                };
-            }).ToArray();
-            return new ShipTransportModel { decks = decks };
-        }).ToArray();
     var response = controller.CreateFleet(new FleetCreationRequestModel
-    { userId = id, ships = decksArrays });
+        { userId = id, ships = ReadDecks() });
     Console.WriteLine($"User id=[{id}] has created ships. Response: [{response}].");
 }
 
@@ -140,4 +113,24 @@ void ProcessCreateGameDecision()
     var userId = new Random().Next(100);
     var response = controller.WhatsUp(new WhatsupRequestModel { userId = userId });
     Console.WriteLine($"User id=[{userId}] has created game. Response: [{response}].");
+}
+
+static ShipTransportModel[] ReadDecks()
+{
+    return Console.ReadLine()!.Split("-")
+            .Select(x => x[1..^1]).ToArray()
+            .Select(shipString =>
+            {
+                var decksStrings = shipString.Split(';');
+                var decks = decksStrings.Select(deckString =>
+                {
+                    var parts = deckString.Split(',');
+                    return new LocationModel
+                    {
+                        x = int.Parse(parts[0]),
+                        y = int.Parse(parts[1])
+                    };
+                }).ToArray();
+                return new ShipTransportModel { decks = decks };
+            }).ToArray();
 }

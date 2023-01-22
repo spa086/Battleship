@@ -29,16 +29,13 @@ public class WebTests
             Is.EqualTo(GameStateModel.YourTurn));
     }
 
-    private ShipTransportModel NewSimpleShipForFleetCreationRequest(int x, int y) => 
-        new ShipTransportModel { decks = new[] { new LocationModel { x = x, y = y } } };
-
     [Test]
     public void SecondPlayerCreatesFleet()
     {
         var testableGame = CreateAndGetNewTestableGame(GameState.WaitingForPlayer2ToCreateFleet);
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel 
-            { ships = new[] {NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
+            { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
 
         Assert.That(result, Is.False);
         var ship = testableGame!.SecondFleet.AssertSingle();
@@ -111,4 +108,7 @@ public class WebTests
 
     private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) => 
         new() { userId = userIdParam };
+
+    private static ShipTransportModel NewSimpleShipForFleetCreationRequest(int x, int y) =>
+        new() { decks = new[] { new LocationModel { x = x, y = y } } };
 }
