@@ -24,8 +24,11 @@ Returns nothing.
 Request model:
 {
 	userId - integer,
-	x - integer,
-	y - integer.
+	location - object:
+	{
+		x - integer,
+		y - integer.
+	}
 }
 Returns object:
 {
