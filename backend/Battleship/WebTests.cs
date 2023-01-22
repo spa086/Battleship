@@ -1,5 +1,5 @@
 ﻿using BattleshipApi;
-using BattleShipLibrary;
+using BattleshipLibrary;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using NUnit.Framework;
 

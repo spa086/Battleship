@@ -1,5 +1,5 @@
 ﻿using BattleshipApi;
-using BattleShipLibrary;
+using BattleshipLibrary;
 
 var controller = new Controller();
 do
@@ -130,7 +130,7 @@ void ProcessJoinGameDecision()
 {
     var userId = new Random().Next(100);
     var response = controller.WhatsUp(new WhatsupRequestModel { userId = userId });
-    var game = GamePool.TheGame;
+    var game = GamePool.TheGame!;
     Console.WriteLine($"User id=[{userId}] has joined game created by user id=[{game.FirstUserId}]. " +
         $"Response: [{response}].");
 }

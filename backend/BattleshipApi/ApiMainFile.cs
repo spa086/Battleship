@@ -1,6 +1,5 @@
-using BattleShipLibrary;
+using BattleshipLibrary;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace BattleshipApi;
 

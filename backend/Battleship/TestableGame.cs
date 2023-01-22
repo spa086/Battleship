@@ -1,4 +1,4 @@
-﻿using BattleShipLibrary;
+﻿using BattleshipLibrary;
 
 namespace BattleshipTests;
 
