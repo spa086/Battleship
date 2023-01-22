@@ -121,6 +121,10 @@ public class Game
 
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
+        if(FirstUserId is null)
+        {
+            FirstUserId = userId;
+        }
         var newShips = ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))

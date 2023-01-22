@@ -104,26 +104,31 @@ public class Controller
 {
     public GameStateModel WhatsUp(WhatsupRequestModel request)
     {
-        var firstUserIsPresent = GamePool.TheGame!.FirstUserId.HasValue;
-        var secondUserIsPresent = GamePool.TheGame.SecondUserId.HasValue;
-        if(firstUserIsPresent || secondUserIsPresent)
+        if(GamePool.TheGame is not null)
         {
-            if (firstUserIsPresent)
+            var firstUserIsPresent = GamePool.TheGame!.FirstUserId.HasValue;
+            var secondUserIsPresent = GamePool.TheGame.SecondUserId.HasValue;
+            if (firstUserIsPresent || secondUserIsPresent)
             {
-                if (GamePool.TheGame.FirstUserId == request.userId)
-                    return GameStateModel.YourTurn;
+                if (firstUserIsPresent)
+                {
+                    if (GamePool.TheGame.FirstUserId == request.userId)
+                        return GameStateModel.YourTurn;
+                }
+                if (secondUserIsPresent)
+                {
+                    if (GamePool.TheGame.SecondUserId == request.userId)
+                        return GameStateModel.YourTurn;
+                }
+                return GameStateModel.OpponentsTurn;
             }
-            if (secondUserIsPresent)
-            {
-                if (GamePool.TheGame.SecondUserId == request.userId)
-                    return GameStateModel.YourTurn;
-            }
-            return GameStateModel.OpponentsTurn;
         }
-
-        var secondPlayerJoined = GamePool.StartPlaying(request.userId);
-        if (secondPlayerJoined) return GameStateModel.CreatingFleet;
-        else return GameStateModel.WaitingForStart;
+        else
+        {
+            var secondPlayerJoined = GamePool.StartPlaying(request.userId);
+            if (secondPlayerJoined) return GameStateModel.CreatingFleet;
+        }
+        return GameStateModel.WaitingForStart;
     }
 
     public bool CreateFleet(FleetCreationRequestModel requestModel)

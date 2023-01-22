@@ -88,7 +88,7 @@ public class Tests
     public void CreateShipsSimple()
     {
         game.SetupSimpleFleets(null, null, null, null);
-        game.CreateAndSaveShips(0, new[]
+        game.CreateAndSaveShips(1, new[]
         {
                 new Ship
                 {
