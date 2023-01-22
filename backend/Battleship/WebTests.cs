@@ -1,6 +1,5 @@
 ﻿using BattleshipApi;
 using BattleshipLibrary;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using NUnit.Framework;
 
 namespace BattleshipTests;
@@ -17,9 +16,8 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(2));
-
-        Assert.That(result, Is.EqualTo(GameStateModel.OpponentsTurn));
+        Assert.That(CreateController().WhatsUp(CreateWhatsUpRequestModel(2)), 
+            Is.EqualTo(GameStateModel.OpponentsTurn));
     }
 
     [Test]
@@ -27,24 +25,20 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(1));
-
-        Assert.That(result, Is.EqualTo(GameStateModel.YourTurn));
+        Assert.That(CreateController().WhatsUp(CreateWhatsUpRequestModel(1)), 
+            Is.EqualTo(GameStateModel.YourTurn));
     }
+
+    private ShipTransportModel NewSimpleShipForFleetCreationRequest(int x, int y) => 
+        new ShipTransportModel { decks = new[] { new LocationModel { x = x, y = y } } };
 
     [Test]
     public void SecondPlayerCreatesFleet()
     {
         var testableGame = CreateAndGetNewTestableGame(GameState.WaitingForPlayer2ToCreateFleet);
 
-        var result = CreateController().CreateFleet(new FleetCreationRequestModel
-        {
-            ships = new[]
-            {
-                new ShipTransportModel { decks = new[] { new LocationModel{x=5, y=5 } } },
-            },
-            userId = 0
-        });
+        var result = CreateController().CreateFleet(new FleetCreationRequestModel 
+            { ships = new[] {NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
 
         Assert.That(result, Is.False);
         var ship = testableGame!.SecondFleet.AssertSingle();
@@ -63,10 +57,7 @@ public class WebTests
         var testableGame = CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets);
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel
-        {
-            ships = new[] { new ShipTransportModel { decks = new[] { new LocationModel { x=1, y=1 } } } },
-            userId = 1
-        });
+        { ships = new[] { NewSimpleShipForFleetCreationRequest(1, 1) }, userId = 1 });
 
         Assert.That(result, Is.True);
         var ship = testableGame!.FirstFleet.AssertSingle();
@@ -94,9 +85,7 @@ public class WebTests
     [Test]
     public void FirstPlayerStarts()
     {
-        var controller = CreateController();
-
-        var result = controller.WhatsUp(new WhatsupRequestModel { userId =1 });
+        var result = CreateController().WhatsUp(new WhatsupRequestModel { userId =1 });
 
         Assert.That(result, Is.EqualTo(GameStateModel.WaitingForStart));
         var game = GamePool.TheGame;
@@ -113,19 +102,13 @@ public class WebTests
         GamePool.SetGame(new TestableGame(1).SetState(state));
         var testableGame = (GamePool.TheGame as TestableGame)!;
         if(state == GameState.Player1Turn || state == GameState.Player2Turn)
-        {
-            testableGame
-                .SetSecondUserId(2)
-                .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-                new[] { new Cell(2, 2) }, 2);
-        }
+            testableGame.SetSecondUserId(2)
+                .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
         return testableGame;
     }
 
     private static Controller CreateController() => new();
 
-    private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0)
-    {
-        return new WhatsupRequestModel { userId = userIdParam };
-    }
+    private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) => 
+        new() { userId = userIdParam };
 }

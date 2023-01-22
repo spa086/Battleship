@@ -56,7 +56,10 @@ public class WebAttackTests
                 }
             }));
 
-        var result = CreateController().Attack(new AttackRequestModel { location = new LocationModel { x=0, y=0}, userId = 0 });
+        var result = CreateController().Attack(new AttackRequestModel 
+        { 
+            location = new LocationModel { x=0, y=0}, userId = 0
+        });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Killed));
     }
@@ -70,7 +73,8 @@ public class WebAttackTests
             new[] { new Cell(0, 2)}, 2));
 
         //todo put controller into variable?
-        var result = CreateController().Attack(new AttackRequestModel { location = new LocationModel { x = 0, y = 2 }, userId = 0 });
+        var result = CreateController().Attack(new AttackRequestModel
+            { location = new LocationModel { x = 0, y = 2 }, userId = 0 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
         Assert.That(game.Win, Is.True);
