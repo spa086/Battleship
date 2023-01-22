@@ -17,7 +17,7 @@ public static class GamePool
         }
         else
         {
-            TheGame.Start();
+            TheGame.Start(userId);
         }
 
         return result;
@@ -116,7 +116,11 @@ public class Game
     public List<Ship>? SecondFleet => secondFleet;
 
     //todo test
-    public void Start() => State = GameState.BothPlayersCreateFleets;
+    public void Start(int secondUserId)
+    {
+        State = GameState.BothPlayersCreateFleets;
+        SecondUserId = secondUserId;
+    } 
 
 
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)

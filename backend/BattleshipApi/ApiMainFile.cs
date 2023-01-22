@@ -107,6 +107,7 @@ public class Controller
         var game = GamePool.TheGame;
         if(game is null)
         {
+            GamePool.StartPlaying(request.userId);
             return GameStateModel.WaitingForStart;
         }
         if (game.SecondUserId is null)

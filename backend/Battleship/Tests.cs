@@ -78,7 +78,10 @@ public class Tests
     [Test]
     public void StartingAGame()
     {
+        GamePool.SetGame(null);
+
         Assert.That(GamePool.StartPlaying(0), Is.False);
+
         var game = GamePool.TheGame;
         Assert.That(game, Is.Not.Null);
         Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2));

@@ -88,12 +88,20 @@ public class WebTests
             GameStateModel.CreatingFleet);
 
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
+        Assert.That(game.SecondUserId, Is.EqualTo(2));
     }
 
     [Test]
-    public void FirstPlayerStarts() =>
-        AssertControllerReturnValue(x => x.WhatsUp(CreateWhatsUpRequestModel()),
-            GameStateModel.WaitingForStart);
+    public void FirstPlayerStarts()
+    {
+        var controller = CreateController();
+
+        var result = controller.WhatsUp(new WhatsupRequestModel { userId =1 });
+
+        Assert.That(result, Is.EqualTo(GameStateModel.WaitingForStart));
+        var game = GamePool.TheGame;
+        Assert.That(game, Is.Not.Null);
+    }
 
     private static void AssertControllerReturnValue<T>(Func<Controller, T> controllerFunction,
         T expectedValue) =>

@@ -2,7 +2,6 @@
 using BattleShipLibrary;
 
 var controller = new Controller();
-int? lastSessionId = null;
 do
 {
     PrepareConsole();
@@ -20,7 +19,12 @@ do
 
 Cell ReadCell()
 {
-    throw new NotImplementedException();
+    var cellStr = Console.ReadLine()!;
+    var parts = cellStr.Split(',');
+    var x = int.Parse(parts[0]);
+    var y = int.Parse(parts[1]);
+    var result = new Cell(x, y);
+    return result;
 }
 
 void ProcessAttackDecision()
@@ -39,7 +43,6 @@ void ProcessAttackDecision()
 
 string GetBoolString(bool isDestroyed) => isDestroyed ? "t" : "F";
 
-#pragma warning disable CS8321 // Локальная функция объявлена, но не используется
 string GetFleetString(IEnumerable<Ship> fleet) => 
     string.Join("; ", fleet.Select(ship =>
     {
@@ -47,7 +50,6 @@ string GetFleetString(IEnumerable<Ship> fleet) =>
             ship.Decks.Select(deck => $"{deck.Key}{GetBoolString(deck.Value.Destroyed)}"));
         return $"[{shipStr}]";
     }));
-#pragma warning restore CS8321 // Локальная функция объявлена, но не используется
 
 void PrepareConsole()
 {
@@ -55,77 +57,87 @@ void PrepareConsole()
     Console.ReadKey();
     Console.Clear();
     Console.WriteLine($"Welcome to BATTLESHIPS by FIERCE DEVELOPMENT!");
-    throw new NotImplementedException();
-    //var sessionInfoString = sessionModels.Select(x => $"[id={x.sessionId};state={x.State}]");
-    //if (sessionInfoString.Any())
-    //    Console.WriteLine($"Ongoing sessions: [{string.Join(", ", sessionInfoString)}].");
-    //ShowLastSessionIfExists(lastSessionId);
-    //var optionsDescription = "Do you wish to create a game (g), join existing one (j)";
-    //if (sessionModels.Any(x => x.State == GameState.BothPlayersCreateFleets || 
-    //    x.State == GameState.WaitingForPlayer2ToCreateFleet))
-    //    optionsDescription += " or create ships (s)";
-    //if (sessionModels.Any(x => x.State == GameState.Player1Turn || x.State == GameState.Player2Turn))
-    //    optionsDescription += " or attack (a)";
-    //optionsDescription += "?";
-    //Console.WriteLine(optionsDescription);
+    ShowCurrentGameIfExists();
+    var optionsDescription = "Do you wish to create a game (g), join existing one (j)";
+    var game = GamePool.TheGame;
+    if (game is not null)
+    {
+        if (game.State == GameState.BothPlayersCreateFleets ||
+                game.State == GameState.WaitingForPlayer2ToCreateFleet)
+            optionsDescription += " or create ships (s)";
+        if (game.State == GameState.Player1Turn || game.State == GameState.Player2Turn)
+            optionsDescription += " or attack (a)";
+    }
+    optionsDescription += "?";
+    Console.WriteLine(optionsDescription);
 }
 
-#pragma warning disable CS8321 // Локальная функция объявлена, но не используется
-void ShowLastSessionIfExists(int? lastSessionId)
+void ShowCurrentGameIfExists()
 {
-    throw new NotImplementedException();
-    //if (lastSessionId.HasValue)
-    //{
-    //    var game = GamePool.Games[lastSessionId.Value];
-    //    if (game.State == GameState.Player1Turn || game.State == GameState.Player2Turn)
-    //    {
-    //        Console.WriteLine($"Last session id is: [{lastSessionId}].");
-    //        var player1FleetStr = GetFleetString(game!.Player1Ships!);
-    //        var player2FleetStr = GetFleetString(game!.Player2Ships!);
-    //        //todo check 3 times
-    //        Console.WriteLine($"Player 1 ships after attack: {{{player1FleetStr}}}.");
-    //        Console.WriteLine($"Player 2 ships after attack: {{{player2FleetStr}}}.");
-    //    }
-    //}
+    var game = GamePool.TheGame;
+    if(game is null) return;
+    if(game.FirstUserId is not null)
+    {
+        Console.WriteLine($"First user id = [{game.FirstUserId}].");
+    }
+    if (game.SecondUserId is not null)
+    {
+        Console.WriteLine($"Second user id = [{game.SecondUserId}].");
+    }
+    if (game.FirstFleet is not null)
+    {
+        var player1FleetStr = GetFleetString(game!.FirstFleet!);
+        //todo check 3 times
+        Console.WriteLine($"Player 1 ships: {{{player1FleetStr}}}.");
+    }
+    if (game.SecondFleet is not null)
+    {
+        var player2FleetStr = GetFleetString(game!.SecondFleet!);
+        //todo check 3 times
+        Console.WriteLine($"Player 2 ships: {{{player2FleetStr}}}.");
+    }
 }
-#pragma warning restore CS8321 // Локальная функция объявлена, но не используется
 
 void ProcessCreateShipsDecision()
 {
-    throw new NotImplementedException();
-    //Console.WriteLine("Which one? Enter id: ");
-    //var idStr = Console.ReadLine();
-    //var id = int.Parse(idStr!);
-    //Console.WriteLine("Enter ships in format \"[d1,d2,..];[e1,e2,..];..\" " +
-    //            "where di, ei etc. are deck coordinates...");
-    //var decksArrays = Console.ReadLine()!.Split(";")
-    //    .Select(x => x[1..^1]).ToArray()
-    //    .Select(shipString =>
-    //    {
-    //        var decksStrings = shipString.Split(',');
-    //        var decks = decksStrings.Select(deckString => int.Parse(deckString)).ToArray();
-    //        return new ShipTransportModel { decks = decks };
-    //    }).ToArray();
-    //var response = controller.CreateFleet(new FleetCreationRequestModel
-    //    { userId = id, ships = decksArrays });
-    //Console.WriteLine($"Ships created with game id = [{id}]. Response: [{response}].");
+    Console.WriteLine("Enter your user id: ");
+    var idStr = Console.ReadLine();
+    var id = int.Parse(idStr!);
+    Console.WriteLine("Enter ships in format \"[d1;d2;..]-[e1;e2;..];..\" " +
+                "where di, ei are deck coordinates di=xi,yi.");
+    var decksArrays = Console.ReadLine()!.Split("-")
+        .Select(x => x[1..^1]).ToArray()
+        .Select(shipString =>
+        {
+            var decksStrings = shipString.Split(';');
+            var decks = decksStrings.Select(deckString =>
+            {
+                var parts = deckString.Split(',');
+                return new LocationModel
+                {
+                    x = int.Parse(parts[0]),
+                    y = int.Parse(parts[1])
+                };
+            }).ToArray();
+            return new ShipTransportModel { decks = decks };
+        }).ToArray();
+    var response = controller.CreateFleet(new FleetCreationRequestModel
+    { userId = id, ships = decksArrays });
+    Console.WriteLine($"User id=[{id}] has created ships. Response: [{response}].");
 }
 
 void ProcessJoinGameDecision()
 {
-    Console.WriteLine("Which one? Enter id: ");
-    //todo check 3 times
-    var idStr = Console.ReadLine();
-    var id = int.Parse(idStr!);
-    var response = controller.WhatsUp(new WhatsupRequestModel { userId = id });
-    lastSessionId = id;
-    Console.WriteLine($"Joined game with id = [{id}]. Response: [{response}].");
+    var userId = new Random().Next(100);
+    var response = controller.WhatsUp(new WhatsupRequestModel { userId = userId });
+    var game = GamePool.TheGame;
+    Console.WriteLine($"User id=[{userId}] has joined game created by user id=[{game.FirstUserId}]. " +
+        $"Response: [{response}].");
 }
 
 void ProcessCreateGameDecision()
 {
-    var sessionId = new Random().Next(100);
-    var response = controller.WhatsUp(new WhatsupRequestModel { userId = sessionId });
-    lastSessionId = sessionId;
-    Console.WriteLine($"Game created with id = [{sessionId}]. Response: [{response}].");
+    var userId = new Random().Next(100);
+    var response = controller.WhatsUp(new WhatsupRequestModel { userId = userId });
+    Console.WriteLine($"User id=[{userId}] has created game. Response: [{response}].");
 }
