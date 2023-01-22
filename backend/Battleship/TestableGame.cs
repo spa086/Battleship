@@ -4,9 +4,21 @@ namespace BattleshipTests;
 
 public class TestableGame : Game
 {
-    public TestableGame(int sessionId) : base(sessionId)
+    public TestableGame(int userId) : base(userId)
     {
 
+    }
+
+    public TestableGame SetFirstUserId(int? firstUserId = null)
+    {
+        FirstUserId= firstUserId;
+        return this;
+    }
+
+    public TestableGame SetSecondUserId(int? secondUserId = null)
+    {
+        SecondUserId = secondUserId;
+        return this;
     }
 
     public Game SetState(GameState newState)

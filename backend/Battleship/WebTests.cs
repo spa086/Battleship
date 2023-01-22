@@ -17,7 +17,7 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0));
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(2));
 
         Assert.That(result, Is.EqualTo(GameStateModel.OpponentsTurn));
     }
@@ -27,7 +27,7 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(0));
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(1));
 
         Assert.That(result, Is.EqualTo(GameStateModel.YourTurn));
     }
@@ -65,7 +65,7 @@ public class WebTests
         var result = CreateController().CreateFleet(new FleetCreationRequestModel
         {
             ships = new[] { new ShipTransportModel { decks = new[] { new LocationModel { x=1, y=1 } } } },
-            userId = 0
+            userId = 1
         });
 
         Assert.That(result, Is.True);
@@ -80,20 +80,11 @@ public class WebTests
     }
 
     [Test]
-    public void UserDoesNotJoinButCreatesNewGame()
-    {
-        CreateAndGetNewTestableGame();
-
-        AssertControllerReturnValue(x => x.WhatsUp(CreateWhatsUpRequestModel(1)),
-            GameStateModel.WaitingForStart);
-    }
-
-    [Test]
     public void SecondPlayerJoins()
     {
         var game = CreateAndGetNewTestableGame();
 
-        AssertControllerReturnValue(x => x.WhatsUp(CreateWhatsUpRequestModel()), 
+        AssertControllerReturnValue(x => x.WhatsUp(CreateWhatsUpRequestModel(2)), 
             GameStateModel.CreatingFleet);
 
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
@@ -111,11 +102,13 @@ public class WebTests
     private static TestableGame CreateAndGetNewTestableGame(
         GameState state = GameState.WaitingForPlayer2)
     {
-        GamePool.SetGame(new TestableGame(0).SetState(state));
+        GamePool.SetGame(new TestableGame(1).SetState(state));
         var testableGame = (GamePool.TheGame as TestableGame)!;
-        if(state == GameState.Player1Turn)
+        if(state == GameState.Player1Turn || state == GameState.Player2Turn)
         {
-            testableGame.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
+            testableGame
+                .SetSecondUserId(2)
+                .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
                 new[] { new Cell(2, 2) }, 2);
         }
         return testableGame;
