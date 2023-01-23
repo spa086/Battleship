@@ -12,11 +12,22 @@ public class WebTests
     //todo tdd finishing the game from controller.
 
     [Test]
+    public void FirstPlayerWhatsupWhileWaitingForSecondPlayer()
+    {
+        CreateAndGetNewTestableGame(GameState.WaitingForPlayer2);
+        (GamePool.TheGame as TestableGame)!.SetFirstUserId(1);
+
+        var result = CallWhatsupViaController(1);
+
+        Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
+    }
+
+    [Test]
     public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        WhatsUpResponseModel result = CreateController().WhatsUp(CreateWhatsUpRequestModel(2));
+        var result = CallWhatsupViaController(2);
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.OpponentsTurn));
         AssertSimpleFleet(result.fleet1, 1, 1);
@@ -28,7 +39,7 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        Assert.That(CreateController().WhatsUp(CreateWhatsUpRequestModel(1)).gameState, 
+        Assert.That(CallWhatsupViaController(1).gameState, 
             Is.EqualTo(GameStateModel.YourTurn));
     }
 
@@ -75,7 +86,7 @@ public class WebTests
     {
         var game = CreateAndGetNewTestableGame();
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(2));
+        var result = CallWhatsupViaController(2);
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
@@ -119,5 +130,11 @@ public class WebTests
         Assert.That(deck1.destroyed, Is.False);
         Assert.That(deck1.x, Is.EqualTo(x));
         Assert.That(deck1.y, Is.EqualTo(y));
+    }
+
+    private static WhatsUpResponseModel CallWhatsupViaController(int userId)
+    {
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(userId));
+        return result;
     }
 }

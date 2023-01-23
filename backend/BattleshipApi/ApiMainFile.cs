@@ -66,11 +66,7 @@ public class Controller
             GamePool.StartPlaying(request.userId);
             return GenerateWhatsupResponse(GameStateModel.WaitingForStart);
         }
-        if (game.SecondUserId is null)
-        {
-            GamePool.StartPlaying(request.userId);
-            return GenerateWhatsupResponse(GameStateModel.CreatingFleet);
-        }
+        if (game.SecondUserId is null) return AwaitingSecondPlayerSituation(request, game);
         if (game.FirstUserId is not null && game.SecondUserId is not null &&
             game.FirstFleet is not null && game.SecondFleet is not null)
             return ProcessWhatsUpInBattle(request, game);
@@ -123,7 +119,7 @@ public class Controller
     }
 
     private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel) =>
-        new WhatsUpResponseModel { gameState = stateModel };
+        new() { gameState = stateModel };
 
     private static WhatsUpResponseModel ProcessWhatsUpInBattle(WhatsupRequestModel request, Game? game)
     {
@@ -146,5 +142,17 @@ public class Controller
                     y = deck.Key.y
                 }).ToArray()
             }).ToArray();
+    }
+
+    private static WhatsUpResponseModel AwaitingSecondPlayerSituation(WhatsupRequestModel request,
+        Game? game)
+    {
+        if (request.userId == game.FirstUserId)
+            return GenerateWhatsupResponse(GameStateModel.WaitingForStart);
+        else
+        {
+            GamePool.StartPlaying(request.userId);
+            return GenerateWhatsupResponse(GameStateModel.CreatingFleet);
+        }
     }
 }
