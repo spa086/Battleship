@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using BattleshipLibrary;
+using System.Text.Json.Serialization;
 
 namespace BattleshipApi;
 
@@ -8,6 +9,15 @@ public class AttackRequestModel
 {
     public int userId { get; set; }
     public LocationModel location { get; set; } = new LocationModel();
+}
+
+public class WhatsUpResponseModel
+{
+    public GameStateModel gameState { get; set; }
+    //todo tdd filling
+    public ShipStateModel[]? fleet1 { get; set; }
+    //todo tdd filling
+    public ShipStateModel[]? fleet2 { get; set; }
 }
 
 public class WhatsupRequestModel

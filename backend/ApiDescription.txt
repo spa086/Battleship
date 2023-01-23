@@ -1,12 +1,35 @@
 "/whatsUp" 
-Request model:
+Request object:
 {
 	userId - int.
 }
-Returns string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn" }.
+Returns object:
+{
+	gameState - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn" }
+	fleet1 (optional) - array of objects:
+	{
+		userId - integer.
+		decks - array of objects: 
+		{
+			x - integer,
+			y - integer,
+			destroyed - boolean.
+		}
+	}
+	fleet2 (optional) - array of objects:
+	{
+		userId - integer.
+		decks - array of objects: 
+		{
+			x - integer,
+			y - integer,
+			destroyed - boolean.
+		}
+	}
+}
 
 "/createFleet"
-Request model:
+Request object:
 {
 	userId - integer,
 	ships - array of objects:

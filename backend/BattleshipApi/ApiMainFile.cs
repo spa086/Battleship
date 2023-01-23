@@ -12,7 +12,8 @@ public static class MainApi
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
 
-        MapPostFunction<WhatsupRequestModel, GameStateModel>(app, "whatsUp", (m, c) => c.WhatsUp(m));
+        MapPostFunction<WhatsupRequestModel, WhatsUpResponseModel>(app, "whatsUp", 
+            (m, c) => c.WhatsUp(m));
         MapPostAction<FleetCreationRequestModel>(app, "createFleet", (m, c) => c.CreateFleet(m));
         MapPostFunction<AttackRequestModel, AttackResponse>(app, "attack", (m, c) => c.Attack(m));
         app.Run();
@@ -56,23 +57,29 @@ public static class MainApi
 
 public class Controller
 {
-    public GameStateModel WhatsUp(WhatsupRequestModel request)
+    private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel)
+    {
+        var result = new WhatsUpResponseModel { gameState = stateModel };
+        return result;
+    }
+
+    public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
         var game = GamePool.TheGame;
         if(game is null)
         {
             GamePool.StartPlaying(request.userId);
-            return GameStateModel.WaitingForStart;
+            return GenerateWhatsupResponse(GameStateModel.WaitingForStart);
         }
         if (game.SecondUserId is null)
         {
             GamePool.StartPlaying(request.userId);
-            return GameStateModel.CreatingFleet;
+            return GenerateWhatsupResponse(GameStateModel.CreatingFleet);
         }
         if (game.FirstUserId is not null && game.SecondUserId is not null &&
             game.FirstFleet is not null && game.SecondFleet is not null)
             return RecognizeBattleStateModel(game, request.userId);
-        return GameStateModel.CreatingFleet;
+        return GenerateWhatsupResponse(GameStateModel.CreatingFleet);
     }
 
     public bool CreateFleet(FleetCreationRequestModel requestModel)
@@ -106,14 +113,16 @@ public class Controller
         };
     }
 
-    private static GameStateModel RecognizeBattleStateModel(Game game, int userId)
+    private static WhatsUpResponseModel RecognizeBattleStateModel(Game game, int userId)
     {
         if (game.FirstUserId == userId)
-            if (game.State == GameState.Player1Turn) return GameStateModel.YourTurn;
-            else return GameStateModel.OpponentsTurn;
+            if (game.State == GameState.Player1Turn) 
+                return GenerateWhatsupResponse(GameStateModel.YourTurn);
+            else return GenerateWhatsupResponse(GameStateModel.OpponentsTurn);
         else if (game.SecondUserId == userId)
-            if (game.State == GameState.Player2Turn) return GameStateModel.YourTurn;
-            else return GameStateModel.OpponentsTurn;
+            if (game.State == GameState.Player2Turn) 
+                return GenerateWhatsupResponse(GameStateModel.YourTurn);
+            else return GenerateWhatsupResponse(GameStateModel.OpponentsTurn);
         //todo tdd
         else throw new Exception($"Unknown user id=[{userId}].");
     }

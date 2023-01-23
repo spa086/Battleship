@@ -16,7 +16,7 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        Assert.That(CreateController().WhatsUp(CreateWhatsUpRequestModel(2)), 
+        Assert.That(CreateController().WhatsUp(CreateWhatsUpRequestModel(2)).gameState, 
             Is.EqualTo(GameStateModel.OpponentsTurn));
     }
 
@@ -25,7 +25,7 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        Assert.That(CreateController().WhatsUp(CreateWhatsUpRequestModel(1)), 
+        Assert.That(CreateController().WhatsUp(CreateWhatsUpRequestModel(1)).gameState, 
             Is.EqualTo(GameStateModel.YourTurn));
     }
 
@@ -72,9 +72,9 @@ public class WebTests
     {
         var game = CreateAndGetNewTestableGame();
 
-        AssertControllerReturnValue(x => x.WhatsUp(CreateWhatsUpRequestModel(2)), 
-            GameStateModel.CreatingFleet);
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(2));
 
+        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
         Assert.That(game.SecondUserId, Is.EqualTo(2));
     }
@@ -84,14 +84,10 @@ public class WebTests
     {
         var result = CreateController().WhatsUp(new WhatsupRequestModel { userId =1 });
 
-        Assert.That(result, Is.EqualTo(GameStateModel.WaitingForStart));
+        Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
         var game = GamePool.TheGame;
         Assert.That(game, Is.Not.Null);
     }
-
-    private static void AssertControllerReturnValue<T>(Func<Controller, T> controllerFunction,
-        T expectedValue) =>
-        Assert.That(controllerFunction(CreateController()), Is.EqualTo(expectedValue));
 
     private static TestableGame CreateAndGetNewTestableGame(
         GameState state = GameState.WaitingForPlayer2)
