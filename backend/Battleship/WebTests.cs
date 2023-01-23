@@ -155,11 +155,8 @@ public class WebTests
         Assert.That(deck1.y, Is.EqualTo(y));
     }
 
-    private static WhatsUpResponseModel CallWhatsupViaController(int userId)
-    {
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(userId));
-        return result;
-    }
+    private static WhatsUpResponseModel CallWhatsupViaController(int userId) => 
+        CreateController().WhatsUp(CreateWhatsUpRequestModel(userId));
 
     private static FleetCreationRequestModel SingleShipFleetCreationRequest(int userId,
         LocationModel[]? decks) =>
