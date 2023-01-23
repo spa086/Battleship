@@ -76,6 +76,11 @@ public class Controller
     {
         if (requestModel.ships.Any(x => x.decks is null)) 
             throw new Exception("Empty decks are not allowed.");
+        var firstGroupWithDuplicates = requestModel.ships.SelectMany(x => x.decks)
+            .GroupBy(deck => new Cell(deck.x, deck.y))
+            .FirstOrDefault(x => x.Count() > 1);
+        if(firstGroupWithDuplicates is not null)
+            throw new Exception($"Two decks are at the same place: [{firstGroupWithDuplicates.Key}].");
         //todo tdd what if did not find game
         var game = GamePool.TheGame!;
         game.CreateAndSaveShips(requestModel.userId, 

@@ -11,7 +11,17 @@ public class WebTests
 
     //todo tdd finishing the game from controller.
 
-    //todo tdd two decks in one ship are at the same location
+    [Test]
+    public void TwoDecksOfSameShipAreInTheSameLocation()
+    {
+        CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets, 1);
+
+        var exception = Assert.Throws<Exception>(() =>
+            CreateController().CreateFleet(SingleShipFleetCreationRequest(1,
+            new[] { new LocationModel { x = 1, y = 1 }, new LocationModel { x = 1, y = 1 } })));
+
+        Assert.That(exception.Message, Is.EqualTo("Two decks are at the same place: [1,1]."));
+    }
 
     [Test]
     public void CannotCreateEmptyDecks()
@@ -19,12 +29,9 @@ public class WebTests
         CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets);
         (GamePool.TheGame as TestableGame)!.SetFirstUserId(1);
         var controller = CreateController();
+        var request = SingleShipFleetCreationRequest(1, null);
 
-#pragma warning disable CS8625 
-        var exception = Assert.Throws<Exception>(() =>
-            controller.CreateFleet(new FleetCreationRequestModel
-                {ships = new[]{new ShipForCreationModel{decks = null}},userId = 1 }));
-#pragma warning restore CS8625 
+        var exception = Assert.Throws<Exception>(() => controller.CreateFleet(request));
 
         Assert.That(exception.Message, Is.EqualTo("Empty decks are not allowed."));
     }
@@ -122,9 +129,9 @@ public class WebTests
     }
 
     private static TestableGame CreateAndGetNewTestableGame(
-        GameState state = GameState.WaitingForPlayer2)
+        GameState state = GameState.WaitingForPlayer2, int? firstUserId = null)
     {
-        GamePool.SetGame(new TestableGame(1).SetState(state));
+        GamePool.SetGame(new TestableGame(firstUserId ?? 1).SetState(state));
         var testableGame = (GamePool.TheGame as TestableGame)!;
         if(state == GameState.Player1Turn || state == GameState.Player2Turn)
             testableGame.SetSecondUserId(2)
@@ -155,4 +162,10 @@ public class WebTests
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(userId));
         return result;
     }
+
+    private static FleetCreationRequestModel SingleShipFleetCreationRequest(int userId,
+#pragma warning disable CS8601 
+        LocationModel[]? decks) =>
+        new() { userId = userId, ships = new[] { new ShipForCreationModel { decks = decks } } };
+#pragma warning restore CS8601 
 }
