@@ -26,8 +26,7 @@ public class WebTests
     [Test]
     public void CannotCreateEmptyDecks()
     {
-        CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets);
-        (GamePool.TheGame as TestableGame)!.SetFirstUserId(1);
+        CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets, 1);
         var controller = CreateController();
         var request = SingleShipFleetCreationRequest(1, null);
 
@@ -39,8 +38,7 @@ public class WebTests
     [Test]
     public void FirstPlayerWhatsupWhileWaitingForSecondPlayer()
     {
-        CreateAndGetNewTestableGame(GameState.WaitingForPlayer2);
-        (GamePool.TheGame as TestableGame)!.SetFirstUserId(1);
+        CreateAndGetNewTestableGame(GameState.WaitingForPlayer2, 1);
 
         var result = CallWhatsupViaController(1);
 
