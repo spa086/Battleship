@@ -41,6 +41,7 @@ public class Game
         var player2Decks = (tempPlayer2Ships ?? Array.Empty<Ship>().ToList())
             .SelectMany(x => x.Decks.Keys).ToHashSet();
         if (player1Decks.Intersect(player2Decks).Any())
+            //todo move this exception to controller
             throw new Exception("Two ships at the same location.");
         UpdateState(userId, newShips);
     }
