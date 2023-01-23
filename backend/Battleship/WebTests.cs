@@ -16,8 +16,11 @@ public class WebTests
     {
         CreateAndGetNewTestableGame(GameState.Player1Turn);
 
-        Assert.That(CreateController().WhatsUp(CreateWhatsUpRequestModel(2)).gameState, 
-            Is.EqualTo(GameStateModel.OpponentsTurn));
+        WhatsUpResponseModel result = CreateController().WhatsUp(CreateWhatsUpRequestModel(2));
+
+        Assert.That(result.gameState, Is.EqualTo(GameStateModel.OpponentsTurn));
+        AssertSimpleFleet(result.fleet1, 1, 1);
+        AssertSimpleFleet(result.fleet2, 3, 3);
     }
 
     [Test]
@@ -96,7 +99,7 @@ public class WebTests
         var testableGame = (GamePool.TheGame as TestableGame)!;
         if(state == GameState.Player1Turn || state == GameState.Player2Turn)
             testableGame.SetSecondUserId(2)
-                .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+                .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2);
         return testableGame;
     }
 
@@ -105,6 +108,16 @@ public class WebTests
     private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) => 
         new() { userId = userIdParam };
 
-    private static ShipTransportModel NewSimpleShipForFleetCreationRequest(int x, int y) =>
+    private static ShipForCreationModel NewSimpleShipForFleetCreationRequest(int x, int y) =>
         new() { decks = new[] { new LocationModel { x = x, y = y } } };
+
+    private static void AssertSimpleFleet(ShipStateModel[]? fleet, int x, int y)
+    {
+        Assert.That(fleet, Is.Not.Null);
+        var ship1 = fleet.AssertSingle();
+        var deck1 = ship1.decks.AssertSingle();
+        Assert.That(deck1.destroyed, Is.False);
+        Assert.That(deck1.x, Is.EqualTo(x));
+        Assert.That(deck1.y, Is.EqualTo(y));
+    }
 }

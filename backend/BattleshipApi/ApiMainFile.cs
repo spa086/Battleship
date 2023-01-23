@@ -1,4 +1,5 @@
 using BattleshipLibrary;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Text.Json;
 
 namespace BattleshipApi;
@@ -57,12 +58,6 @@ public static class MainApi
 
 public class Controller
 {
-    private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel)
-    {
-        var result = new WhatsUpResponseModel { gameState = stateModel };
-        return result;
-    }
-
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
         var game = GamePool.TheGame;
@@ -78,7 +73,7 @@ public class Controller
         }
         if (game.FirstUserId is not null && game.SecondUserId is not null &&
             game.FirstFleet is not null && game.SecondFleet is not null)
-            return RecognizeBattleStateModel(game, request.userId);
+            return ProcessWhatsUpInBattle(request, game);
         return GenerateWhatsupResponse(GameStateModel.CreatingFleet);
     }
 
@@ -125,5 +120,31 @@ public class Controller
             else return GenerateWhatsupResponse(GameStateModel.OpponentsTurn);
         //todo tdd
         else throw new Exception($"Unknown user id=[{userId}].");
+    }
+
+    private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel) =>
+        new WhatsUpResponseModel { gameState = stateModel };
+
+    private static WhatsUpResponseModel ProcessWhatsUpInBattle(WhatsupRequestModel request, Game? game)
+    {
+        var result = RecognizeBattleStateModel(game, request.userId);
+        result.fleet1 = ToFleetStateModel(game.FirstFleet);
+        result.fleet2 = ToFleetStateModel(game.SecondFleet);
+        return result;
+    }
+
+    private static ShipStateModel[] ToFleetStateModel(IEnumerable<Ship> fleet)
+    {
+        return fleet.Select(ship =>
+            new ShipStateModel
+            {
+                decks = ship.Decks.Select(deck =>
+                new DeckStateModel
+                {
+                    destroyed = deck.Value.Destroyed,
+                    x = deck.Key.x,
+                    y = deck.Key.y
+                }).ToArray()
+            }).ToArray();
     }
 }

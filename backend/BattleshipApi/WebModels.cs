@@ -29,8 +29,8 @@ public class FleetCreationRequestModel
 {
     public int userId { get; set; }
 
-    public ShipTransportModel[] ships { get; set; }
-        = Array.Empty<ShipTransportModel>();
+    public ShipForCreationModel[] ships { get; set; }
+        = Array.Empty<ShipForCreationModel>();
 }
 
 public class LocationModel
@@ -39,7 +39,7 @@ public class LocationModel
     public int y { get; set; }
 }
 
-public class ShipTransportModel
+public class ShipForCreationModel
 {
     public LocationModel[] decks { get; set; } = Array.Empty<LocationModel>();
 }

@@ -115,7 +115,7 @@ void ProcessCreateGameDecision()
     Console.WriteLine($"User id=[{userId}] has created game. Response: [{response}].");
 }
 
-static ShipTransportModel[] ReadDecks()
+static ShipForCreationModel[] ReadDecks()
 {
     return Console.ReadLine()!.Split("-")
             .Select(x => x[1..^1]).ToArray()
@@ -131,6 +131,6 @@ static ShipTransportModel[] ReadDecks()
                         y = int.Parse(parts[1])
                     };
                 }).ToArray();
-                return new ShipTransportModel { decks = decks };
+                return new ShipForCreationModel { decks = decks };
             }).ToArray();
 }
