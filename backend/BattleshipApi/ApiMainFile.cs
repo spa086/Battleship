@@ -74,6 +74,8 @@ public class Controller
 
     public bool CreateFleet(FleetCreationRequestModel requestModel)
     {
+        if (requestModel.ships.Any(x => x.decks is null)) 
+            throw new Exception("Empty decks are not allowed.");
         //todo tdd what if did not find game
         var game = GamePool.TheGame!;
         game.CreateAndSaveShips(requestModel.userId, 

@@ -6,6 +6,17 @@ namespace BattleshipTests;
 
 public class WebAttackTests
 {
+    //[Test]
+    //public void AttackReturnsField()
+    //{
+    //    var controller = CreateController();
+    //    var result = controller.Attack(new AttackRequestModel { location = new LocationModel { x = 1, y = 1 } });
+
+    //    var firstFleet = result.fleet1;
+    //    Assert.That(firstFleet, Is.Not.Null);
+    //    Assert.That(firstFleet.)
+    //}
+
     [Test]
     public void AttackMissed()
     {

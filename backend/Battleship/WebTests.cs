@@ -11,6 +11,24 @@ public class WebTests
 
     //todo tdd finishing the game from controller.
 
+    //todo tdd two decks in one ship are at the same location
+
+    [Test]
+    public void CannotCreateEmptyDecks()
+    {
+        CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets);
+        (GamePool.TheGame as TestableGame)!.SetFirstUserId(1);
+        var controller = CreateController();
+
+#pragma warning disable CS8625 
+        var exception = Assert.Throws<Exception>(() =>
+            controller.CreateFleet(new FleetCreationRequestModel
+                {ships = new[]{new ShipForCreationModel{decks = null}},userId = 1 }));
+#pragma warning restore CS8625 
+
+        Assert.That(exception.Message, Is.EqualTo("Empty decks are not allowed."));
+    }
+
     [Test]
     public void FirstPlayerWhatsupWhileWaitingForSecondPlayer()
     {
