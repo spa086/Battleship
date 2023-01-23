@@ -18,7 +18,7 @@ public class WebTests
 
         var exception = Assert.Throws<Exception>(() =>
             CreateController().CreateFleet(SingleShipFleetCreationRequest(1,
-            new[] { new LocationModel { x = 1, y = 1 }, new LocationModel { x = 1, y = 1 } })));
+            new[] { new LocationModel { x = 1, y = 1 }, new LocationModel { x = 1, y = 1 } })))!;
 
         Assert.That(exception.Message, Is.EqualTo("Two decks are at the same place: [1,1]."));
     }
@@ -162,8 +162,6 @@ public class WebTests
     }
 
     private static FleetCreationRequestModel SingleShipFleetCreationRequest(int userId,
-#pragma warning disable CS8601 
         LocationModel[]? decks) =>
         new() { userId = userId, ships = new[] { new ShipForCreationModel { decks = decks } } };
-#pragma warning restore CS8601 
 }
