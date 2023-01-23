@@ -6,6 +6,7 @@ namespace BattleshipTests;
 
 public class WebAttackTests
 {
+    //todo finish this
     //[Test]
     //public void AttackReturnsField()
     //{
