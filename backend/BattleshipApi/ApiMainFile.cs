@@ -121,11 +121,11 @@ public class Controller
     private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel) =>
         new() { gameState = stateModel };
 
-    private static WhatsUpResponseModel ProcessWhatsUpInBattle(WhatsupRequestModel request, Game? game)
+    private static WhatsUpResponseModel ProcessWhatsUpInBattle(WhatsupRequestModel request, Game game)
     {
         var result = RecognizeBattleStateModel(game, request.userId);
-        result.fleet1 = ToFleetStateModel(game.FirstFleet);
-        result.fleet2 = ToFleetStateModel(game.SecondFleet);
+        result.fleet1 = ToFleetStateModel(game.FirstFleet!); //todo tdd handle null
+        result.fleet2 = ToFleetStateModel(game.SecondFleet!); //todo tdd handle null
         return result;
     }
 
@@ -145,7 +145,7 @@ public class Controller
     }
 
     private static WhatsUpResponseModel AwaitingSecondPlayerSituation(WhatsupRequestModel request,
-        Game? game)
+        Game game)
     {
         if (request.userId == game.FirstUserId)
             return GenerateWhatsupResponse(GameStateModel.WaitingForStart);
