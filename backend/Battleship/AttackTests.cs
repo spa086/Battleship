@@ -87,7 +87,8 @@ public class AttackTests
         game.SecondFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
     }
 
-    //todo similar for 2nd player
+    //todo does exclusion actually work?
+
     [Test]
     public void Excluding()
     {
