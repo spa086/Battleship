@@ -1,5 +1,4 @@
 using BattleshipLibrary;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Text.Json;
 
 namespace BattleshipApi;
