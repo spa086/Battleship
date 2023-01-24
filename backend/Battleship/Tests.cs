@@ -49,23 +49,6 @@ public class Tests
     }
 
     [Test]
-    public void TwoShipsInTheSameLocation()
-    {
-        game.SetupSimpleFleets(new[] { new Cell(1, 1), new Cell(1, 2) }, 1, null, null);
-
-        var exception = Assert.Throws<Exception>(() => game.CreateAndSaveShips(0,
-            new[] 
-            {
-                new Ship 
-                { 
-                    Decks = new[] { new Deck(1, 0), new Deck(1,1) }.ToDictionary(x => x.Location)
-                } 
-            }));
-
-        Assert.That(exception.Message, Is.EqualTo("Two ships at the same location."));
-    }
-
-    [Test]
     public void SecondPlayerJoins()
     {
         GamePool.SetGame(new Game(0));

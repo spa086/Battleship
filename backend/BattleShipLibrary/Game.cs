@@ -34,15 +34,6 @@ public class Game
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
                 .ToDictionary(x => x.Location)
         }).ToList();
-        var tempPlayer1Ships = userId == FirstUserId ? newShips : firstFleet;
-        var tempPlayer2Ships = userId == FirstUserId ? secondFleet : newShips;
-        var player1Decks = (tempPlayer1Ships ?? Array.Empty<Ship>().ToList())
-            .SelectMany(x => x.Decks.Keys).ToHashSet();
-        var player2Decks = (tempPlayer2Ships ?? Array.Empty<Ship>().ToList())
-            .SelectMany(x => x.Decks.Keys).ToHashSet();
-        if (player1Decks.Intersect(player2Decks).Any())
-            //todo move this exception to controller
-            throw new Exception("Two ships at the same location.");
         UpdateState(userId, newShips);
     }
 
