@@ -1,3 +1,5 @@
+https://docs.google.com/document/d/1ANfJDfpzo-SCtpOg50fyA6460oYWWVxBm7OP0yjpw9c/edit?usp=sharing
+
 "/whatsUp" 
 Request object:
 {
