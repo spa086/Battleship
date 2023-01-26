@@ -77,3 +77,16 @@ Returns object:
 		}
 	}
 }
+
+
+### this will go in soon:
+excludedLocations1 - array of objects:
+	{
+		x - integer,
+		y - integer.
+	},
+	excludedLocations2 - array of objects:
+	{
+		x - integer,
+		y - integer.
+	}

@@ -6,26 +6,30 @@ namespace BattleshipTests;
 
 public class WebAttackTests
 {
-    //todo finish this
-    //[Test]
-    //public void AttackReturnsField()
-    //{
-    //    var controller = CreateController();
-    //    var result = controller.Attack(new AttackRequestModel { location = new LocationModel { x = 1, y = 1 } });
+    [Test]
+    public void AttackReturnsField()
+    {
+        var deckLocations1 = new[] { new Cell(1, 1) }; 
+        var deckLocations2 = new[] { new Cell(2, 2) };
+        SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
+            game => game.SetupSimpleFleets(deckLocations1, 1, deckLocations2, 2));
+        var controller = CreateController();
 
-    //    var firstFleet = result.fleet1;
-    //    Assert.That(firstFleet, Is.Not.Null);
-    //    Assert.That(firstFleet.)
-    //}
+        var result = controller.Attack(
+            new AttackRequestModel { location = new LocationModel { x = 1, y = 1 } });
+
+        AssertFleet(result.fleet1, 1, 1);
+        AssertFleet(result.fleet2, 2, 2);
+    }
 
     [Test]
     public void AttackMissed()
     {
-        var game = SetupGameInPoolWithState(GameState.Player2Turn, 0,
+        var game = SetupGameInPoolWithState(GameState.Player2Turn, 1, 2,
             game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2));
 
         var result = CreateController().Attack(new AttackRequestModel 
-            { location = new LocationModel { x = 22, y = 22 }, userId = 0 });
+            { location = new LocationModel { x = 22, y = 22 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Missed));
         Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
@@ -34,7 +38,7 @@ public class WebAttackTests
     [Test]
     public void AttackHitsAShip()
     {
-        var game = SetupGameInPoolWithState(GameState.Player1Turn, 0,
+        var game = SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
             game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
             new[] {new Cell(2, 2), new Cell(2, 3) }, 2));
 
@@ -42,7 +46,7 @@ public class WebAttackTests
         var result = CreateController().Attack(
             new AttackRequestModel 
             { 
-                location = new LocationModel { x=2, y=2}, userId = 0 
+                location = new LocationModel { x=2, y=2}, userId = 1
             });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Hit));
@@ -57,21 +61,20 @@ public class WebAttackTests
     [Test]
     public void AttackKillsAShip()
     {
-        SetupGameInPoolWithState(GameState.Player2Turn, 0, game => game.SetupFleets(new List<Ship> {
-            new Ship{Decks = new Dictionary<Cell, Deck> { { new Cell(0,0), new Deck(0,0, false) } }},
-            new Ship{Decks = new Dictionary<Cell, Deck>{{ new Cell(2, 2), new Deck(2,2, false) }}}},
-            new List<Ship>
+        SetupGameInPoolWithState(GameState.Player2Turn, 1, 2, game => game.SetupFleets(
+            new List<Ship> 
             {
-                new Ship
-                {
-                    Decks = new Dictionary<Cell, Deck> { { new Cell(2,2), new Deck(2,2, false) } }
-                }
-            }));
+                new Ship{Decks = GenerateDeckDictionary(0,0) },
+                new Ship{Decks = GenerateDeckDictionary(2,2) }
+            },
+            new List<Ship> {new Ship{Decks = GenerateDeckDictionary(2,2)}}));
 
-        var result = CreateController().Attack(new AttackRequestModel 
-        { 
-            location = new LocationModel { x=0, y=0}, userId = 0
-        });
+        var result = CreateController().Attack(
+            new AttackRequestModel
+            {
+                location = new LocationModel { x = 0, y = 0 },
+                userId = 1
+            });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Killed));
     }
@@ -80,13 +83,13 @@ public class WebAttackTests
     [Test]
     public void Player1AttacksAndWins()
     {
-        var game = SetupGameInPoolWithState(GameState.Player1Turn, 0,
+        var game = SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
             game => game.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1, 
             new[] { new Cell(0, 2)}, 2));
 
         //todo put controller into variable?
         var result = CreateController().Attack(new AttackRequestModel
-            { location = new LocationModel { x = 0, y = 2 }, userId = 0 });
+            { location = new LocationModel { x = 0, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
         Assert.That(game.Win, Is.True);
@@ -96,15 +99,32 @@ public class WebAttackTests
         Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
     }
 
-    private static TestableGame SetupGameInPoolWithState(GameState state, int sessionId,
-        Action<TestableGame> modifier)
+    private static TestableGame SetupGameInPoolWithState(GameState state, int firstUserId,
+        int? secondUserId = null, Action<TestableGame>? modifier = null)
     {
-        var game = new TestableGame(sessionId);
+        var game = new TestableGame(firstUserId);
+        if (secondUserId != null) game.SetSecondUserId(secondUserId);
         game.SetState(state);
-        modifier.Invoke(game);
+        modifier?.Invoke(game);
         GamePool.SetGame(game);
         return game;
     }
 
     private static Controller CreateController() => new();
+
+    private static Dictionary<Cell, Deck> GenerateDeckDictionary(int x, int y)
+    {
+        var result = new Dictionary<Cell, Deck> { { new Cell(x, y), new Deck(x, y, false) } };
+        return result;
+    }
+
+    private static void AssertFleet(ShipStateModel[] fleet, int expectedX, int expectedY)
+    {
+        var ship = fleet.AssertSingle();
+        Assert.That(ship, Is.Not.Null);
+        var deck = ship.decks.AssertSingle();
+        Assert.That(deck.x, Is.EqualTo(expectedX));
+        Assert.That(deck.y, Is.EqualTo(expectedY));
+        Assert.That(deck.destroyed, Is.False);
+    }
 }

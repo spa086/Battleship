@@ -94,19 +94,29 @@ public class Controller
 
     public AttackResponse Attack(AttackRequestModel model)
     {
+        //todo tdd throw if game is inappropriate state
         //todo tdd what if did not find game
         //todo check 3 times
         var attackResult = GamePool.TheGame!.Attack(model.userId, ToCell(model.location));
         return new AttackResponse
         {
-            result = attackResult switch
-            {
-                AttackResult.Win => AttackResultTransportModel.Win,
-                AttackResult.Killed => AttackResultTransportModel.Killed,
-                AttackResult.Missed => AttackResultTransportModel.Missed,
-                AttackResult.Hit => AttackResultTransportModel.Hit,
-                _ => throw new Exception($"Unknown attack result [{attackResult}].")
-            }
+            result = ToAttackResultModel(attackResult),
+            //todo tdd throw if first fleet is null
+            fleet1 = ToFleetStateModel(GamePool.TheGame.FirstFleet!),
+            //todo tdd throw if first fleet is null
+            fleet2 = ToFleetStateModel(GamePool.TheGame.SecondFleet!)
+        };
+    }
+
+    private static AttackResultTransportModel ToAttackResultModel(AttackResult attackResult)
+    {
+        return attackResult switch
+        {
+            AttackResult.Win => AttackResultTransportModel.Win,
+            AttackResult.Killed => AttackResultTransportModel.Killed,
+            AttackResult.Missed => AttackResultTransportModel.Missed,
+            AttackResult.Hit => AttackResultTransportModel.Hit,
+            _ => throw new Exception($"Unknown attack result [{attackResult}].")
         };
     }
 
