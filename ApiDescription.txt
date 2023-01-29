@@ -25,6 +25,16 @@ Returns object:
 			y - integer,
 			destroyed - boolean.
 		}
+	},
+	excludedLocations1 - array of objects:
+	{
+		x - integer,
+		y - integer.
+	},
+	excludedLocations2 - array of objects:
+	{
+		x - integer,
+		y - integer.
 	}
 }
 
@@ -55,7 +65,7 @@ Request object:
 }
 Returns object:
 {
-	result - enum string { "Hit","Killed","Missed","Win" },
+	result - string enum { "Hit","Killed","Missed","Win" },
 	fleet1 - array of objects:
 	{
 		userId - integer.
@@ -75,17 +85,8 @@ Returns object:
 			y - integer,
 			destroyed - boolean.
 		}
-	}
-}
-
-"\abortGame"
-Request: int
-(it's userId!)
-Returns nothing.
-
-
-### this will go in soon:
-excludedLocations1 - array of objects:
+	},
+	excludedLocations1 - array of objects:
 	{
 		x - integer,
 		y - integer.
@@ -95,3 +96,9 @@ excludedLocations1 - array of objects:
 		x - integer,
 		y - integer.
 	}
+}
+
+"\abortGame"
+Request: int
+(it's userId!)
+Returns nothing.

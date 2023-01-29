@@ -66,6 +66,7 @@ public class Controller
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
+        //todo throw if it's third player
         var game = GamePool.TheGame;
         if(game is null)
         {
@@ -141,14 +142,27 @@ public class Controller
         else throw new Exception($"Unknown user id=[{userId}].");
     }
 
-    private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel) =>
-        new() { gameState = stateModel };
+    //todo mb kill 2 params?
+    private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel,
+        IEnumerable<LocationModel> excludedLocations1 = null, 
+        IEnumerable<LocationModel> excludedLocations2 = null)
+    {
+        return new() 
+        {
+            gameState = stateModel, excludedLocations1 = excludedLocations1?.ToArray(), 
+            excludedLocations2 = excludedLocations2?.ToArray()
+        };
+    }
 
     private static WhatsUpResponseModel ProcessWhatsUpInBattle(WhatsupRequestModel request, Game game)
     {
         var result = RecognizeBattleStateModel(game, request.userId);
         result.fleet1 = ToFleetStateModel(game.FirstFleet!); //todo tdd handle null
         result.fleet2 = ToFleetStateModel(game.SecondFleet!); //todo tdd handle null
+        result.excludedLocations1 = GamePool.TheGame.ExcludedLocations1
+            .Select(cell => new LocationModel { x = cell.x, y = cell.y }).ToArray();
+        result.excludedLocations2 = GamePool.TheGame.ExcludedLocations2
+            .Select(cell => new LocationModel { x = cell.x, y = cell.y }).ToArray();
         return result;
     }
 

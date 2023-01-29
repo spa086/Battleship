@@ -57,7 +57,7 @@ public class AttackTests
     [Test]
     public void AttackSamePlaceTwice()
     {
-        game.SetupExcludedLocations(new Cell(0, 0));
+        game.SetupExcludedLocations(1, new Cell(0, 0));
 
         var exception = Assert.Throws<Exception>(() => game.Attack(0, new Cell(0,0)));
         Assert.That(exception.Message, Is.EqualTo("Location [0,0] is already excluded."));

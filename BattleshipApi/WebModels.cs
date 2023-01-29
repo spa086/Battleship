@@ -18,6 +18,8 @@ public class WhatsUpResponseModel
     public ShipStateModel[]? fleet1 { get; set; }
     //todo tdd filling
     public ShipStateModel[]? fleet2 { get; set; }
+    public LocationModel[]? excludedLocations1 { get; set; }
+    public LocationModel[]? excludedLocations2 { get; set; }
 }
 
 public class WhatsupRequestModel
@@ -63,6 +65,8 @@ public class AttackResponse
     public ShipStateModel[] fleet1 { get; set; } = Array.Empty<ShipStateModel>();
     //todo tdd filling
     public ShipStateModel[] fleet2 { get; set; } = Array.Empty<ShipStateModel>();
+    public LocationModel[] excludedLocations1 { get; set; }
+    public LocationModel[] excludedLocations2 { get; set; }
 }
 
 

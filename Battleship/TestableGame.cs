@@ -27,8 +27,12 @@ public class TestableGame : Game
         return this;
     }
 
-    public void SetupExcludedLocations(params Cell[] locations) => 
-        excludedLocations1 = CreateLocationList(locations);
+    public void SetupExcludedLocations(int userId, params Cell[] locations)
+    {
+        if (userId == FirstUserId) excludedLocations1 = CreateLocationList(locations);
+        else if (userId == SecondUserId) excludedLocations2 = CreateLocationList(locations);
+        else throw new Exception("Incorrect userId");
+    }
 
     //todo check for 3 times
     public void SetTurn(bool setPlayer1Turn) => 

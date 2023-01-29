@@ -22,6 +22,7 @@ public enum AttackResult
 //todo use DI instead
 public static class GamePool
 {
+    //todo make another method for non-testing purposes
     //for testing
     public static void SetGame(Game? game) => TheGame = game;
 

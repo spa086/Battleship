@@ -12,6 +12,20 @@ public class WebTests
     //todo tdd finishing the game from controller.
 
     [Test]
+    public void ReturningExcludedLocationsFor([Values] bool firstPlayer)
+    {
+        var game = CreateAndGetNewTestableGame(GameState.Player1Turn, 1, 2);
+        game.SetupExcludedLocations(firstPlayer ? 1 : 2, new Cell(5, 6));
+
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
+
+        var location = 
+            (firstPlayer ? result.excludedLocations1 : result.excludedLocations2).AssertSingle();
+        Assert.That(location.x, Is.EqualTo(5));
+        Assert.That(location.y, Is.EqualTo(6));
+    }
+
+    [Test]
     public void GameAbortion([Values] GameState state)
     {
         CreateAndGetNewTestableGame(state, 1, 2);
