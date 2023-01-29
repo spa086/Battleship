@@ -12,6 +12,16 @@ public class WebTests
     //todo tdd finishing the game from controller.
 
     [Test]
+    public void GameAbortion([Values] GameState state)
+    {
+        CreateAndGetNewTestableGame(state, 1, 2);
+
+        CreateController().AbortGame(1);
+
+        Assert.That(GamePool.TheGame, Is.Null);
+    }
+
+    [Test]
     public void TwoDecksOfSameShipAreInTheSameLocation()
     {
         CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets, 1);
@@ -127,12 +137,12 @@ public class WebTests
     }
 
     private static TestableGame CreateAndGetNewTestableGame(
-        GameState state = GameState.WaitingForPlayer2, int? firstUserId = null)
+        GameState state = GameState.WaitingForPlayer2, int? firstUserId = null, int? secondUserId = null)
     {
         GamePool.SetGame(new TestableGame(firstUserId ?? 1).SetState(state));
         var testableGame = (GamePool.TheGame as TestableGame)!;
         if(state == GameState.Player1Turn || state == GameState.Player2Turn)
-            testableGame.SetSecondUserId(2)
+            testableGame.SetSecondUserId(secondUserId)
                 .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2);
         return testableGame;
     }
@@ -160,5 +170,5 @@ public class WebTests
 
     private static FleetCreationRequestModel SingleShipFleetCreationRequest(int userId,
         LocationModel[]? decks) =>
-        new() { userId = userId, ships = new[] { new ShipForCreationModel { decks = decks } } };
+        new() { userId = userId, ships = new[] { new ShipForCreationModel { decks = decks ?? null } } };
 }

@@ -44,7 +44,7 @@ Request object:
 Returns nothing.
 
 "/attack"
-Request model:
+Request object:
 {
 	userId - integer,
 	location - object:
@@ -77,6 +77,11 @@ Returns object:
 		}
 	}
 }
+
+"\abortGame"
+Request: int
+(it's userId!)
+Returns nothing.
 
 
 ### this will go in soon:

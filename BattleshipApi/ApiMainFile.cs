@@ -11,11 +11,13 @@ public static class MainApi
         builder.WebHost.UseUrls("http://0.0.0.0:5000");
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
-
         MapPostFunction<WhatsupRequestModel, WhatsUpResponseModel>(app, "whatsUp", 
-            (m, c) => c.WhatsUp(m));
-        MapPostAction<FleetCreationRequestModel>(app, "createFleet", (m, c) => c.CreateFleet(m));
-        MapPostFunction<AttackRequestModel, AttackResponse>(app, "attack", (m, c) => c.Attack(m));
+            (model, controller) => controller.WhatsUp(model));
+        MapPostFunction<AttackRequestModel, AttackResponse>(app, "attack", 
+            (model, controller) => controller.Attack(model));
+        MapPostAction<FleetCreationRequestModel>(app, "createFleet", 
+            (model, controller) => controller.CreateFleet(model));
+        MapPostAction<int>(app, "abortGame", (userId, controller) => controller.AbortGame(userId));
         app.Run();
     }
 
@@ -57,6 +59,11 @@ public static class MainApi
 
 public class Controller
 {
+    //todo tdd use the userId param to check if the user is authorized to abort TheGame
+#pragma warning disable IDE0060 // Удалите неиспользуемый параметр
+    public void AbortGame(int userId) => GamePool.SetGame(null);
+#pragma warning restore IDE0060 // Удалите неиспользуемый параметр
+
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
         var game = GamePool.TheGame;
@@ -145,9 +152,8 @@ public class Controller
         return result;
     }
 
-    private static ShipStateModel[] ToFleetStateModel(IEnumerable<Ship> fleet)
-    {
-        return fleet.Select(ship =>
+    private static ShipStateModel[] ToFleetStateModel(IEnumerable<Ship> fleet) => 
+        fleet.Select(ship =>
             new ShipStateModel
             {
                 decks = ship.Decks.Select(deck =>
@@ -158,7 +164,6 @@ public class Controller
                     y = deck.Key.y
                 }).ToArray()
             }).ToArray();
-    }
 
     private static WhatsUpResponseModel AwaitingSecondPlayerSituation(WhatsupRequestModel request,
         Game game)
