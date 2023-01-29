@@ -100,6 +100,9 @@ public class Controller
 
     public Cell ToCell(LocationModel model) => new(model.x, model.y);
 
+    private static LocationModel ToLocationModel(Cell location) => 
+        new() { x = location.x, y = location.y };
+
     public AttackResponse Attack(AttackRequestModel model)
     {
         //todo tdd throw if game is inappropriate state
@@ -112,7 +115,9 @@ public class Controller
             //todo tdd throw if first fleet is null
             fleet1 = ToFleetStateModel(GamePool.TheGame.FirstFleet!),
             //todo tdd throw if first fleet is null
-            fleet2 = ToFleetStateModel(GamePool.TheGame.SecondFleet!)
+            fleet2 = ToFleetStateModel(GamePool.TheGame.SecondFleet!),
+            excludedLocations1 = GamePool.TheGame.ExcludedLocations1.Select(ToLocationModel).ToArray(),
+            excludedLocations2 = GamePool.TheGame.ExcludedLocations2.Select(ToLocationModel).ToArray()
         };
     }
 
@@ -144,8 +149,8 @@ public class Controller
 
     //todo mb kill 2 params?
     private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel,
-        IEnumerable<LocationModel> excludedLocations1 = null, 
-        IEnumerable<LocationModel> excludedLocations2 = null)
+        IEnumerable<LocationModel>? excludedLocations1 = null, 
+        IEnumerable<LocationModel>? excludedLocations2 = null)
     {
         return new() 
         {
@@ -159,10 +164,8 @@ public class Controller
         var result = RecognizeBattleStateModel(game, request.userId);
         result.fleet1 = ToFleetStateModel(game.FirstFleet!); //todo tdd handle null
         result.fleet2 = ToFleetStateModel(game.SecondFleet!); //todo tdd handle null
-        result.excludedLocations1 = GamePool.TheGame.ExcludedLocations1
-            .Select(cell => new LocationModel { x = cell.x, y = cell.y }).ToArray();
-        result.excludedLocations2 = GamePool.TheGame.ExcludedLocations2
-            .Select(cell => new LocationModel { x = cell.x, y = cell.y }).ToArray();
+        result.excludedLocations1 = GamePool.TheGame!.ExcludedLocations1.Select(ToLocationModel).ToArray();
+        result.excludedLocations2 = GamePool.TheGame!.ExcludedLocations2.Select(ToLocationModel).ToArray();
         return result;
     }
 

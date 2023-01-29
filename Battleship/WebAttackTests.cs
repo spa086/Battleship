@@ -6,6 +6,27 @@ namespace BattleshipTests;
 
 public class WebAttackTests
 {
+    [SetUp]
+    public void SetUp() => GamePool.SetGame(null);
+
+    [Test]
+    public void ReturningExcludedLocationsFor([Values] bool firstPlayer)
+    {
+        CreateAndGetNewTestableGame(firstPlayer ? GameState.Player1Turn : GameState.Player2Turn,
+            1, 2);
+
+        var result = CreateController().Attack(
+            new AttackRequestModel 
+            { 
+                location = new LocationModel { x = 5, y = 6 }, userId = firstPlayer ? 1 : 2
+            });
+
+        var location = (firstPlayer ? result.excludedLocations1 : result.excludedLocations2)
+            .AssertSingle();
+        Assert.That(location.x, Is.EqualTo(5));
+        Assert.That(location.y, Is.EqualTo(6));
+    }
+
     [Test]
     public void AttackReturnsField()
     {
@@ -126,5 +147,16 @@ public class WebAttackTests
         Assert.That(deck.x, Is.EqualTo(expectedX));
         Assert.That(deck.y, Is.EqualTo(expectedY));
         Assert.That(deck.destroyed, Is.False);
+    }
+
+    private static TestableGame CreateAndGetNewTestableGame(
+        GameState state = GameState.WaitingForPlayer2, int? firstUserId = null, int? secondUserId = null)
+    {
+        GamePool.SetGame(new TestableGame(firstUserId ?? 1).SetState(state));
+        var testableGame = (GamePool.TheGame as TestableGame)!;
+        if (state == GameState.Player1Turn || state == GameState.Player2Turn)
+            testableGame.SetSecondUserId(secondUserId)
+                .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2);
+        return testableGame;
     }
 }
