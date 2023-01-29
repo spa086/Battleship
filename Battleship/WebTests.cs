@@ -7,14 +7,14 @@ namespace BattleshipTests;
 public class WebTests
 {
     [SetUp]
-    public void SetUp() => GamePool.SetGame(null);
+    public void SetUp() => GamePool.ClearGames();
 
     //todo tdd finishing the game from controller.
 
     [Test]
-    public void ReturningExcludedLocationsFor([Values] bool firstPlayer)
+    public void ReturningExcludedLocations([Values] bool firstPlayer)
     {
-        var game = CreateAndGetNewTestableGame(GameState.Player1Turn, 1, 2);
+        var game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
         game.SetupExcludedLocations(firstPlayer ? 1 : 2, new Cell(5, 6));
 
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
@@ -28,17 +28,18 @@ public class WebTests
     [Test]
     public void GameAbortion([Values] GameState state)
     {
-        CreateAndGetNewTestableGame(state, 1, 2);
+        TestingEnvironment.CreateNewTestableGame(state, 1, 2);
+        var gameId = GamePool.Games.Single().Key;
 
         CreateController().AbortGame(1);
 
-        Assert.That(GamePool.TheGame, Is.Null);
+        Assert.That(GamePool.Games.Keys, Does.Not.Contain(gameId));
     }
 
     [Test]
     public void TwoDecksOfSameShipAreInTheSameLocation()
     {
-        CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets, 1);
+        TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1);
 
         var exception = Assert.Throws<Exception>(() =>
             CreateController().CreateFleet(SingleShipFleetCreationRequest(1,
@@ -50,7 +51,7 @@ public class WebTests
     [Test]
     public void CannotCreateEmptyDecks()
     {
-        CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets, 1);
+        TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1);
         var controller = CreateController();
         var request = SingleShipFleetCreationRequest(1, null);
 
@@ -62,7 +63,7 @@ public class WebTests
     [Test]
     public void FirstPlayerWhatsupWhileWaitingForSecondPlayer()
     {
-        CreateAndGetNewTestableGame(GameState.WaitingForPlayer2, 1);
+        TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2, 1);
 
         var result = CallWhatsupViaController(1);
 
@@ -72,7 +73,7 @@ public class WebTests
     [Test]
     public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        CreateAndGetNewTestableGame(GameState.Player1Turn);
+        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
 
         var result = CallWhatsupViaController(2);
 
@@ -84,7 +85,7 @@ public class WebTests
     [Test]
     public void Player1WhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        CreateAndGetNewTestableGame(GameState.Player1Turn);
+        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
 
         Assert.That(CallWhatsupViaController(1).gameState, 
             Is.EqualTo(GameStateModel.YourTurn));
@@ -93,7 +94,8 @@ public class WebTests
     [Test]
     public void SecondPlayerCreatesFleet()
     {
-        var testableGame = CreateAndGetNewTestableGame(GameState.WaitingForPlayer2ToCreateFleet);
+        var testableGame = TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2ToCreateFleet, 
+            1, 2);
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel 
             { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
@@ -112,7 +114,7 @@ public class WebTests
     [Test]
     public void FirstPlayerCreatesFleet()
     {
-        var testableGame = CreateAndGetNewTestableGame(GameState.BothPlayersCreateFleets);
+        var testableGame = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel
         { ships = new[] { NewSimpleShipForFleetCreationRequest(1, 1) }, userId = 1 });
@@ -131,7 +133,8 @@ public class WebTests
     [Test]
     public void SecondPlayerJoins()
     {
-        var game = CreateAndGetNewTestableGame();
+        var game = TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2, 
+            1, 2);
 
         var result = CallWhatsupViaController(2);
 
@@ -146,19 +149,8 @@ public class WebTests
         var result = CreateController().WhatsUp(new WhatsupRequestModel { userId =1 });
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
-        var game = GamePool.TheGame;
+        var game = GamePool.Games;
         Assert.That(game, Is.Not.Null);
-    }
-
-    private static TestableGame CreateAndGetNewTestableGame(
-        GameState state = GameState.WaitingForPlayer2, int? firstUserId = null, int? secondUserId = null)
-    {
-        GamePool.SetGame(new TestableGame(firstUserId ?? 1).SetState(state));
-        var testableGame = (GamePool.TheGame as TestableGame)!;
-        if(state == GameState.Player1Turn || state == GameState.Player2Turn)
-            testableGame.SetSecondUserId(secondUserId)
-                .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2);
-        return testableGame;
     }
 
     private static Controller CreateController() => new();
@@ -183,6 +175,8 @@ public class WebTests
         CreateController().WhatsUp(CreateWhatsUpRequestModel(userId));
 
     private static FleetCreationRequestModel SingleShipFleetCreationRequest(int userId,
+#pragma warning disable CS8601 // Возможно, назначение-ссылка, допускающее значение NULL.
         LocationModel[]? decks) =>
-        new() { userId = userId, ships = new[] { new ShipForCreationModel { decks = decks ?? null } } };
+        new() { userId = userId, ships = new[] { new ShipForCreationModel { decks = decks } } };
+#pragma warning restore CS8601 // Возможно, назначение-ссылка, допускающее значение NULL.
 }

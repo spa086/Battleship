@@ -7,12 +7,13 @@ namespace BattleshipTests;
 public class WebAttackTests
 {
     [SetUp]
-    public void SetUp() => GamePool.SetGame(null);
+    public void SetUp() => GamePool.ClearGames();
 
     [Test]
     public void ReturningExcludedLocationsFor([Values] bool firstPlayer)
     {
-        CreateAndGetNewTestableGame(firstPlayer ? GameState.Player1Turn : GameState.Player2Turn,
+        TestingEnvironment.CreateNewTestableGame(
+            firstPlayer ? GameState.Player1Turn : GameState.Player2Turn,
             1, 2);
 
         var result = CreateController().Attack(
@@ -37,7 +38,7 @@ public class WebAttackTests
         var controller = CreateController();
 
         var result = controller.Attack(
-            new AttackRequestModel { location = new LocationModel { x = 1, y = 1 } });
+            new AttackRequestModel { userId = 1, location = new LocationModel { x = 1, y = 1 } });
 
         AssertFleet(result.fleet1, 1, 1);
         AssertFleet(result.fleet2, 2, 2);
@@ -147,16 +148,5 @@ public class WebAttackTests
         Assert.That(deck.x, Is.EqualTo(expectedX));
         Assert.That(deck.y, Is.EqualTo(expectedY));
         Assert.That(deck.destroyed, Is.False);
-    }
-
-    private static TestableGame CreateAndGetNewTestableGame(
-        GameState state = GameState.WaitingForPlayer2, int? firstUserId = null, int? secondUserId = null)
-    {
-        GamePool.SetGame(new TestableGame(firstUserId ?? 1).SetState(state));
-        var testableGame = (GamePool.TheGame as TestableGame)!;
-        if (state == GameState.Player1Turn || state == GameState.Player2Turn)
-            testableGame.SetSecondUserId(secondUserId)
-                .SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2);
-        return testableGame;
     }
 }

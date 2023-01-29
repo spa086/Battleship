@@ -22,20 +22,45 @@ public enum AttackResult
 //todo use DI instead
 public static class GamePool
 {
+    public static Game? GetGame(int userId)
+    {
+        //todo tdd throw if user participates in several games simultaneously
+        var game = Games.Values.SingleOrDefault(x => 
+            x.FirstUserId == userId || x.SecondUserId == userId);
+        return game;
+    }
+
+    //for testing
+    public static void ClearGames()
+    {
+        Games = new Dictionary<int, Game>();
+    }
+
+    //todo if null do remove instead of assigning
     //todo make another method for non-testing purposes
     //for testing
-    public static void SetGame(Game? game) => TheGame = game;
+#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
+    public static void SetGame(Game? game) => Games[game.Id] = game;
+#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 
     public static bool StartPlaying(int userId)
     {
-        var result = TheGame is not null;
-        if (TheGame is null) TheGame = new Game(userId);
-        else TheGame.Start(userId);
-        return result;
+        var game = GetGame(userId);
+        //todo tdd ensure id uniqueness
+        if (game is null)
+        {
+            var newGame = new Game(userId);
+            Games[newGame.Id] = newGame;
+            return false;
+        }
+        else
+        {
+            game.Start(userId);
+            return true;
+        }
     }
 
-    //todo does it need to be public?
-    public static Game? TheGame { get; private set; }
+    public static Dictionary<int, Game> Games { get; private set; } = new Dictionary<int, Game>();
 }
 
 public readonly struct Cell

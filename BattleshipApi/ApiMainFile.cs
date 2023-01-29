@@ -59,43 +59,59 @@ public static class MainApi
 
 public class Controller
 {
-    //todo tdd use the userId param to check if the user is authorized to abort TheGame
-#pragma warning disable IDE0060 // Удалите неиспользуемый параметр
-    public void AbortGame(int userId) => GamePool.SetGame(null);
-#pragma warning restore IDE0060 // Удалите неиспользуемый параметр
+    public void AbortGame(int userId)
+    {
+        var game = GamePool.GetGame(userId);
+        if (game is null)
+        {
+            //todo tdd throw here
+        }
+#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
+        GamePool.Games.Remove(game.Id);
+#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+    }
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
-        //todo throw if it's third player
-        var game = GamePool.TheGame;
-        if(game is null)
+        var ongoingGame = GamePool.GetGame(request.userId);
+        if (ongoingGame is null)
         {
-            GamePool.StartPlaying(request.userId);
-            return GenerateWhatsupResponse(GameStateModel.WaitingForStart);
+            //todo this is matching. tdd it.
+            var awaitingGame = GamePool.Games.Values.FirstOrDefault(x => x.SecondUserId is null);
+            if (awaitingGame is not null) 
+            {
+                return AwaitingSecondPlayerSituation(request, awaitingGame);
+            }
+            else
+            {
+                GamePool.StartPlaying(request.userId);
+                return GenerateWhatsupResponse(GameStateModel.WaitingForStart);
+            }
         }
-        if (game.SecondUserId is null) return AwaitingSecondPlayerSituation(request, game);
-        if (game.FirstUserId is not null && game.SecondUserId is not null &&
-            game.FirstFleet is not null && game.SecondFleet is not null)
-            return ProcessWhatsUpInBattle(request, game);
+        //todo tdd add condition: 1st user id is equal to id in request. else throw?
+        //todo try to remove conditions about fleets
+        if (ongoingGame.FirstUserId is not null && ongoingGame.SecondUserId is not null &&
+            ongoingGame.FirstFleet is not null && ongoingGame.SecondFleet is not null)
+            return ProcessWhatsUpInBattle(request, ongoingGame);
         return GenerateWhatsupResponse(GameStateModel.CreatingFleet);
     }
 
-    public bool CreateFleet(FleetCreationRequestModel requestModel)
+    public bool CreateFleet(FleetCreationRequestModel request)
     {
-        if (requestModel.ships.Any(x => x.decks is null)) 
+        if (request.ships.Any(x => x.decks is null)) 
             throw new Exception("Empty decks are not allowed.");
-        var firstGroupWithDuplicates = requestModel.ships.SelectMany(x => x.decks)
+        var firstGroupWithDuplicates = request.ships.SelectMany(x => x.decks)
             .GroupBy(deck => new Cell(deck.x, deck.y))
             .FirstOrDefault(x => x.Count() > 1);
         if(firstGroupWithDuplicates is not null)
             throw new Exception($"Two decks are at the same place: [{firstGroupWithDuplicates.Key}].");
-        //todo tdd what if did not find game
-        var game = GamePool.TheGame!;
-        game.CreateAndSaveShips(requestModel.userId, 
-            requestModel.ships.Select(ship =>
+        //todo tdd what if did not find a game
+        var game = GamePool.GetGame(request.userId);
+        game!.CreateAndSaveShips(request.userId, 
+            request.ships.Select(ship =>
                 new Ship { Decks = ship.decks.ToDictionary(x => ToCell(x),
                 deckModel => new Deck(deckModel.x, deckModel.y))}).ToArray());
-        return game.FirstUserId == requestModel.userId;
+        return game.FirstUserId == request.userId;
     }
 
     public Cell ToCell(LocationModel model) => new(model.x, model.y);
@@ -103,21 +119,22 @@ public class Controller
     private static LocationModel ToLocationModel(Cell location) => 
         new() { x = location.x, y = location.y };
 
-    public AttackResponse Attack(AttackRequestModel model)
+    public AttackResponse Attack(AttackRequestModel request)
     {
         //todo tdd throw if game is inappropriate state
         //todo tdd what if did not find game
         //todo check 3 times
-        var attackResult = GamePool.TheGame!.Attack(model.userId, ToCell(model.location));
+        var game = GamePool.GetGame(request.userId);
+        var attackResult = game!.Attack(request.userId, ToCell(request.location));
         return new AttackResponse
         {
             result = ToAttackResultModel(attackResult),
             //todo tdd throw if first fleet is null
-            fleet1 = ToFleetStateModel(GamePool.TheGame.FirstFleet!),
+            fleet1 = ToFleetStateModel(game.FirstFleet!),
             //todo tdd throw if first fleet is null
-            fleet2 = ToFleetStateModel(GamePool.TheGame.SecondFleet!),
-            excludedLocations1 = GamePool.TheGame.ExcludedLocations1.Select(ToLocationModel).ToArray(),
-            excludedLocations2 = GamePool.TheGame.ExcludedLocations2.Select(ToLocationModel).ToArray()
+            fleet2 = ToFleetStateModel(game.SecondFleet!),
+            excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
+            excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray()
         };
     }
 
@@ -164,8 +181,8 @@ public class Controller
         var result = RecognizeBattleStateModel(game, request.userId);
         result.fleet1 = ToFleetStateModel(game.FirstFleet!); //todo tdd handle null
         result.fleet2 = ToFleetStateModel(game.SecondFleet!); //todo tdd handle null
-        result.excludedLocations1 = GamePool.TheGame!.ExcludedLocations1.Select(ToLocationModel).ToArray();
-        result.excludedLocations2 = GamePool.TheGame!.ExcludedLocations2.Select(ToLocationModel).ToArray();
+        result.excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray();
+        result.excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray();
         return result;
     }
 

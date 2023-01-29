@@ -5,7 +5,12 @@ public class Game
     public Game(int user1Id)
     {
         FirstUserId = user1Id;
+        var random = new Random();
+        Id = random.Next();
     }
+
+    //todo tdd this field
+    public int Id { get; private set; }
 
     public int? FirstUserId { get; protected set; }
     public int? SecondUserId { get; protected set; }
@@ -52,7 +57,9 @@ public class Game
     }
 
     //todo tdd userId field
+#pragma warning disable IDE0060 // Удалите неиспользуемый параметр
     public AttackResult Attack(int userId, Cell attackedLocation)
+#pragma warning restore IDE0060 // Удалите неиспользуемый параметр
     {
         //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);

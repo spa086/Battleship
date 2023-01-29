@@ -21,7 +21,7 @@ public class Tests
     [SetUp]
     public void SetUp()
     {
-        GamePool.SetGame(null);
+        GamePool.ClearGames();
         game.StandardSetup();
     }
 
@@ -51,24 +51,24 @@ public class Tests
     [Test]
     public void SecondPlayerJoins()
     {
-        GamePool.SetGame(new Game(0));
+        GamePool.SetGame(new Game(1));
 
-        Assert.That(GamePool.StartPlaying(0), Is.True);
-        Assert.That(GamePool.TheGame!.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
+        Assert.That(GamePool.StartPlaying(1), Is.True);
+
+        Assert.That(GamePool.Games.Values.Single().State, Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
 
     [Test]
     public void StartingAGame()
     {
-        GamePool.SetGame(null);
+        Assert.That(GamePool.StartPlaying(1), Is.False);
 
-        Assert.That(GamePool.StartPlaying(0), Is.False);
-
-        var game = GamePool.TheGame;
+        var game = GamePool.Games.Values.AssertSingle();
         Assert.That(game, Is.Not.Null);
         Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2));
     }
 
+    //todo refactor
     [Test]
     public void CreateShipsSimple()
     {
