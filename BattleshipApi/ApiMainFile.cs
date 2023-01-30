@@ -73,27 +73,7 @@ public class Controller
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
-        var ongoingGame = GamePool.GetGame(request.userId);
-        if (ongoingGame is null)
-        {
-            //todo this is matching. tdd it.
-            var awaitingGame = GamePool.Games.Values.FirstOrDefault(x => x.SecondUserId is null);
-            if (awaitingGame is not null) 
-            {
-                return AwaitingSecondPlayerSituation(request, awaitingGame);
-            }
-            else
-            {
-                GamePool.StartPlaying(request.userId);
-                return GenerateWhatsupResponse(GameStateModel.WaitingForStart);
-            }
-        }
-        //todo tdd add condition: 1st user id is equal to id in request. else throw?
-        //todo try to remove conditions about fleets
-        if (ongoingGame.FirstUserId is not null && ongoingGame.SecondUserId is not null &&
-            ongoingGame.FirstFleet is not null && ongoingGame.SecondFleet is not null)
-            return ProcessWhatsUpInBattle(request, ongoingGame);
-        return GenerateWhatsupResponse(GameStateModel.CreatingFleet);
+        throw new NotImplementedException();
     }
 
     public bool CreateFleet(FleetCreationRequestModel request)
@@ -164,28 +144,6 @@ public class Controller
         else throw new Exception($"Unknown user id=[{userId}].");
     }
 
-    //todo mb kill 2 params?
-    private static WhatsUpResponseModel GenerateWhatsupResponse(GameStateModel stateModel,
-        IEnumerable<LocationModel>? excludedLocations1 = null, 
-        IEnumerable<LocationModel>? excludedLocations2 = null)
-    {
-        return new() 
-        {
-            gameState = stateModel, excludedLocations1 = excludedLocations1?.ToArray(), 
-            excludedLocations2 = excludedLocations2?.ToArray()
-        };
-    }
-
-    private static WhatsUpResponseModel ProcessWhatsUpInBattle(WhatsupRequestModel request, Game game)
-    {
-        var result = RecognizeBattleStateModel(game, request.userId);
-        result.fleet1 = ToFleetStateModel(game.FirstFleet!); //todo tdd handle null
-        result.fleet2 = ToFleetStateModel(game.SecondFleet!); //todo tdd handle null
-        result.excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray();
-        result.excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray();
-        return result;
-    }
-
     private static ShipStateModel[] ToFleetStateModel(IEnumerable<Ship> fleet) => 
         fleet.Select(ship =>
             new ShipStateModel
@@ -198,16 +156,4 @@ public class Controller
                     y = deck.Key.y
                 }).ToArray()
             }).ToArray();
-
-    private static WhatsUpResponseModel AwaitingSecondPlayerSituation(WhatsupRequestModel request,
-        Game game)
-    {
-        if (request.userId == game.FirstUserId)
-            return GenerateWhatsupResponse(GameStateModel.WaitingForStart);
-        else
-        {
-            GamePool.StartPlaying(request.userId);
-            return GenerateWhatsupResponse(GameStateModel.CreatingFleet);
-        }
-    }
 }
