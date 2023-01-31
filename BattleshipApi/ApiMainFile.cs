@@ -77,13 +77,23 @@ public class Controller
         var game = GamePool.GetGame(userId);
         if(game is null) return StartPlaying(userId);
         if (game.FirstUserId.HasValue && !game.SecondUserId.HasValue) return WaitingForStartResult();
+        if (game.FirstUserId.HasValue && game.SecondUserId.HasValue &&
+            (game.FirstFleet is null || game.SecondFleet is null))
+            return WhatsUpWhileCreatingFleets(game);
         if (game.FirstFleet is not null && game.SecondFleet is not null) 
             return WhatsUpInBattle(request, game);
         //todo tdd this exception
         throw new Exception("Unknown situation.");
     }
 
-    private static WhatsUpResponseModel WhatsUpInBattle(WhatsupRequestModel request, Game? game)
+    private static WhatsUpResponseModel WhatsUpWhileCreatingFleets(Game game) => 
+        new WhatsUpResponseModel
+        {
+            gameState = GameStateModel.CreatingFleet, fleet1 = ToFleetStateModel(game.FirstFleet),
+            fleet2 = ToFleetStateModel(game.SecondFleet)
+        };
+
+    private static WhatsUpResponseModel WhatsUpInBattle(WhatsupRequestModel request, Game game)
     {
         var excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray();
         var excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray();
@@ -165,8 +175,8 @@ public class Controller
             _ => throw new Exception($"Unknown attack result [{attackResult}].")
         };
 
-    private static ShipStateModel[] ToFleetStateModel(IEnumerable<Ship> fleet) => 
-        fleet.Select(ship =>
+    private static ShipStateModel[]? ToFleetStateModel(IEnumerable<Ship>? fleet) => 
+        fleet?.Select(ship =>
             new ShipStateModel
             {
                 decks = ship.Decks.Select(deck =>

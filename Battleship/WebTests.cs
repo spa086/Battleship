@@ -11,6 +11,19 @@ public class WebTests
 
     //todo tdd finishing the game from controller.
 
+    [TestCase(GameState.WaitingForPlayer2ToCreateFleet, true)]
+    [TestCase(GameState.WaitingForPlayer2ToCreateFleet, false)]
+    [TestCase(GameState.BothPlayersCreateFleets, true)]
+    [TestCase(GameState.BothPlayersCreateFleets, false)]
+    public void WhatsUpWhileCreatingShips(GameState state, bool firstPlayer)
+    {
+        var game = TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2ToCreateFleet, 1, 2);
+
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
+
+        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
+    }
+
     [Test]
     public void ReturningExcludedLocations([Values] bool firstPlayer)
     {
