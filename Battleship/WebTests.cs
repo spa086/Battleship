@@ -17,7 +17,7 @@ public class WebTests
     [TestCase(GameState.BothPlayersCreateFleets, false)]
     public void WhatsUpWhileCreatingShips(GameState state, bool firstPlayer)
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2ToCreateFleet, 1, 2);
+        TestingEnvironment.CreateNewTestableGame(state, 1, 2);
 
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
 

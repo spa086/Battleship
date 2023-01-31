@@ -87,7 +87,7 @@ public class Controller
     }
 
     private static WhatsUpResponseModel WhatsUpWhileCreatingFleets(Game game) => 
-        new WhatsUpResponseModel
+        new()
         {
             gameState = GameStateModel.CreatingFleet, fleet1 = ToFleetStateModel(game.FirstFleet),
             fleet2 = ToFleetStateModel(game.SecondFleet)
@@ -108,16 +108,16 @@ public class Controller
             stateModel = GameStateModel.OpponentsTurn;
         var result = new WhatsUpResponseModel
         {
-            gameState = stateModel.Value,excludedLocations1 = excludedLocations1,
+            gameState = stateModel!.Value,excludedLocations1 = excludedLocations1,
             excludedLocations2 = excludedLocations2, fleet1 = firstFleet, fleet2 = secondFleet,
         };
         return result;
     }
 
     private static WhatsUpResponseModel WaitingForStartResult() => 
-        new WhatsUpResponseModel { gameState = GameStateModel.WaitingForStart };
+        new() { gameState = GameStateModel.WaitingForStart };
 
-    private static WhatsUpResponseModel StartPlaying(int userId) => new WhatsUpResponseModel
+    private static WhatsUpResponseModel StartPlaying(int userId) => new()
     {
         gameState = GamePool.StartPlaying(userId) ? GameStateModel.CreatingFleet
                 : GameStateModel.WaitingForStart
@@ -152,9 +152,9 @@ public class Controller
         {
             result = ToAttackResultModel(attackResult),
             //todo tdd throw if first fleet is null
-            fleet1 = ToFleetStateModel(game.FirstFleet!),
+            fleet1 = ToFleetStateModel(game.FirstFleet)!,
             //todo tdd throw if first fleet is null
-            fleet2 = ToFleetStateModel(game.SecondFleet!),
+            fleet2 = ToFleetStateModel(game.SecondFleet)!,
             excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
             excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray()
         };

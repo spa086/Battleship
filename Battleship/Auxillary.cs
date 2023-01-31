@@ -6,22 +6,28 @@ namespace BattleshipTests;
 public static class TestingEnvironment
 {
     public static TestableGame CreateNewTestableGame(
-        GameState state = GameState.WaitingForPlayer2, 
+        GameState state = GameState.WaitingForPlayer2,
         int? firstUserId = null, int? secondUserId = null)
     {
         var game = new TestableGame(firstUserId ?? 1).SetState(state);
         GamePool.SetGame(game);
         var testableGame = (GamePool.Games[game.Id] as TestableGame)!;
         var battleOngoing = state == GameState.Player1Turn || state == GameState.Player2Turn;
-        if (state == GameState.WaitingForPlayer2ToCreateFleet || battleOngoing)
+        var creatingFleets = state == GameState.WaitingForPlayer2ToCreateFleet ||
+            state == GameState.BothPlayersCreateFleets;
+        if (creatingFleets || battleOngoing)
         {
             testableGame.SetSecondUserId(secondUserId);
-            if(battleOngoing)
-            {
-                testableGame.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2);
-            }
+            if (battleOngoing)
+                testableGame.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(3), 2);
+            else if (creatingFleets) testableGame.SetupSimpleFleets(SimpleCellArray(1), 1, null, 2);
         }
         return testableGame;
+    }
+
+    private static Cell[] SimpleCellArray(int content)
+    {
+        return new[] { new Cell(content, content) };
     }
 }
 
