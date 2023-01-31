@@ -73,8 +73,45 @@ public class Controller
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
-        throw new NotImplementedException();
+        var userId = request.userId;
+        var game = GamePool.GetGame(userId);
+        if(game is null) return StartPlaying(userId);
+        if (game.FirstUserId.HasValue && !game.SecondUserId.HasValue) return WaitingForStartResult();
+        if (game.FirstFleet is not null && game.SecondFleet is not null) 
+            return WhatsUpInBattle(request, game);
+        //todo tdd this exception
+        throw new Exception("Unknown situation.");
     }
+
+    private static WhatsUpResponseModel WhatsUpInBattle(WhatsupRequestModel request, Game? game)
+    {
+        var excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray();
+        var excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray();
+        var firstFleet = ToFleetStateModel(game.FirstFleet);
+        var secondFleet = ToFleetStateModel(game.SecondFleet);
+        GameStateModel? stateModel = null;
+        if (game.State == GameState.Player1Turn && game.FirstUserId == request.userId ||
+            game.State == GameState.Player2Turn && game.SecondUserId == request.userId)
+            stateModel = GameStateModel.YourTurn;
+        if (game.State == GameState.Player1Turn && game.SecondUserId == request.userId ||
+            game.State == GameState.Player2Turn && game.FirstUserId == request.userId)
+            stateModel = GameStateModel.OpponentsTurn;
+        var result = new WhatsUpResponseModel
+        {
+            gameState = stateModel.Value,excludedLocations1 = excludedLocations1,
+            excludedLocations2 = excludedLocations2, fleet1 = firstFleet, fleet2 = secondFleet,
+        };
+        return result;
+    }
+
+    private static WhatsUpResponseModel WaitingForStartResult() => 
+        new WhatsUpResponseModel { gameState = GameStateModel.WaitingForStart };
+
+    private static WhatsUpResponseModel StartPlaying(int userId) => new WhatsUpResponseModel
+    {
+        gameState = GamePool.StartPlaying(userId) ? GameStateModel.CreatingFleet
+                : GameStateModel.WaitingForStart
+    };
 
     public bool CreateFleet(FleetCreationRequestModel request)
     {
@@ -93,11 +130,6 @@ public class Controller
                 deckModel => new Deck(deckModel.x, deckModel.y))}).ToArray());
         return game.FirstUserId == request.userId;
     }
-
-    public Cell ToCell(LocationModel model) => new(model.x, model.y);
-
-    private static LocationModel ToLocationModel(Cell location) => 
-        new() { x = location.x, y = location.y };
 
     public AttackResponse Attack(AttackRequestModel request)
     {
@@ -118,9 +150,13 @@ public class Controller
         };
     }
 
-    private static AttackResultTransportModel ToAttackResultModel(AttackResult attackResult)
-    {
-        return attackResult switch
+    private static Cell ToCell(LocationModel model) => new(model.x, model.y);
+
+    private static LocationModel ToLocationModel(Cell location) => 
+        new() { x = location.x, y = location.y };
+
+    private static AttackResultTransportModel ToAttackResultModel(AttackResult attackResult) => 
+        attackResult switch
         {
             AttackResult.Win => AttackResultTransportModel.Win,
             AttackResult.Killed => AttackResultTransportModel.Killed,
@@ -128,21 +164,6 @@ public class Controller
             AttackResult.Hit => AttackResultTransportModel.Hit,
             _ => throw new Exception($"Unknown attack result [{attackResult}].")
         };
-    }
-
-    private static WhatsUpResponseModel RecognizeBattleStateModel(Game game, int userId)
-    {
-        if (game.FirstUserId == userId)
-            if (game.State == GameState.Player1Turn) 
-                return GenerateWhatsupResponse(GameStateModel.YourTurn);
-            else return GenerateWhatsupResponse(GameStateModel.OpponentsTurn);
-        else if (game.SecondUserId == userId)
-            if (game.State == GameState.Player2Turn) 
-                return GenerateWhatsupResponse(GameStateModel.YourTurn);
-            else return GenerateWhatsupResponse(GameStateModel.OpponentsTurn);
-        //todo tdd
-        else throw new Exception($"Unknown user id=[{userId}].");
-    }
 
     private static ShipStateModel[] ToFleetStateModel(IEnumerable<Ship> fleet) => 
         fleet.Select(ship =>

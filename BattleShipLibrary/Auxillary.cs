@@ -45,7 +45,7 @@ public static class GamePool
 
     public static bool StartPlaying(int userId)
     {
-        var game = GetGame(userId);
+        var game = Games.Values.FirstOrDefault(x => !x.SecondUserId.HasValue);
         //todo tdd ensure id uniqueness
         if (game is null)
         {
