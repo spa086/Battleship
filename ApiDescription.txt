@@ -6,7 +6,7 @@ Request object:
 Returns object:
 {
 	gameState - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn" }
-	fleet1 (optional) - array of objects:
+	myFleet (optional) - array of objects:
 	{
 		userId - integer.
 		decks - array of objects: 
@@ -16,7 +16,7 @@ Returns object:
 			destroyed - boolean.
 		}
 	}
-	fleet2 (optional) - array of objects:
+	opponentFleet (optional) - array of objects:
 	{
 		userId - integer.
 		decks - array of objects: 
@@ -26,12 +26,12 @@ Returns object:
 			destroyed - boolean.
 		}
 	},
-	excludedLocations1 - array of objects:
+	myExcludedLocations - array of objects:
 	{
 		x - integer,
 		y - integer.
 	},
-	excludedLocations2 - array of objects:
+	opponentExcludedLocations - array of objects:
 	{
 		x - integer,
 		y - integer.
@@ -66,7 +66,7 @@ Request object:
 Returns object:
 {
 	result - string enum { "Hit","Killed","Missed","Win" },
-	fleet1 - array of objects:
+	myFleet - array of objects:
 	{
 		userId - integer.
 		decks - array of objects: 
@@ -76,7 +76,7 @@ Returns object:
 			destroyed - boolean.
 		}
 	}
-	fleet2 - array of objects:
+	opponentFleet - array of objects:
 	{
 		userId - integer.
 		decks - array of objects: 
@@ -86,12 +86,12 @@ Returns object:
 			destroyed - boolean.
 		}
 	},
-	excludedLocations1 - array of objects:
+	myExcludedLocations - array of objects:
 	{
 		x - integer,
 		y - integer.
 	},
-	excludedLocations2 - array of objects:
+	opponentExcludedLocations - array of objects:
 	{
 		x - integer,
 		y - integer.
