@@ -15,11 +15,11 @@ public class WhatsUpResponseModel
 {
     public GameStateModel gameState { get; set; }
     //todo tdd filling
-    public ShipStateModel[]? fleet1 { get; set; }
+    public ShipStateModel[]? myFleet { get; set; }
     //todo tdd filling
-    public ShipStateModel[]? fleet2 { get; set; }
-    public LocationModel[]? excludedLocations1 { get; set; }
-    public LocationModel[]? excludedLocations2 { get; set; }
+    public ShipStateModel[]? opponentFleet { get; set; }
+    public LocationModel[]? myExcludedLocations { get; set; }
+    public LocationModel[]? opponentExcludedLocations { get; set; }
 }
 
 public class WhatsupRequestModel

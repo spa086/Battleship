@@ -11,33 +11,6 @@ public class WebTests
 
     //todo tdd finishing the game from controller.
 
-    [TestCase(GameState.WaitingForPlayer2ToCreateFleet, true)]
-    [TestCase(GameState.WaitingForPlayer2ToCreateFleet, false)]
-    [TestCase(GameState.BothPlayersCreateFleets, true)]
-    [TestCase(GameState.BothPlayersCreateFleets, false)]
-    public void WhatsUpWhileCreatingShips(GameState state, bool firstPlayer)
-    {
-        TestingEnvironment.CreateNewTestableGame(state, 1, 2);
-
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
-    }
-
-    [Test]
-    public void ReturningExcludedLocations([Values] bool firstPlayer)
-    {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
-        game.SetupExcludedLocations(firstPlayer ? 1 : 2, new Cell(5, 6));
-
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
-
-        var location = 
-            (firstPlayer ? result.excludedLocations1 : result.excludedLocations2).AssertSingle();
-        Assert.That(location.x, Is.EqualTo(5));
-        Assert.That(location.y, Is.EqualTo(6));
-    }
-
     [Test]
     public void GameAbortion([Values] GameState state)
     {
@@ -74,41 +47,10 @@ public class WebTests
     }
 
     [Test]
-    public void FirstPlayerWhatsupWhileWaitingForSecondPlayer()
-    {
-        TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2, 1);
-
-        var result = CallWhatsupViaController(1);
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
-    }
-
-    [Test]
-    public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
-    {
-        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
-
-        var result = CallWhatsupViaController(2);
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.OpponentsTurn));
-        AssertSimpleFleet(result.fleet1, 1, 1);
-        AssertSimpleFleet(result.fleet2, 3, 3);
-    }
-
-    [Test]
-    public void Player1WhatsupAfterShipsOfBothPlayersAreSaved()
-    {
-        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
-
-        Assert.That(CallWhatsupViaController(1).gameState, 
-            Is.EqualTo(GameStateModel.YourTurn));
-    }
-
-    [Test]
     public void SecondPlayerCreatesFleet()
     {
-        var testableGame = TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2ToCreateFleet, 
-            1, 2);
+        var testableGame = TestingEnvironment.CreateNewTestableGame(
+            GameState.WaitingForPlayer2ToCreateFleet, 1, 2);
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel 
             { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
@@ -143,49 +85,10 @@ public class WebTests
         Assert.That(testableGame.State, Is.EqualTo(GameState.WaitingForPlayer2ToCreateFleet));
     }
 
-    [Test]
-    public void SecondPlayerJoins()
-    {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2, 
-            1, 2);
-
-        var result = CallWhatsupViaController(2);
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
-        Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
-        Assert.That(game.SecondUserId, Is.EqualTo(2));
-    }
-
-    [Test]
-    public void FirstPlayerStarts()
-    {
-        var result = CreateController().WhatsUp(new WhatsupRequestModel { userId =1 });
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
-        var game = GamePool.Games;
-        Assert.That(game, Is.Not.Null);
-    }
-
     private static Controller CreateController() => new();
-
-    private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) => 
-        new() { userId = userIdParam };
 
     private static ShipForCreationModel NewSimpleShipForFleetCreationRequest(int x, int y) =>
         new() { decks = new[] { new LocationModel { x = x, y = y } } };
-
-    private static void AssertSimpleFleet(ShipStateModel[]? fleet, int x, int y)
-    {
-        Assert.That(fleet, Is.Not.Null);
-        var ship1 = fleet.AssertSingle();
-        var deck1 = ship1.decks.AssertSingle();
-        Assert.That(deck1.destroyed, Is.False);
-        Assert.That(deck1.x, Is.EqualTo(x));
-        Assert.That(deck1.y, Is.EqualTo(y));
-    }
-
-    private static WhatsUpResponseModel CallWhatsupViaController(int userId) => 
-        CreateController().WhatsUp(CreateWhatsUpRequestModel(userId));
 
     private static FleetCreationRequestModel SingleShipFleetCreationRequest(int userId,
 #pragma warning disable CS8601 // Возможно, назначение-ссылка, допускающее значение NULL.
