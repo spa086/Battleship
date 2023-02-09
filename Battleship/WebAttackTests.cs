@@ -10,6 +10,17 @@ public class WebAttackTests
     public void SetUp() => GamePool.ClearGames();
 
     [Test]
+    public void AttackingInOpponentsTurn()
+    {
+        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+
+        var exception = Assert.Throws<Exception>(() => CreateController().Attack(
+            new AttackRequestModel { location = new LocationModel { x = 5, y = 6 },userId = 2 }));
+
+        Assert.That(exception.Message, Is.EqualTo("Not your turn."));
+    }
+
+    [Test]
     public void ReturningExcludedLocationsFor([Values] bool firstPlayer)
     {
         TestingEnvironment.CreateNewTestableGame(
@@ -47,14 +58,14 @@ public class WebAttackTests
     [Test]
     public void AttackMissed()
     {
-        var game = SetupGameInPoolWithState(GameState.Player2Turn, 1, 2,
+        var game = SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
             game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2));
 
         var result = CreateController().Attack(new AttackRequestModel 
             { location = new LocationModel { x = 22, y = 22 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Missed));
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
     }
 
     [Test]
@@ -92,11 +103,7 @@ public class WebAttackTests
             new List<Ship> {new Ship{Decks = GenerateDeckDictionary(2,2)}}));
 
         var result = CreateController().Attack(
-            new AttackRequestModel
-            {
-                location = new LocationModel { x = 0, y = 0 },
-                userId = 1
-            });
+            new AttackRequestModel { location = new LocationModel { x = 0, y = 0 }, userId = 2 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Killed));
     }

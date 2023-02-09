@@ -1,6 +1,11 @@
 ﻿using BattleshipLibrary;
 
 namespace BattleshipApi;
+
+//todo attacking again after hit
+//todo handle all errors and return error messages
+//todo attack must return correct fields as in ApiDescription (myFleet etc.)
+
 public class Controller
 {
     public void AbortGame(int userId)
@@ -117,6 +122,7 @@ public class Controller
         //todo tdd what if did not find game
         //todo check 3 times
         var game = GamePool.GetGame(request.userId);
+        AssertYourTurn(request, game);
         var attackResult = game!.Attack(request.userId, ToCell(request.location));
         return new AttackResponse
         {
@@ -128,6 +134,13 @@ public class Controller
             excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
             excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray()
         };
+    }
+
+    private static void AssertYourTurn(AttackRequestModel request, Game? game)
+    {
+        if (game.State == GameState.Player1Turn && game.SecondUserId == request.userId ||
+                    game.State == GameState.Player2Turn && game.FirstUserId == request.userId)
+            throw new Exception("Not your turn.");
     }
 
     private static Cell ToCell(LocationModel model) => new(model.x, model.y);
