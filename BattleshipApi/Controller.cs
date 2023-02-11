@@ -91,7 +91,7 @@ public class Controller
         {
             gameState = secondPlayerJoined ? GameStateModel.CreatingFleet
                 : GameStateModel.WaitingForStart,
-            gameId = GamePool.GetGame(userId).Id
+            gameId = GamePool.GetGame(userId)!.Id
         };
     }
 
@@ -118,10 +118,10 @@ public class Controller
 
     public AttackResponse Attack(AttackRequestModel request)
     {
-        //todo tdd throw if game is inappropriate state
+        //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
         //todo check 3 times
-        var game = GamePool.GetGame(request.userId);
+        var game = GamePool.GetGame(request.userId)!;
         AssertYourTurn(request, game);
         var attackResult = game!.Attack(request.userId, ToCell(request.location));
         return new AttackResponse
@@ -136,7 +136,7 @@ public class Controller
         };
     }
 
-    private static void AssertYourTurn(AttackRequestModel request, Game? game)
+    private static void AssertYourTurn(AttackRequestModel request, Game game)
     {
         if (game.State == GameState.Player1Turn && game.SecondUserId == request.userId ||
                     game.State == GameState.Player2Turn && game.FirstUserId == request.userId)
