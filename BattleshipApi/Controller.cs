@@ -40,7 +40,8 @@ public class Controller
         {
             gameState = GameStateModel.CreatingFleet,
             myFleet = ToFleetStateModel(game.FirstFleet),
-            opponentFleet = ToFleetStateModel(game.SecondFleet)
+            opponentFleet = ToFleetStateModel(game.SecondFleet),
+            gameId = game.Id
         };
 
     private static LocationModel[] GetMyExcludedLocations(Game game, bool forFirstUser) =>
@@ -63,7 +64,7 @@ public class Controller
         var opponentFleet = forFirstUser ? ToFleetStateModel(game.SecondFleet)
             : ToFleetStateModel(game.FirstFleet);
         GameStateModel? stateModel = GetStateModel(request, game);
-        var result = new WhatsUpResponseModel(stateModel!.Value, myFleet, opponentFleet, 
+        var result = new WhatsUpResponseModel(game.Id, stateModel!.Value, myFleet, opponentFleet, 
             myExcludedLocations, opponentExcludedLocations);
         return result;
     }

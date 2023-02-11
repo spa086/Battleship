@@ -15,11 +15,12 @@ public class WhatsUpTests
     [TestCase(GameState.BothPlayersCreateFleets, false)]
     public void WhatsUpWhileCreatingShips(GameState state, bool firstPlayer)
     {
-        TestingEnvironment.CreateNewTestableGame(state, 1, 2);
+        var game = TestingEnvironment.CreateNewTestableGame(state, 1, 2);
 
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
+        Assert.That(result.gameId, Is.EqualTo(game.Id));
     }
 
     [Test]

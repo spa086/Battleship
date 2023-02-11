@@ -15,7 +15,7 @@ public class WhatsUpResponseModel
 {
     public WhatsUpResponseModel() { }
 
-    public WhatsUpResponseModel(GameStateModel gameState, ShipStateModel[]? myFleet, 
+    public WhatsUpResponseModel(int gameId, GameStateModel gameState, ShipStateModel[]? myFleet, 
         ShipStateModel[]? opponentFleet, LocationModel[]? myExcludedLocations,
         LocationModel[]? opponentExcludedLocations)
     {
