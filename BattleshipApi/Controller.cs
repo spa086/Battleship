@@ -63,14 +63,8 @@ public class Controller
         var opponentFleet = forFirstUser ? ToFleetStateModel(game.SecondFleet)
             : ToFleetStateModel(game.FirstFleet);
         GameStateModel? stateModel = GetStateModel(request, game);
-        var result = new WhatsUpResponseModel
-        {
-            gameState = stateModel!.Value,
-            myExcludedLocations = myExcludedLocations,
-            opponentExcludedLocations = opponentExcludedLocations,
-            myFleet = myFleet,
-            opponentFleet = opponentFleet,
-        };
+        var result = new WhatsUpResponseModel(stateModel!.Value, myFleet, opponentFleet, 
+            myExcludedLocations, opponentExcludedLocations);
         return result;
     }
 

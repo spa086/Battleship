@@ -61,13 +61,14 @@ public class WhatsUpTests
     [Test]
     public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
+        var game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
 
         var result = CallWhatsupViaController(2);
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.OpponentsTurn));
         AssertSimpleFleet(result.myFleet, 3, 3);
         AssertSimpleFleet(result.opponentFleet, 1, 1);
+        Assert.That(result.gameId, Is.EqualTo(game.Id));
     }
 
     [Test]

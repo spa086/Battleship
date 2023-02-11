@@ -13,6 +13,20 @@ public class AttackRequestModel
 
 public class WhatsUpResponseModel
 {
+    public WhatsUpResponseModel() { }
+
+    public WhatsUpResponseModel(GameStateModel gameState, ShipStateModel[]? myFleet, 
+        ShipStateModel[]? opponentFleet, LocationModel[]? myExcludedLocations,
+        LocationModel[]? opponentExcludedLocations)
+    {
+        this.gameState = gameState;
+        this.myFleet = myFleet;
+        this.opponentFleet = opponentFleet;
+        this.myExcludedLocations = myExcludedLocations;
+        this.opponentExcludedLocations= opponentExcludedLocations;
+        this.gameId = gameId;
+    }
+
     public int gameId { get; set; }
     public GameStateModel gameState { get; set; }
     //todo tdd filling
