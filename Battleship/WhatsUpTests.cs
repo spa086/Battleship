@@ -98,8 +98,8 @@ public class WhatsUpTests
         var result = CreateController().WhatsUp(new WhatsupRequestModel { userId =1 });
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
-        var game = GamePool.Games;
-        Assert.That(game, Is.Not.Null);
+        var gameId = GamePool.Games.Keys.AssertSingle();
+        Assert.That(result.gameId, Is.EqualTo(gameId));
     }
 
     private static Controller CreateController() => new();

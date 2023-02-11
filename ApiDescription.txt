@@ -35,7 +35,8 @@ Returns object:
 	{
 		x - integer,
 		y - integer.
-	}
+	},
+	gameId - integer.
 }
 
 "/createFleet"

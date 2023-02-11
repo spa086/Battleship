@@ -13,6 +13,7 @@ public class AttackRequestModel
 
 public class WhatsUpResponseModel
 {
+    public int gameId { get; set; }
     public GameStateModel gameState { get; set; }
     //todo tdd filling
     public ShipStateModel[]? myFleet { get; set; }

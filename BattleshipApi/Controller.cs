@@ -89,11 +89,16 @@ public class Controller
     private static WhatsUpResponseModel WaitingForStartResult() =>
         new() { gameState = GameStateModel.WaitingForStart };
 
-    private static WhatsUpResponseModel StartPlaying(int userId) => new()
+    private static WhatsUpResponseModel StartPlaying(int userId)
     {
-        gameState = GamePool.StartPlaying(userId) ? GameStateModel.CreatingFleet
-                : GameStateModel.WaitingForStart
-    };
+        var secondPlayerJoined = GamePool.StartPlaying(userId);
+        return new()
+        {
+            gameState = secondPlayerJoined ? GameStateModel.CreatingFleet
+                : GameStateModel.WaitingForStart,
+            gameId = GamePool.GetGame(userId).Id
+        };
+    }
 
     public bool CreateFleet(FleetCreationRequestModel request)
     {
