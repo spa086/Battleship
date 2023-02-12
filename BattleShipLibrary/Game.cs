@@ -19,7 +19,6 @@ public class Game
 
     public List<Cell> ExcludedLocations1 => excludedLocations1;
     public List<Cell> ExcludedLocations2 => excludedLocations2;
-    public bool Win => win;
     public List<Ship>? FirstFleet => firstFleet;
     public List<Ship>? SecondFleet => secondFleet;
 
@@ -83,7 +82,7 @@ public class Game
     {
         if (attackedShips.All(x => IsDestroyed(x)))
         {
-            win = true;
+            State = player1Turn ? GameState.Player1Won : GameState.Player2Won;
             result = AttackResult.Win;
         }
         else State = player1Turn ? GameState.Player2Turn : GameState.Player1Turn; //todo tdd this
@@ -118,8 +117,6 @@ public class Game
     //todo tdd validate ship shape
     protected List<Ship>? firstFleet;
     protected List<Ship>? secondFleet;
-    protected bool win;
 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);
 }
-

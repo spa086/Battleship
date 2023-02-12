@@ -71,7 +71,6 @@ public class AttackTests
         game.Attack(0, new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
-        Assert.That(game.Win, Is.False);
         //todo tdd player ship desctruction
         //todo check 3 times
         game.FirstFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle(); 
@@ -83,7 +82,6 @@ public class AttackTests
         game.Attack(0, new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
-        Assert.That(game.Win, Is.False);
         game.SecondFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
     }
 
@@ -102,12 +100,11 @@ public class AttackTests
     {
         game.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 2);
 
-        game.Attack(0, new Cell(2, 2));
+        game.Attack(1, new Cell(2, 2));
 
         game.ExcludedLocations1.AssertSingle();
         Assert.That(Game.IsDestroyed(game.SecondFleet.AssertSingle()));
-        Assert.That(game.Win);
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
     }
 
     [Test]
@@ -120,7 +117,6 @@ public class AttackTests
 
         game.SecondFleet.AssertSingle();
         Assert.That(Game.IsDestroyed(game.FirstFleet.AssertSingle()));
-        Assert.That(game.Win);
-        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
+        Assert.That(game.State, Is.EqualTo(GameState.Player2Won));
     }
 }

@@ -43,7 +43,6 @@ public class TestableGame : Game
         excludedLocations1 = CreateLocationList();
         excludedLocations2 = CreateLocationList();
         State = GameState.Player1Turn;
-        win = false;
         SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  
             new[] { new Cell(3, 3) }, 2);
     }
@@ -57,7 +56,7 @@ public class TestableGame : Game
     public void DestroyFleet(int userId)
     {
         if(userId == FirstUserId)
-            foreach (var ship in FirstFleet)
+            foreach (var ship in FirstFleet!)
                 foreach (var deck in ship.Decks.Values)
                     deck.Destroyed = true;
     }

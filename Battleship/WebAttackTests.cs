@@ -9,8 +9,6 @@ public class WebAttackTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
-    //todo tdd attack sets state to win states
-
     [Test]
     public void AttackingInOpponentsTurn()
     {
@@ -110,24 +108,40 @@ public class WebAttackTests
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Killed));
     }
 
-    //todo similar for player 2
+    [Test]
+    public void Playe21AttacksAndWins()
+    {
+        var game = SetupGameInPoolWithState(GameState.Player2Turn, 1, 2,
+            game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
+            new[] { new Cell(2, 2) }, 2));
+
+        //todo put controller into field?
+        var result = CreateController().Attack(new AttackRequestModel
+        { location = new LocationModel { x = 1, y = 1 }, userId = 2 });
+
+        Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
+        //todo check 3 times
+        Assert.That(game.FirstFleet!.Single().Decks.Single().Value.Destroyed, Is.True);
+        Assert.That(game.SecondFleet!.Single().Decks.Single().Value.Destroyed, Is.False);
+        Assert.That(game.State, Is.EqualTo(GameState.Player2Won));
+    }
+
     [Test]
     public void Player1AttacksAndWins()
     {
         var game = SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
-            game => game.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1, 
-            new[] { new Cell(0, 2)}, 2));
+            game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
+            new[] { new Cell(2, 2)}, 2));
 
         //todo put controller into variable?
         var result = CreateController().Attack(new AttackRequestModel
-            { location = new LocationModel { x = 0, y = 2 }, userId = 1 });
+            { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
-        Assert.That(game.Win, Is.True);
         //todo check 3 times
         Assert.That(game.SecondFleet!.Single().Decks.Single().Value.Destroyed, Is.True);
         Assert.That(game.FirstFleet!.Single().Decks.Single().Value.Destroyed, Is.False);
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
     }
 
     private static TestableGame SetupGameInPoolWithState(GameState state, int firstUserId,
