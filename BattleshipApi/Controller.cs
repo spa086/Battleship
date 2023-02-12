@@ -24,7 +24,7 @@ public class Controller
     {
         var userId = request.userId;
         var game = GamePool.GetGame(userId);
-        Console.WriteLine($"Whatsup got game. First fleet = [{game?.FirstFleet}], " +
+        Log.Info($"Whatsup got game. First fleet = [{game?.FirstFleet}], " +
             $"second fleet = [{game?.SecondFleet}].");
         if (game is null) return StartPlaying(userId);
         if (game.FirstUserId.HasValue && !game.SecondUserId.HasValue) return WaitingForStartResult();
@@ -85,7 +85,8 @@ public class Controller
         if (game.State == GameState.Player1Won && game.SecondUserId == request.userId ||
             game.State == GameState.Player2Won && game.FirstUserId == request.userId)
             return GameStateModel.OpponentWon;
-        throw new Exception($"Unknown situation. State = [{game.State}], user 1 id = [{game.FirstUserId}], user 2 id = [{game.SecondUserId}], " +
+        throw new Exception($"Unknown situation. State = [{game.State}], " +
+            $"user 1 id = [{game.FirstUserId}], user 2 id = [{game.SecondUserId}], " +
             $"requester user id = [{request.userId}].");
     }
 

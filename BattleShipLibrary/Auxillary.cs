@@ -1,6 +1,22 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using NLog;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BattleshipLibrary;
+
+public static class Log
+{
+    public static void Error(Exception ex)
+    {
+        Logger.Error(ex);
+    }
+
+    public static void Info(string message)
+    {
+        Logger.Info(message);
+    }
+
+    private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+}
 
 public enum GameState
 {
