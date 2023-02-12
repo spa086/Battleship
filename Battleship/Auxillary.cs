@@ -21,6 +21,18 @@ public static class TestingEnvironment
             if (battleOngoing)
                 testableGame.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(3), 2);
             else if (creatingFleets) testableGame.SetupSimpleFleets(SimpleCellArray(1), 1, null, 2);
+            else if (gameOver)
+            {
+                testableGame.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
+                if(state == GameState.Player1Won)
+                {
+                    testableGame.DestroyFleet(2);
+                }
+                else
+                {
+                    testableGame.DestroyFleet(1);
+                }
+            } 
         }
         return testableGame;
     }
