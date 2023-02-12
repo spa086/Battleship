@@ -69,23 +69,22 @@ public class Controller
         return result;
     }
 
-    private static GameStateModel? GetStateModel(WhatsupRequestModel request, Game game)
+    private static GameStateModel GetStateModel(WhatsupRequestModel request, Game game)
     {
-        //todo rewrite to else if and return, and throw in the end
-        GameStateModel? result = null;
         if (game.State == GameState.Player1Turn && game.FirstUserId == request.userId ||
             game.State == GameState.Player2Turn && game.SecondUserId == request.userId)
-            result = GameStateModel.YourTurn;
+            return GameStateModel.YourTurn;
         if (game.State == GameState.Player1Turn && game.SecondUserId == request.userId ||
             game.State == GameState.Player2Turn && game.FirstUserId == request.userId)
-            result = GameStateModel.OpponentsTurn;
+            return GameStateModel.OpponentsTurn;
         if (game.State == GameState.Player1Won && game.FirstUserId == request.userId ||
             game.State == GameState.Player2Won && game.SecondUserId == request.userId)
-            result = GameStateModel.YouWon;
+            return GameStateModel.YouWon;
         if (game.State == GameState.Player1Won && game.SecondUserId == request.userId ||
             game.State == GameState.Player2Won && game.FirstUserId == request.userId)
-            result = GameStateModel.OpponentWon;
-        return result;
+            return GameStateModel.OpponentWon;
+        throw new Exception($"Unknown situation. State = [{game.State}], user 1 id = [{game.FirstUserId}], user 2 id = [{game.SecondUserId}], " +
+            $"requester user id = [{request.userId}].");
     }
 
     private static WhatsUpResponseModel WaitingForStartResult() =>
