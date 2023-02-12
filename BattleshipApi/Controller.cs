@@ -24,6 +24,8 @@ public class Controller
     {
         var userId = request.userId;
         var game = GamePool.GetGame(userId);
+        Console.WriteLine($"Whatsup got game. First fleet = [{game?.FirstFleet}], " +
+            $"second fleet = [{game?.SecondFleet}].");
         if (game is null) return StartPlaying(userId);
         if (game.FirstUserId.HasValue && !game.SecondUserId.HasValue) return WaitingForStartResult();
         if (game.FirstUserId.HasValue && game.SecondUserId.HasValue &&

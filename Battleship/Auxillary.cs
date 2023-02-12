@@ -6,7 +6,7 @@ namespace BattleshipTests;
 public static class TestingEnvironment
 {
     public static TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForPlayer2,
-        int? firstUserId = null, int? secondUserId = null)
+        int? firstUserId = null, int? secondUserId = null, bool firstPlayerHasFleet = true)
     {
         var game = new TestableGame(firstUserId ?? 1).SetState(state);
         GamePool.SetGame(game);
@@ -15,15 +15,19 @@ public static class TestingEnvironment
             game.SetSecondUserId(secondUserId);
             if (game.BattleOngoing)
                 game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
-            else if (game.CreatingFleets) game.SetupSimpleFleets(SimpleCellArray(1), 1, null, 2);
-            else if (game.ItsOver)
-            {
-                game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
-                if(state == GameState.Player1Won) game.DestroyFleet(2);
-                else game.DestroyFleet(1);
-            }
+            else if (game.CreatingFleets) 
+                game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, 1, 
+                    firstPlayerHasFleet ? null : SimpleCellArray(2), 2);
+            else if (game.ItsOver) SetupGameOver(state, game);
         }
         return game;
+    }
+
+    private static void SetupGameOver(GameState state, TestableGame game)
+    {
+        game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
+        if (state == GameState.Player1Won) game.DestroyFleet(2);
+        else game.DestroyFleet(1);
     }
 
     private static Cell[] SimpleCellArray(int content)

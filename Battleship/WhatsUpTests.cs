@@ -9,6 +9,19 @@ public class WhatsUpTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
+    //todo this test must catch the bug
+    [Test]
+    public void SecondPlayerCreatesFleetFirst()
+    {
+        var game = TestingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 
+            firstPlayerHasFleet: false);
+        var controller = CreateController();
+
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(2));
+  
+        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
+    }
+
     [TestCase(GameState.Player1Won, GameStateModel.YouWon)]
     [TestCase(GameState.Player2Won, GameStateModel.OpponentWon)]
     public void WhatsupWhenWon(GameState gameState, GameStateModel expectedModel)
