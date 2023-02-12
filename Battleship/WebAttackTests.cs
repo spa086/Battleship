@@ -9,6 +9,8 @@ public class WebAttackTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
+    //todo tdd attack sets state to win states
+
     [Test]
     public void AttackingInOpponentsTurn()
     {

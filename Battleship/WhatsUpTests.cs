@@ -9,8 +9,20 @@ public class WhatsUpTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
-    [TestCase(GameState.WaitingForPlayer2ToCreateFleet, true)]
-    [TestCase(GameState.WaitingForPlayer2ToCreateFleet, false)]
+    [TestCase(GameState.Player1Won, GameStateModel.YouWon)]
+    [TestCase(GameState.Player2Won, GameStateModel.OpponentWon)]
+    public void WhatsupWhenWon(GameState gameState, GameStateModel expectedModel)
+    {
+        var game = TestingEnvironment.CreateNewTestableGame(gameState);
+        var controller = CreateController();
+
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
+
+        Assert.That(result.gameState, Is.EqualTo(expectedModel));
+    }
+
+    [TestCase(GameState.OnePlayerCreatesFleet, true)]
+    [TestCase(GameState.OnePlayerCreatesFleet, false)]
     [TestCase(GameState.BothPlayersCreateFleets, true)]
     [TestCase(GameState.BothPlayersCreateFleets, false)]
     public void WhatsUpWhileCreatingShips(GameState state, bool firstPlayer)
@@ -67,7 +79,7 @@ public class WhatsUpTests
         var result = CallWhatsupViaController(2);
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.OpponentsTurn));
-        AssertSimpleFleet(result.myFleet, 3, 3);
+        AssertSimpleFleet(result.myFleet, 2, 2);
         AssertSimpleFleet(result.opponentFleet, 1, 1);
         Assert.That(result.gameId, Is.EqualTo(game.Id));
     }

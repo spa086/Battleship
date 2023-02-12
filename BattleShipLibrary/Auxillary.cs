@@ -6,9 +6,11 @@ public enum GameState
 {
     WaitingForPlayer2,
     BothPlayersCreateFleets,
-    WaitingForPlayer2ToCreateFleet,
+    OnePlayerCreatesFleet,
     Player1Turn,
-    Player2Turn
+    Player2Turn,
+    Player1Won,
+    Player2Won
 }
 
 public enum AttackResult
@@ -105,6 +107,8 @@ public class Deck
 
 public class Ship
 {
+    public bool IsDestroyed => Decks.Values.All(x => x.Destroyed);
+
     //todo make it a hashset
     public Dictionary<Cell, Deck> Decks { get; set; } = new Dictionary<Cell, Deck>();
 }

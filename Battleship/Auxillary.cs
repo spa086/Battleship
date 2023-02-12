@@ -5,36 +5,25 @@ namespace BattleshipTests;
 
 public static class TestingEnvironment
 {
-    public static TestableGame CreateNewTestableGame(
-        GameState state = GameState.WaitingForPlayer2,
+    public static TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForPlayer2,
         int? firstUserId = null, int? secondUserId = null)
     {
         var game = new TestableGame(firstUserId ?? 1).SetState(state);
         GamePool.SetGame(game);
-        var testableGame = (GamePool.Games[game.Id] as TestableGame)!;
-        var battleOngoing = state == GameState.Player1Turn || state == GameState.Player2Turn;
-        var creatingFleets = state == GameState.WaitingForPlayer2ToCreateFleet ||
-            state == GameState.BothPlayersCreateFleets;
-        if (creatingFleets || battleOngoing)
+        if (game.CreatingFleets || game.BattleOngoing || game.ItsOver)
         {
-            testableGame.SetSecondUserId(secondUserId);
-            if (battleOngoing)
-                testableGame.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(3), 2);
-            else if (creatingFleets) testableGame.SetupSimpleFleets(SimpleCellArray(1), 1, null, 2);
-            else if (gameOver)
+            game.SetSecondUserId(secondUserId);
+            if (game.BattleOngoing)
+                game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
+            else if (game.CreatingFleets) game.SetupSimpleFleets(SimpleCellArray(1), 1, null, 2);
+            else if (game.ItsOver)
             {
-                testableGame.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
-                if(state == GameState.Player1Won)
-                {
-                    testableGame.DestroyFleet(2);
-                }
-                else
-                {
-                    testableGame.DestroyFleet(1);
-                }
-            } 
+                game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
+                if(state == GameState.Player1Won) game.DestroyFleet(2);
+                else game.DestroyFleet(1);
+            }
         }
-        return testableGame;
+        return game;
     }
 
     private static Cell[] SimpleCellArray(int content)

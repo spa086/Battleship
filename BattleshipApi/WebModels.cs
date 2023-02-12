@@ -104,5 +104,7 @@ public enum GameStateModel
     WaitingForStart,
     CreatingFleet,
     YourTurn,
-    OpponentsTurn
+    OpponentsTurn,
+    YouWon,
+    OpponentWon
 }

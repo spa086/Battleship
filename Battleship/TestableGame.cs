@@ -21,7 +21,7 @@ public class TestableGame : Game
         return this;
     }
 
-    public Game SetState(GameState newState)
+    public TestableGame SetState(GameState newState)
     {
         State = newState;
         return this;
@@ -52,6 +52,14 @@ public class TestableGame : Game
     {
         firstFleet = fleet1.ToList();
         secondFleet = fleet2.ToList();
+    }
+
+    public void DestroyFleet(int userId)
+    {
+        if(userId == FirstUserId)
+            foreach (var ship in FirstFleet)
+                foreach (var deck in ship.Decks.Values)
+                    deck.Destroyed = true;
     }
 
     public void SetupSimpleFleets(Cell[]? deckLocations1, int? firstUserId,

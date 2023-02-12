@@ -55,7 +55,8 @@ public class Tests
 
         Assert.That(GamePool.StartPlaying(1), Is.True);
 
-        Assert.That(GamePool.Games.Values.Single().State, Is.EqualTo(GameState.BothPlayersCreateFleets));
+        Assert.That(GamePool.Games.Values.Single().State, 
+            Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
 
     [Test]
@@ -68,25 +69,16 @@ public class Tests
         Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2));
     }
 
-    //todo refactor
     [Test]
     public void CreateShipsSimple()
     {
         game.SetupSimpleFleets(null, null, null, null);
-        game.CreateAndSaveShips(1, new[]
-        {
-                new Ship
-                {
-                    Decks = new[]
-                    {
-                        new Deck(1, 1), new Deck(1, 2)
-                    }.ToDictionary(x => x.Location)
-                 }
-        });
+        var decks = new[] { new Deck(1, 1), new Deck(1, 2) }.ToDictionary(x => x.Location);
+
+        game.CreateAndSaveShips(1, new[] { new Ship { Decks = decks } });
 
         //todo use separate collection
         var ship = game.FirstFleet!.AssertSingle();
-        var decks = ship.Decks;
         Assert.That(decks, Has.Count.EqualTo(2));
         var orderedDecks = decks.Values.OrderBy(x => x.Location.y);
         var deck1 = orderedDecks.First();
@@ -95,6 +87,6 @@ public class Tests
         var deck2 = orderedDecks.Last();
         Assert.That(deck2.Destroyed, Is.False);
         Assert.That(deck2.Location, Is.EqualTo(new Cell(1, 2)));
-        Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2ToCreateFleet));
+        Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
     }
 }

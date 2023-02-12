@@ -23,6 +23,11 @@ public class Game
     public List<Ship>? FirstFleet => firstFleet;
     public List<Ship>? SecondFleet => secondFleet;
 
+    public bool BattleOngoing => State == GameState.Player1Turn || State == GameState.Player2Turn;
+    public bool CreatingFleets => 
+        State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
+    public bool ItsOver => State == GameState.Player1Won || State == GameState.Player2Won;
+
     //todo test
     public void Start(int secondUserId)
     {
@@ -47,7 +52,7 @@ public class Game
         if (userId == FirstUserId)
         {
             firstFleet = newShips;
-            State = GameState.WaitingForPlayer2ToCreateFleet;
+            State = GameState.OnePlayerCreatesFleet;
         }
         else
         {

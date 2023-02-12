@@ -50,7 +50,7 @@ public class WebTests
     public void SecondPlayerCreatesFleet()
     {
         var testableGame = TestingEnvironment.CreateNewTestableGame(
-            GameState.WaitingForPlayer2ToCreateFleet, 1, 2);
+            GameState.OnePlayerCreatesFleet, 1, 2);
 
         var result = CreateController().CreateFleet(new FleetCreationRequestModel 
             { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
@@ -82,7 +82,7 @@ public class WebTests
         Assert.That(deck.Value, Is.Not.Null);
         Assert.That(deck.Value.Location, Is.EqualTo(new Cell(1, 1)));
         Assert.That(deck.Value.Destroyed, Is.False);
-        Assert.That(testableGame.State, Is.EqualTo(GameState.WaitingForPlayer2ToCreateFleet));
+        Assert.That(testableGame.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
     }
 
     private static Controller CreateController() => new();
