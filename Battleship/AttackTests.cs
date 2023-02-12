@@ -16,7 +16,7 @@ public class AttackTests
     //todo tdd game cycle
     //todo tdd field borders (and what if nowhere left to fire?)
     //todo tdd 2nd dimension
-    private readonly TestableGame game = new(0);
+    private TestableGame game = new(1);
 
     [SetUp]
     public void SetUp()
@@ -28,13 +28,14 @@ public class AttackTests
     [Test]
     public void DamagingAMultideckShip()
     {
-        game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 
-            2);
-        game.SetTurn(false);
+        game = TestingEnvironment.CreateNewTestableGame(GameState.Player2Turn);
+        game.SetupSimpleFleets(
+            new[] { new Cell(0, 1), new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 2);
 
-        game.Attack(0, new Cell(0, 1));
+        game.Attack(1, new Cell(0, 1));
 
         Assert.That(game.FirstFleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
+        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
     }
 
     //todo tdd this but for 1st player turn

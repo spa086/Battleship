@@ -74,18 +74,24 @@ public class Game
             secondFleet!.Where(x => !IsDestroyed(x)) : firstFleet!.Where(x => !IsDestroyed(x));
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
-        ProcessWin(player1Turn, attackedShips, ref result);
+        SetStateForBattleOrWin(player1Turn, attackedShips, ref result);
         return result; //todo tdd correct result
     }
 
-    private void ProcessWin(bool player1Turn, IEnumerable<Ship> attackedShips, ref AttackResult result)
+    private void SetStateForBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips, 
+        ref AttackResult result)
     {
         if (attackedShips.All(x => IsDestroyed(x)))
         {
             State = player1Turn ? GameState.Player1Won : GameState.Player2Won;
             result = AttackResult.Win;
         }
-        else State = player1Turn ? GameState.Player2Turn : GameState.Player1Turn; //todo tdd this
+        else
+        {
+            var hit = result == AttackResult.Hit;
+            if(player1Turn && hit || !player1Turn && !hit) State = GameState.Player1Turn;
+            if(!player1Turn && hit || player1Turn && !hit) State = GameState.Player2Turn;
+        }
     }
 
     private static void ProcessHit(Cell attackedLocation, Ship? attackedShip, ref AttackResult result)

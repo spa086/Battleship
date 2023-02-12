@@ -76,11 +76,9 @@ public class WebAttackTests
             new[] {new Cell(2, 2), new Cell(2, 3) }, 2));
 
         //todo put controller into variable?
-        var result = CreateController().Attack(
-            new AttackRequestModel 
-            { 
-                location = new LocationModel { x=2, y=2}, userId = 1
-            });
+        var request = new AttackRequestModel
+        { location = new LocationModel { x = 2, y = 2 }, userId = 1 };
+        var result = CreateController().Attack(request);
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Hit));
         var decks = game.SecondFleet.AssertSingle().Decks.Values;
@@ -88,7 +86,7 @@ public class WebAttackTests
         //todo check 3 times
         Assert.That(decks.Where(x => x.Location == new Cell(2,2)).AssertSingle().Destroyed, Is.True);
         Assert.That(decks.Where(x => x.Location == new Cell(2,3)).AssertSingle().Destroyed, Is.False);
-        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
     }
 
     [Test]
