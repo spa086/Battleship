@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using BattleshipLibrary;
+using System.Numerics;
 
 namespace BattleshipTests;
 
@@ -26,26 +27,46 @@ public class Tests
     }
 
     [Test]
+    public void FirstPlayerCreatesShipAfterSecondPlayer()
+    {
+        var game = 
+            TestingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 1, 2, false);
+        game.SetupSimpleFleets(null, 1, new[] { new Cell(2, 2) }, 2);
+
+        game.CreateAndSaveShips(1, CreateSimpleShip(1,1));
+
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+    }
+
+    [Test]
+    public void SecondPlayerCreatesShipsWhenFirstHasNoShips()
+    {
+        var game = 
+            TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2, false);
+
+        game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
+
+
+        Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
+    }
+
+    [Test]
     public void Player2CreatesShips()
     {
-        game.SetupSimpleFleets(new[] { new Cell(1,1) }, 1, null, null);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, null, null);
 
-        game.CreateAndSaveShips(0, new[] 
-        { 
-            new Ship 
-            {
-                Decks = new [] 
-                { 
-                    new Deck(2,2)
-                }.ToDictionary(x => x.Location)
-            } 
-        });
+        game.CreateAndSaveShips(2, CreateSimpleShip(2,2));
 
         Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
         var deck = game.SecondFleet.AssertSingle().Decks.AssertSingle();
-        Assert.That(deck.Key, Is.EqualTo(new Cell(2,2)));
+        Assert.That(deck.Key, Is.EqualTo(new Cell(2, 2)));
         Assert.That(deck.Value.Destroyed, Is.False);
-        Assert.That(deck.Value.Location, Is.EqualTo(new Cell(2,2)));
+        Assert.That(deck.Value.Location, Is.EqualTo(new Cell(2, 2)));
+    }
+
+    private static Ship[] CreateSimpleShip(int x, int y)
+    {
+        return new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(x => x.Location) } };
     }
 
     [Test]

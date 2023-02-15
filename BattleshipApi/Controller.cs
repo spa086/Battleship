@@ -22,12 +22,12 @@ public class Controller
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
+        //throw new Exception("Fuck yo momma");
         var userId = request.userId;
         var game = GamePool.GetGame(userId);
-        Log.Info($"Whatsup got game. First fleet = [{game?.FirstFleet}], " +
-            $"second fleet = [{game?.SecondFleet}].");
-        if (game is null) return StartPlaying(userId);
-        if (game.FirstUserId.HasValue && !game.SecondUserId.HasValue) return WaitingForStartResult();
+        if (game is not null) LogFleets(game);
+        else return StartPlaying(userId);
+        if (game!.FirstUserId.HasValue && !game.SecondUserId.HasValue) return WaitingForStartResult();
         if (game.FirstUserId.HasValue && game.SecondUserId.HasValue &&
             (game.FirstFleet is null || game.SecondFleet is null))
             return WhatsUpWhileCreatingFleets(game);
@@ -35,6 +35,56 @@ public class Controller
             return WhatsUpInBattle(request, game);
         //todo tdd this exception
         throw new Exception("Unknown situation.");
+    }
+
+    //todo kill?
+    private static void LogFleets(Game? game)
+    {
+        var firstFleetStr = string.Join<Ship>(",", game!.FirstFleet ?? Array.Empty<Ship>());
+        var secondFleetStr = string.Join<Ship>(",", game.SecondFleet ?? Array.Empty<Ship>());
+        Log.Info($"Whatsup got game. First fleet = [{firstFleetStr}], " +
+            $"second fleet = [{secondFleetStr}]. State = [{game.State}].");
+    }
+
+    public bool CreateFleet(FleetCreationRequestModel request)
+    {
+        if (request.ships.Any(x => x.decks is null))
+            throw new Exception("Empty decks are not allowed.");
+        var firstGroupWithDuplicates = request.ships.SelectMany(x => x.decks)
+            .GroupBy(deck => new Cell(deck.x, deck.y))
+            .FirstOrDefault(x => x.Count() > 1);
+        if (firstGroupWithDuplicates is not null)
+            throw new Exception($"Two decks are at the same place: {firstGroupWithDuplicates.Key}.");
+        //todo tdd what if did not find a game
+        var game = GamePool.GetGame(request.userId);
+        game!.CreateAndSaveShips(request.userId,
+            request.ships.Select(ship =>
+                new Ship
+                {
+                    Decks = ship.decks.ToDictionary(x => ToCell(x),
+                deckModel => new Deck(deckModel.x, deckModel.y))
+                }).ToArray());
+        return game.FirstUserId == request.userId;
+    }
+
+    public AttackResponse Attack(AttackRequestModel request)
+    {
+        //todo tdd throw if game is in inappropriate state
+        //todo tdd what if did not find game
+        //todo check 3 times
+        var game = GamePool.GetGame(request.userId)!;
+        AssertYourTurn(request, game);
+        var attackResult = game!.Attack(request.userId, ToCell(request.location));
+        return new AttackResponse
+        {
+            result = ToAttackResultModel(attackResult),
+            //todo tdd throw if first fleet is null
+            fleet1 = ToFleetStateModel(game.FirstFleet)!,
+            //todo tdd throw if first fleet is null
+            fleet2 = ToFleetStateModel(game.SecondFleet)!,
+            excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
+            excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray()
+        };
     }
 
     private static WhatsUpResponseModel WhatsUpWhileCreatingFleets(Game game) =>
@@ -66,7 +116,7 @@ public class Controller
         var opponentFleet = forFirstUser ? ToFleetStateModel(game.SecondFleet)
             : ToFleetStateModel(game.FirstFleet);
         GameStateModel? stateModel = GetStateModel(request, game);
-        var result = new WhatsUpResponseModel(game.Id, stateModel!.Value, myFleet, opponentFleet, 
+        var result = new WhatsUpResponseModel(game.Id, stateModel!.Value, myFleet, opponentFleet,
             myExcludedLocations, opponentExcludedLocations);
         return result;
     }
@@ -101,47 +151,6 @@ public class Controller
             gameState = secondPlayerJoined ? GameStateModel.CreatingFleet
                 : GameStateModel.WaitingForStart,
             gameId = GamePool.GetGame(userId)!.Id
-        };
-    }
-
-    public bool CreateFleet(FleetCreationRequestModel request)
-    {
-        if (request.ships.Any(x => x.decks is null))
-            throw new Exception("Empty decks are not allowed.");
-        var firstGroupWithDuplicates = request.ships.SelectMany(x => x.decks)
-            .GroupBy(deck => new Cell(deck.x, deck.y))
-            .FirstOrDefault(x => x.Count() > 1);
-        if (firstGroupWithDuplicates is not null)
-            throw new Exception($"Two decks are at the same place: [{firstGroupWithDuplicates.Key}].");
-        //todo tdd what if did not find a game
-        var game = GamePool.GetGame(request.userId);
-        game!.CreateAndSaveShips(request.userId,
-            request.ships.Select(ship =>
-                new Ship
-                {
-                    Decks = ship.decks.ToDictionary(x => ToCell(x),
-                deckModel => new Deck(deckModel.x, deckModel.y))
-                }).ToArray());
-        return game.FirstUserId == request.userId;
-    }
-
-    public AttackResponse Attack(AttackRequestModel request)
-    {
-        //todo tdd throw if game is in inappropriate state
-        //todo tdd what if did not find game
-        //todo check 3 times
-        var game = GamePool.GetGame(request.userId)!;
-        AssertYourTurn(request, game);
-        var attackResult = game!.Attack(request.userId, ToCell(request.location));
-        return new AttackResponse
-        {
-            result = ToAttackResultModel(attackResult),
-            //todo tdd throw if first fleet is null
-            fleet1 = ToFleetStateModel(game.FirstFleet)!,
-            //todo tdd throw if first fleet is null
-            fleet2 = ToFleetStateModel(game.SecondFleet)!,
-            excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
-            excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray()
         };
     }
 

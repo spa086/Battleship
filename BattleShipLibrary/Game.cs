@@ -19,8 +19,8 @@ public class Game
 
     public List<Cell> ExcludedLocations1 => excludedLocations1;
     public List<Cell> ExcludedLocations2 => excludedLocations2;
-    public List<Ship>? FirstFleet => firstFleet;
-    public List<Ship>? SecondFleet => secondFleet;
+    public Ship[]? FirstFleet => firstFleet;
+    public Ship[]? SecondFleet => secondFleet;
 
     public bool BattleOngoing => State == GameState.Player1Turn || State == GameState.Player2Turn;
     public bool CreatingFleets => 
@@ -34,7 +34,6 @@ public class Game
         SecondUserId = secondUserId;
     } 
 
-
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
         FirstUserId ??= userId;
@@ -42,21 +41,21 @@ public class Game
         {
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
                 .ToDictionary(x => x.Location)
-        }).ToList();
+        }).ToArray();
         UpdateState(userId, newShips);
     }
 
-    private void UpdateState(int userId, List<Ship> newShips)
+    private void UpdateState(int userId, Ship[] newShips)
     {
         if (userId == FirstUserId)
         {
             firstFleet = newShips;
-            State = GameState.OnePlayerCreatesFleet;
+            State = secondFleet is not null ? GameState.Player1Turn : GameState.OnePlayerCreatesFleet;
         }
         else
         {
             secondFleet = newShips;
-            State = GameState.Player1Turn;
+            State = firstFleet is not null ? GameState.Player1Turn : GameState.OnePlayerCreatesFleet;
         }
     }
 
@@ -114,15 +113,15 @@ public class Game
         //todo check for 3 times
         var currentExcluded = State == GameState.Player1Turn ? excludedLocations1 : excludedLocations2;
         if (currentExcluded.Contains(location)) 
-            throw new Exception($"Location [{location}] is already excluded.");
+            throw new Exception($"Location {location} is already excluded.");
         currentExcluded.Add(location);
     }
 
     protected List<Cell> excludedLocations1 = new();
     protected List<Cell> excludedLocations2 = new();
     //todo tdd validate ship shape
-    protected List<Ship>? firstFleet;
-    protected List<Ship>? secondFleet;
+    protected Ship[]? firstFleet;
+    protected Ship[]? secondFleet;
 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);
 }

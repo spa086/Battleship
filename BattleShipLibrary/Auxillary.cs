@@ -5,13 +5,11 @@ namespace BattleshipLibrary;
 
 public static class Log
 {
-    public static void Error(Exception ex)
-    {
-        Logger.Error(ex);
-    }
+    public static void Error(Exception ex) => Logger.Error(ex);
 
     public static void Info(string message)
     {
+        Console.WriteLine(message);
         Logger.Info(message);
     }
 
@@ -92,7 +90,7 @@ public readonly struct Cell
     public readonly int x;
     public readonly int y;
 
-    public override string ToString() => $"{x},{y}";
+    public override string ToString() => $"[{x},{y}]";
 
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
@@ -127,4 +125,6 @@ public class Ship
 
     //todo make it a hashset
     public Dictionary<Cell, Deck> Decks { get; set; } = new Dictionary<Cell, Deck>();
+
+    public override string ToString() => "(" + string.Join(";", Decks.Keys) + ")";
 }

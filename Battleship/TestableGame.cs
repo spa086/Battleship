@@ -49,8 +49,8 @@ public class TestableGame : Game
 
     public void SetupFleets(IEnumerable<Ship> fleet1, IEnumerable<Ship> fleet2)
     {
-        firstFleet = fleet1.ToList();
-        secondFleet = fleet2.ToList();
+        firstFleet = fleet1.ToArray();
+        secondFleet = fleet2.ToArray();
     }
 
     public void DestroyFleet(int userId)
@@ -70,13 +70,13 @@ public class TestableGame : Game
         SecondUserId = secondUserId;
     }
 
-    private static List<Ship>? CreateSimpleFleet(Cell[]? deckLocations)
+    private static Ship[]? CreateSimpleFleet(Cell[]? deckLocations)
     {
         if (deckLocations is null)
             return null;
         var decks = deckLocations.Select(location => new Deck(location.x, location.y))
             .ToDictionary(x => x.Location);
-        return new() {new Ship {Decks = decks}};
+        return new[] {new Ship {Decks = decks}};
     }
 
     private static List<Cell> CreateLocationList(params Cell[] locations) => locations.ToList();
