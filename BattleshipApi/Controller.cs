@@ -11,13 +11,7 @@ public class Controller
     public void AbortGame(int userId)
     {
         var game = GamePool.GetGame(userId);
-        if (game is null)
-        {
-            //todo tdd throw here
-        }
-#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-        GamePool.Games.Remove(game.Id);
-#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+        if (game is not null) GamePool.Games.Remove(game.Id);
     }
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
