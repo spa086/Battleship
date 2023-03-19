@@ -2,8 +2,6 @@
 
 namespace BattleshipApi;
 
-//todo handle all errors and return error messages
-
 public class Controller
 {
     public void AbortGame(int userId)

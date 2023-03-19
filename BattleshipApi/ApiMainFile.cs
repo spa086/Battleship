@@ -36,7 +36,8 @@ public static class MainApi
         Log.Info($"Starting to process POST request by URL [{urlWithoutSlash}]...");
         try
         {
-            action(await GetRequestModel<TRequestModel>(context), CreateController());
+            var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
+            action(WebResult.GetRequestModel<TRequestModel>(json), new Controller());
         }
         catch (Exception ex)
         {
@@ -48,49 +49,46 @@ public static class MainApi
 
     private static void MapPostFunction<TRequestModel, TResultModel>(
         WebApplication app, string urlWithoutSlash,
-        Func<TRequestModel, Controller, TResultModel> function)
-    {
-        app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context)
-        {
-            return await FunctionHandler(urlWithoutSlash, function, context);
-        });
-    }
+        Func<TRequestModel, Controller, TResultModel> function) =>
+        app.MapPost($"/{urlWithoutSlash}",
+            async delegate (HttpContext context)
+            {
+                var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
+                return WebResult.Prepare(urlWithoutSlash, function, json);
+            });
+}
 
-    private static async Task<string> FunctionHandler<TRequestModel, TResultModel>(
+public static class WebResult
+{
+    public static string Prepare<TRequestModel, TResultModel>(
         string urlWithoutSlash, Func<TRequestModel, Controller, TResultModel> function,
-        HttpContext context)
+        string requestBody)
     {
         Log.Info($"Starting to process POST request by URL [{urlWithoutSlash}]...");
-        var resultModel = await GetResultWithLogging(function, context);
-        var resultingJson = JsonSerializer.Serialize(resultModel);
+        var result = GetResultWithLogging(function, requestBody);
+        var resultingJson = JsonSerializer.Serialize(result);
         Log.Info($"Resulting JSON is: [{resultingJson}].");
         Log.Info("Successfully handled POST function request.");
         return resultingJson;
     }
 
-    private static async Task<TResultModel> GetResultWithLogging<TRequestModel, TResultModel>(
-        Func<TRequestModel, Controller, TResultModel> function, HttpContext context)
+    public static TRequestModel GetRequestModel<TRequestModel>(string json)
     {
-        TResultModel? result;
+        Log.Info($"Input JSON: [{json}].\n");
+        return JsonSerializer.Deserialize<TRequestModel>(json)!;
+    }
+
+    private static object GetResultWithLogging<TRequestModel, TResultModel>(
+        Func<TRequestModel, Controller, TResultModel> function, string requestBody)
+    {
         try
         {
-            result = function(await GetRequestModel<TRequestModel>(context),
-                CreateController());
+            return function(GetRequestModel<TRequestModel>(requestBody), new Controller())!;
         }
         catch (Exception ex)
         {
             Log.Error(ex);
-            throw;
+            return ex.Message;
         }
-        return result;
     }
-
-    private static async Task<TRequestModel> GetRequestModel<TRequestModel>(HttpContext context)
-    {
-        var requestBody = await new StreamReader(context.Request.Body).ReadToEndAsync();
-        Log.Info($"Input JSON: [{requestBody}].\n");
-        return JsonSerializer.Deserialize<TRequestModel>(requestBody)!;
-    }
-
-    private static Controller CreateController() => new();
 }

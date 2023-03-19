@@ -9,7 +9,30 @@ public class WebTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
-    //todo tdd finishing the game from controller.
+    [Test]
+    public void SimpleGettingRequestModel()
+    {
+        var result = WebResult.GetRequestModel<int>("5");
+
+        Assert.That(result, Is.EqualTo(5));
+    }
+
+    [Test]
+    public void PrepareErrorResult()
+    {
+        var result = WebResult.Prepare<int, int>("", 
+            (m, c) => throw new Exception("Some error."), "5");
+
+        Assert.That(result, Is.EqualTo("\"Some error.\""));
+    }
+
+    [Test]
+    public void PrepareResult()
+    {
+        var result = WebResult.Prepare<int, int>("", (m, c) => 2, "5");
+
+        Assert.That(result, Is.EqualTo("2"));
+    }
 
     [Test]
     public void GameAbortion([Values] GameState state)
