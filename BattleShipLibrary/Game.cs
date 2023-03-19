@@ -87,10 +87,7 @@ public class Game
         return result; //todo tdd correct result
     }
 
-    protected virtual void RenewTurnTimer(int secondsLeft = 30)
-    {
-        RenewTimerInternal(secondsLeft);
-    }
+    protected virtual void RenewTurnTimer(int secondsLeft = 30) => RenewTimerInternal(secondsLeft);
 
     protected void RenewTimerInternal(int secondsLeft = 30)
     {
@@ -156,30 +153,30 @@ public class Game
 
 public class TimerPlus : IDisposable
 {
-    private readonly TimerCallback _realCallback;
-    private readonly System.Threading.Timer _timer;
-    private readonly TimeSpan _period;
-    private DateTime _next;
-
     public TimerPlus(TimerCallback callback, object state, TimeSpan dueTime, TimeSpan period)
     {
-        _timer = new System.Threading.Timer(Callback, state, dueTime, period);
-        _realCallback = callback;
-        _period = period;
-        _next = DateTime.Now.Add(dueTime);
+        timer = new System.Threading.Timer(Callback, state, dueTime, period);
+        realCallback = callback;
+        this.period = period;
+        next = DateTime.Now.Add(dueTime);
     }
 
-    public TimeSpan DueTime => _next - DateTime.Now;
+    public TimeSpan DueTime => next - DateTime.Now;
 
     public void Dispose()
     {
-        _timer.Dispose();
+        timer.Dispose();
         GC.SuppressFinalize(this);
     }
 
     private void Callback(object? state)
     {
-        _next = DateTime.Now.Add(_period);
-        _realCallback(state);
+        next = DateTime.Now.Add(period);
+        realCallback(state);
     }
+
+    private readonly TimerCallback realCallback;
+    private readonly System.Threading.Timer timer;
+    private readonly TimeSpan period;
+    private DateTime next;
 }
