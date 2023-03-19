@@ -50,9 +50,7 @@ public class Game
         //todo look for a helper to do this check:
         if((userId == FirstUserId && SecondFleet is not null) ||
             (userId == SecondUserId && FirstFleet is not null))
-        {
-            turnTimer = new TimerPlus(state => { }, new object(), TimeSpan.FromSeconds(30), Timeout.InfiniteTimeSpan);
-        }
+            RenewTurnTimer();
     }
 
     private void UpdateState(int userId, Ship[] newShips)
@@ -84,8 +82,13 @@ public class Game
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
         SetStateForBattleOrWin(player1Turn, attackedShips, ref result);
+        RenewTurnTimer();
         return result; //todo tdd correct result
     }
+
+    protected void RenewTurnTimer(int secondsLeft = 30) => 
+        turnTimer = new TimerPlus(state => { }, new object(), TimeSpan.FromSeconds(secondsLeft), 
+            Timeout.InfiniteTimeSpan);
 
     private void SetStateForBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips, 
         ref AttackResult result)

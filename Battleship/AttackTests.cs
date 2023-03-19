@@ -26,6 +26,17 @@ public class AttackTests
     }
 
     [Test]
+    public void TimerRenewal()
+    {
+        game = TestingEnvironment.CreateNewTestableGame(GameState.Player2Turn, 1, 2);
+        game.SetupNewTurn(5);
+
+        game.Attack(2, new Cell(0, 0));
+
+        Assert.That(game.TurnSecondsLeft, Is.EqualTo(30));
+    }
+
+    [Test]
     public void DamagingAMultideckShip()
     {
         game = TestingEnvironment.CreateNewTestableGame(GameState.Player2Turn);
