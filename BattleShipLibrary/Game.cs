@@ -16,6 +16,7 @@ public class Game
     public int? SecondUserId { get; protected set; }
 
     public GameState State { get; protected set; }
+    public  int? TurnSecondsLeft { get; protected set; }
 
     public List<Cell> ExcludedLocations1 => excludedLocations1;
     public List<Cell> ExcludedLocations2 => excludedLocations2;
@@ -36,13 +37,19 @@ public class Game
 
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
-        FirstUserId ??= userId;
+        FirstUserId ??= userId; //todo kill this line, seemingly meaningless
         var newShips = ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
                 .ToDictionary(x => x.Location)
         }).ToArray();
         UpdateState(userId, newShips);
+        //todo look for a helper to do this check:
+        if((userId == FirstUserId && SecondFleet is not null) ||
+            (userId == SecondUserId && FirstFleet is not null))
+        {
+            TurnSecondsLeft = 30;
+        }
     }
 
     private void UpdateState(int userId, Ship[] newShips)

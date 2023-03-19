@@ -53,11 +53,12 @@ public class Tests
     [Test]
     public void Player2CreatesShips()
     {
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, null, null);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, null, 2);
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2,2));
 
         Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        Assert.That(game.TurnSecondsLeft, Is.EqualTo(30));
         var deck = game.SecondFleet.AssertSingle().Decks.AssertSingle();
         Assert.That(deck.Key, Is.EqualTo(new Cell(2, 2)));
         Assert.That(deck.Value.Destroyed, Is.False);
@@ -109,5 +110,6 @@ public class Tests
         Assert.That(deck2.Destroyed, Is.False);
         Assert.That(deck2.Location, Is.EqualTo(new Cell(1, 2)));
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
+        Assert.That(game.TurnSecondsLeft, Is.Null);
     }
 }
