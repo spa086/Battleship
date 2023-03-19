@@ -78,10 +78,6 @@ public class ShipStateModel
 public class AttackResponse
 {
     public AttackResultTransportModel result { get; set; }
-    //todo tdd filling
-    public ShipStateModel[] fleet1 { get; set; } = Array.Empty<ShipStateModel>();
-    //todo tdd filling
-    public ShipStateModel[] fleet2 { get; set; } = Array.Empty<ShipStateModel>();
     public LocationModel[] excludedLocations1 { get; set; } = Array.Empty<LocationModel>();
     public LocationModel[] excludedLocations2 { get; set; } = Array.Empty<LocationModel>();
 }

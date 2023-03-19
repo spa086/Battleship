@@ -2,9 +2,7 @@
 
 namespace BattleshipApi;
 
-//todo attacking again after hit
 //todo handle all errors and return error messages
-//todo attack must return correct fields as in ApiDescription (myFleet etc.)
 
 public class Controller
 {
@@ -72,10 +70,6 @@ public class Controller
         return new AttackResponse
         {
             result = ToAttackResultModel(attackResult),
-            //todo tdd throw if first fleet is null
-            fleet1 = ToFleetStateModel(game.FirstFleet)!,
-            //todo tdd throw if first fleet is null
-            fleet2 = ToFleetStateModel(game.SecondFleet)!,
             excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
             excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray()
         };

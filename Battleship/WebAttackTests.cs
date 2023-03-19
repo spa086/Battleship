@@ -40,22 +40,6 @@ public class WebAttackTests
     }
 
     [Test]
-    public void AttackReturnsField()
-    {
-        var deckLocations1 = new[] { new Cell(1, 1) }; 
-        var deckLocations2 = new[] { new Cell(2, 2) };
-        SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
-            game => game.SetupSimpleFleets(deckLocations1, 1, deckLocations2, 2));
-        var controller = CreateController();
-
-        var result = controller.Attack(
-            new AttackRequestModel { userId = 1, location = new LocationModel { x = 1, y = 1 } });
-
-        AssertFleet(result.fleet1, 1, 1);
-        AssertFleet(result.fleet2, 2, 2);
-    }
-
-    [Test]
     public void AttackMissed()
     {
         var game = SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
@@ -159,15 +143,5 @@ public class WebAttackTests
     {
         var result = new Dictionary<Cell, Deck> { { new Cell(x, y), new Deck(x, y, false) } };
         return result;
-    }
-
-    private static void AssertFleet(ShipStateModel[] fleet, int expectedX, int expectedY)
-    {
-        var ship = fleet.AssertSingle();
-        Assert.That(ship, Is.Not.Null);
-        var deck = ship.decks.AssertSingle();
-        Assert.That(deck.x, Is.EqualTo(expectedX));
-        Assert.That(deck.y, Is.EqualTo(expectedY));
-        Assert.That(deck.destroyed, Is.False);
     }
 }
