@@ -17,7 +17,7 @@ public class Tests
     //todo tdd game cycle
     //todo tdd field borders (and what if nowhere left to fire?)
     //todo tdd 2nd dimension
-    private readonly TestableGame game = new(0);
+    private TestableGame game = new(0);
 
     [SetUp]
     public void SetUp()
@@ -27,9 +27,23 @@ public class Tests
     }
 
     [Test]
+    public void LosingWhenTimeIsOut()
+    {
+        game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game.SetupTurnTime = 1;
+
+        game.Attack(1, new Cell(1, 1));
+        Thread.Sleep(1100);
+
+        Assert.That(game.ItsOver, Is.True);
+        Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
+        Assert.That(game.TurnSecondsLeft, Is.LessThanOrEqualTo(0));
+    }
+
+    [Test]
     public void BatleTimer()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
+        game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
@@ -105,6 +119,7 @@ public class Tests
     [Test]
     public void CreateShipsSimple()
     {
+        game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
         game.SetupSimpleFleets(null, null, null, null);
         var decks = new[] { new Deck(1, 1), new Deck(1, 2) }.ToDictionary(x => x.Location);
 

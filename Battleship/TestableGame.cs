@@ -27,6 +27,8 @@ public class TestableGame : Game
         return this;
     }
 
+    public int? SetupTurnTime { get; set; }
+
     public void SetupExcludedLocations(int userId, params Cell[] locations)
     {
         if (userId == FirstUserId) excludedLocations1 = CreateLocationList(locations);
@@ -43,6 +45,7 @@ public class TestableGame : Game
         excludedLocations1 = CreateLocationList();
         excludedLocations2 = CreateLocationList();
         State = GameState.Player1Turn;
+        SetupTurnTime = 30;
         SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  
             new[] { new Cell(3, 3) }, 2);
     }
@@ -71,6 +74,16 @@ public class TestableGame : Game
         FirstUserId = firstUserId;
         secondFleet = CreateSimpleFleet(deckLocations2);
         SecondUserId = secondUserId;
+    }
+
+    protected override void RenewTurnTimer(int secondsLeft = 30)
+    {
+        turnTimer?.Dispose();
+        turnTimer = new TimerPlus(state =>
+        {
+            State = WhoWillWinWhenTurnTimeEnds();
+        }, this,
+            TimeSpan.FromSeconds(SetupTurnTime ?? secondsLeft), Timeout.InfiniteTimeSpan);
     }
 
     private static Ship[]? CreateSimpleFleet(Cell[]? deckLocations)

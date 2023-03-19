@@ -40,6 +40,8 @@ public class Game
 
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
+        var battleStarts = (userId == FirstUserId && SecondFleet is not null) ||
+            (userId == SecondUserId && FirstFleet is not null);
         FirstUserId ??= userId; //todo kill this line, seemingly meaningless
         var newShips = ships.Select(ship => new Ship
         {
@@ -48,8 +50,7 @@ public class Game
         }).ToArray();
         UpdateState(userId, newShips);
         //todo look for a helper to do this check:
-        if((userId == FirstUserId && SecondFleet is not null) ||
-            (userId == SecondUserId && FirstFleet is not null))
+        if(battleStarts)
             RenewTurnTimer();
     }
 
@@ -86,12 +87,15 @@ public class Game
         return result; //todo tdd correct result
     }
 
-    protected void RenewTurnTimer(int secondsLeft = 30)
+    protected virtual void RenewTurnTimer(int secondsLeft = 30)
     {
         turnTimer?.Dispose();
-        turnTimer = new TimerPlus(state => { }, new object(), TimeSpan.FromSeconds(secondsLeft),
-            Timeout.InfiniteTimeSpan);
+        turnTimer = new TimerPlus(state => State = WhoWillWinWhenTurnTimeEnds(), this, 
+            TimeSpan.FromSeconds(secondsLeft), Timeout.InfiniteTimeSpan);
     }
+
+    protected GameState WhoWillWinWhenTurnTimeEnds() => 
+        State == GameState.Player1Turn ? GameState.Player2Won : GameState.Player1Won;
 
     private void SetStateForBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips, 
         ref AttackResult result)
