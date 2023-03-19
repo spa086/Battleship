@@ -89,8 +89,13 @@ public class Game
 
     protected virtual void RenewTurnTimer(int secondsLeft = 30)
     {
+        RenewTimerInternal(secondsLeft);
+    }
+
+    protected void RenewTimerInternal(int secondsLeft = 30)
+    {
         turnTimer?.Dispose();
-        turnTimer = new TimerPlus(state => State = WhoWillWinWhenTurnTimeEnds(), this, 
+        turnTimer = new TimerPlus(state => State = WhoWillWinWhenTurnTimeEnds(), this,
             TimeSpan.FromSeconds(secondsLeft), Timeout.InfiniteTimeSpan);
     }
 
@@ -152,9 +157,7 @@ public class Game
 public class TimerPlus : IDisposable
 {
     private readonly TimerCallback _realCallback;
-#pragma warning disable IDE0052 // Удалить непрочитанные закрытые члены
     private readonly System.Threading.Timer _timer;
-#pragma warning restore IDE0052 // Удалить непрочитанные закрытые члены
     private readonly TimeSpan _period;
     private DateTime _next;
 
@@ -166,13 +169,17 @@ public class TimerPlus : IDisposable
         _next = DateTime.Now.Add(dueTime);
     }
 
+    public TimeSpan DueTime => _next - DateTime.Now;
+
+    public void Dispose()
+    {
+        _timer.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
     private void Callback(object? state)
     {
         _next = DateTime.Now.Add(_period);
         _realCallback(state);
     }
-
-    public TimeSpan DueTime => _next - DateTime.Now;
-
-    public void Dispose() => GC.SuppressFinalize(this);
 }

@@ -72,15 +72,8 @@ public class TestableGame : Game
         SecondUserId = secondUserId;
     }
 
-    protected override void RenewTurnTimer(int secondsLeft = 30)
-    {
-        turnTimer?.Dispose();
-        turnTimer = new TimerPlus(state =>
-        {
-            State = WhoWillWinWhenTurnTimeEnds();
-        }, this,
-            TimeSpan.FromSeconds(SetupTurnTime ?? secondsLeft), Timeout.InfiniteTimeSpan);
-    }
+    protected override void RenewTurnTimer(int secondsLeft = 30) => 
+        RenewTimerInternal(SetupTurnTime ?? secondsLeft);
 
     private static Ship[]? CreateSimpleFleet(Cell[]? deckLocations)
     {
