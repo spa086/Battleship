@@ -103,13 +103,15 @@ public class Tests
         var ship = game.FirstFleet!.AssertSingle();
         Assert.That(decks, Has.Count.EqualTo(2));
         var orderedDecks = decks.Values.OrderBy(x => x.Location.y);
-        var deck1 = orderedDecks.First();
-        Assert.That(deck1.Destroyed, Is.False);
-        Assert.That(deck1.Location, Is.EqualTo(new Cell(1, 1)));
-        var deck2 = orderedDecks.Last();
-        Assert.That(deck2.Destroyed, Is.False);
-        Assert.That(deck2.Location, Is.EqualTo(new Cell(1, 2)));
+        AssertNonDestroyedDeck(orderedDecks.First(), 1, 1);
+        AssertNonDestroyedDeck(orderedDecks.Last(), 1, 2);
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
         Assert.That(game.TurnSecondsLeft, Is.Null);
+    }
+
+    private void AssertNonDestroyedDeck(Deck deck, int x, int y)
+    {
+        Assert.That(deck.Destroyed, Is.False);
+        Assert.That(deck.Location, Is.EqualTo(new Cell(x, y)));
     }
 }

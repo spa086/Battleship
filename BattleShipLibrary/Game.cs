@@ -47,9 +47,7 @@ public class Game
         //todo look for a helper to do this check:
         if((userId == FirstUserId && SecondFleet is not null) ||
             (userId == SecondUserId && FirstFleet is not null))
-        {
             TurnSecondsLeft = 30;
-        }
     }
 
     private void UpdateState(int userId, Ship[] newShips)
