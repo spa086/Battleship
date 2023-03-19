@@ -9,12 +9,6 @@ public class TestableGame : Game
 
     }
 
-    public TestableGame SetFirstUserId(int? firstUserId = null)
-    {
-        FirstUserId= firstUserId;
-        return this;
-    }
-
     public TestableGame SetSecondUserId(int? secondUserId = null)
     {
         SecondUserId = secondUserId;
@@ -26,6 +20,8 @@ public class TestableGame : Game
         State = newState;
         return this;
     }
+
+    public TimerPlus? GetTimer() => turnTimer;
 
     public int? SetupTurnTime { get; set; }
 

@@ -82,8 +82,8 @@ public class Game
             secondFleet!.Where(x => !IsDestroyed(x)) : firstFleet!.Where(x => !IsDestroyed(x));
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
-        SetStateForBattleOrWin(player1Turn, attackedShips, ref result);
-        RenewTurnTimer();
+        ProcessBattleOrWin(player1Turn, attackedShips, ref result);
+        if(this.BattleOngoing) RenewTurnTimer();
         return result; //todo tdd correct result
     }
 
@@ -97,13 +97,15 @@ public class Game
     protected GameState WhoWillWinWhenTurnTimeEnds() => 
         State == GameState.Player1Turn ? GameState.Player2Won : GameState.Player1Won;
 
-    private void SetStateForBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips, 
+    private void ProcessBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips, 
         ref AttackResult result)
     {
         if (attackedShips.All(x => IsDestroyed(x)))
         {
             State = player1Turn ? GameState.Player1Won : GameState.Player2Won;
             result = AttackResult.Win;
+            turnTimer?.Dispose();
+            turnTimer = null;
         }
         else
         {

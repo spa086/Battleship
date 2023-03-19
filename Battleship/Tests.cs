@@ -27,6 +27,19 @@ public class Tests
     }
 
     [Test]
+    public void StoppingTimerWhenLost()
+    {
+        game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupNewTurn(100);
+
+        game.Attack(1, new Cell(2, 2));
+
+        Assert.That(game.TurnSecondsLeft, Is.Null);
+        Assert.That(game.GetTimer(), Is.Null);
+    }
+
+    [Test]
     public void LosingWhenTimeIsOut()
     {
         game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
