@@ -61,7 +61,9 @@ public class TestableGame : Game
                     deck.Destroyed = true;
     }
 
-    public void SetupTurnSeconds(int turnSeconds) => TurnSecondsLeft = turnSeconds;
+    public void SetupNewTurn() => 
+        turnTimer = new TimerPlus(state => { }, new object(), TimeSpan.FromSeconds(30), 
+            Timeout.InfiniteTimeSpan);
 
     public void SetupSimpleFleets(Cell[]? deckLocations1, int? firstUserId,
         Cell[]? deckLocations2, int? secondUserId)

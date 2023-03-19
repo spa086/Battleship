@@ -27,6 +27,17 @@ public class Tests
     }
 
     [Test]
+    public void BatleTimer()
+    {
+        var game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
+
+        game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
+
+        Thread.Sleep(1000);
+        Assert.That(game.TurnSecondsLeft, Is.EqualTo(29));
+    }
+
+    [Test]
     public void FirstPlayerCreatesShipAfterSecondPlayer()
     {
         var game = 

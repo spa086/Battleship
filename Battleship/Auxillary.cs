@@ -16,7 +16,7 @@ public static class TestingEnvironment
             if (game.BattleOngoing)
             {
                 game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
-                game.SetupTurnSeconds(30);
+                game.SetupNewTurn();
             }
             else if (game.CreatingFleets) 
                 game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, 1, 

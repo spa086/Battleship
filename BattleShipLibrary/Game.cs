@@ -1,4 +1,6 @@
-﻿namespace BattleshipLibrary;
+﻿using System.Timers;
+
+namespace BattleshipLibrary;
 
 public class Game
 {
@@ -16,7 +18,8 @@ public class Game
     public int? SecondUserId { get; protected set; }
 
     public GameState State { get; protected set; }
-    public  int? TurnSecondsLeft { get; protected set; }
+    public int? TurnSecondsLeft => 
+        turnTimer is null ? null : (int)Math.Ceiling(turnTimer.DueTime.TotalMilliseconds/1000f);
 
     public List<Cell> ExcludedLocations1 => excludedLocations1;
     public List<Cell> ExcludedLocations2 => excludedLocations2;
@@ -47,7 +50,9 @@ public class Game
         //todo look for a helper to do this check:
         if((userId == FirstUserId && SecondFleet is not null) ||
             (userId == SecondUserId && FirstFleet is not null))
-            TurnSecondsLeft = 30;
+        {
+            turnTimer = new TimerPlus(state => { }, new object(), TimeSpan.FromSeconds(30), Timeout.InfiniteTimeSpan);
+        }
     }
 
     private void UpdateState(int userId, Ship[] newShips)
@@ -127,6 +132,35 @@ public class Game
     //todo tdd validate ship shape
     protected Ship[]? firstFleet;
     protected Ship[]? secondFleet;
+    protected TimerPlus? turnTimer;
 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);
+}
+
+public class TimerPlus : IDisposable
+{
+    private readonly TimerCallback _realCallback;
+#pragma warning disable IDE0052 // Удалить непрочитанные закрытые члены
+    private readonly System.Threading.Timer _timer;
+#pragma warning restore IDE0052 // Удалить непрочитанные закрытые члены
+    private readonly TimeSpan _period;
+    private DateTime _next;
+
+    public TimerPlus(TimerCallback callback, object state, TimeSpan dueTime, TimeSpan period)
+    {
+        _timer = new System.Threading.Timer(Callback, state, dueTime, period);
+        _realCallback = callback;
+        _period = period;
+        _next = DateTime.Now.Add(dueTime);
+    }
+
+    private void Callback(object? state)
+    {
+        _next = DateTime.Now.Add(_period);
+        _realCallback(state);
+    }
+
+    public TimeSpan DueTime => _next - DateTime.Now;
+
+    public void Dispose() => GC.SuppressFinalize(this);
 }
