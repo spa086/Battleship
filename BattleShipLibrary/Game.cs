@@ -86,9 +86,12 @@ public class Game
         return result; //todo tdd correct result
     }
 
-    protected void RenewTurnTimer(int secondsLeft = 30) => 
-        turnTimer = new TimerPlus(state => { }, new object(), TimeSpan.FromSeconds(secondsLeft), 
+    protected void RenewTurnTimer(int secondsLeft = 30)
+    {
+        turnTimer?.Dispose();
+        turnTimer = new TimerPlus(state => { }, new object(), TimeSpan.FromSeconds(secondsLeft),
             Timeout.InfiniteTimeSpan);
+    }
 
     private void SetStateForBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips, 
         ref AttackResult result)
