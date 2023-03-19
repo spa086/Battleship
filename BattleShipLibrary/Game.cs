@@ -73,6 +73,7 @@ public class Game
     public AttackResult Attack(int userId, Cell attackedLocation)
 #pragma warning restore IDE0060 // Удалите неиспользуемый параметр
     {
+        AssertThatShotIsInFieldBorders(attackedLocation);
         //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);
         //todo tdd this condition
@@ -83,7 +84,7 @@ public class Game
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
         ProcessBattleOrWin(player1Turn, attackedShips, ref result);
-        if(this.BattleOngoing) RenewTurnTimer();
+        if (this.BattleOngoing) RenewTurnTimer();
         return result; //todo tdd correct result
     }
 
@@ -149,6 +150,14 @@ public class Game
     protected TimerPlus? turnTimer;
 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);
+
+    private static void AssertThatShotIsInFieldBorders(Cell attackedLocation)
+    {
+        if (attackedLocation.x < 0 || attackedLocation.x > 9 ||
+                    attackedLocation.y < 0 || attackedLocation.y > 9)
+            throw new Exception(
+                "Target cannot be outside the game field. Available coordinates are 0-9.");
+    }
 }
 
 public class TimerPlus : IDisposable

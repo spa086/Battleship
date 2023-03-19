@@ -15,8 +15,6 @@ public class Tests
     //todo tdd throw if any location list is uninitialized
     //todo tdd throw if ships are adjacent
     //todo tdd game cycle
-    //todo tdd field borders (and what if nowhere left to fire?)
-    //todo tdd 2nd dimension
     private TestableGame game = new(0);
 
     [SetUp]

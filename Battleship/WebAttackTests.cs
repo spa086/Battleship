@@ -62,7 +62,7 @@ public class WebAttackTests
             game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2));
 
         var result = CreateController().Attack(new AttackRequestModel 
-            { location = new LocationModel { x = 22, y = 22 }, userId = 1 });
+            { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Missed));
         Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));

@@ -14,8 +14,6 @@ public class AttackTests
     //todo tdd throw if any location list is uninitialized
     //todo tdd throw if ships are adjacent
     //todo tdd game cycle
-    //todo tdd field borders (and what if nowhere left to fire?)
-    //todo tdd 2nd dimension
     private TestableGame game = new(1);
 
     [SetUp]
@@ -23,6 +21,15 @@ public class AttackTests
     {
         GamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void ShotOutsideTheField()
+    {
+        var exception = Assert.Throws<Exception>(() => game.Attack(1, new Cell(11, 0)));
+
+        Assert.That(exception.Message, 
+            Is.EqualTo("Target cannot be outside the game field. Available coordinates are 0-9."));
     }
 
     [Test]
@@ -102,9 +109,9 @@ public class AttackTests
     [Test]
     public void Excluding()
     {
-        game.Attack(0, new Cell(144, 144));
+        game.Attack(0, new Cell(1, 1));
 
-        Assert.That(game.ExcludedLocations1.AssertSingle(), Is.EqualTo(new Cell(144, 144)));
+        Assert.That(game.ExcludedLocations1.AssertSingle(), Is.EqualTo(new Cell(1, 1)));
     }
 
     [Test]
