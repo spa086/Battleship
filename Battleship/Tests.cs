@@ -109,7 +109,7 @@ public class Tests
         Assert.That(game.TurnSecondsLeft, Is.Null);
     }
 
-    private void AssertNonDestroyedDeck(Deck deck, int x, int y)
+    private static void AssertNonDestroyedDeck(Deck deck, int x, int y)
     {
         Assert.That(deck.Destroyed, Is.False);
         Assert.That(deck.Location, Is.EqualTo(new Cell(x, y)));

@@ -14,7 +14,10 @@ public static class TestingEnvironment
         {
             game.SetSecondUserId(secondUserId);
             if (game.BattleOngoing)
+            {
                 game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
+                game.SetupTurnSeconds(30);
+            }
             else if (game.CreatingFleets) 
                 game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, 1, 
                     firstPlayerHasFleet ? null : SimpleCellArray(2), 2);

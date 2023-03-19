@@ -117,7 +117,7 @@ public class Controller
             : ToFleetStateModel(game.FirstFleet);
         GameStateModel? stateModel = GetStateModel(request, game);
         var result = new WhatsUpResponseModel(game.Id, stateModel!.Value, myFleet, opponentFleet,
-            myExcludedLocations, opponentExcludedLocations);
+            myExcludedLocations, opponentExcludedLocations, game.TurnSecondsLeft);
         return result;
     }
 

@@ -9,11 +9,22 @@ public class WhatsUpTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
-    //todo this test must catch the bug
+    //todo test for 2nd player
+    [Test]
+    public void GettingSecondsLeft()
+    {
+        //todo is it needed to set last bool parameter?
+        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2, true);
+
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(1));
+
+        Assert.That(result.secondsLeft, Is.EqualTo(30));
+    }
+
     [Test]
     public void SecondPlayerCreatesFleetFirst()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 
+        TestingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 
             firstPlayerHasFleet: false);
         var controller = CreateController();
 
@@ -26,7 +37,7 @@ public class WhatsUpTests
     [TestCase(GameState.Player2Won, GameStateModel.OpponentWon)]
     public void WhatsupWhenWon(GameState gameState, GameStateModel expectedModel)
     {
-        var game = TestingEnvironment.CreateNewTestableGame(gameState);
+        TestingEnvironment.CreateNewTestableGame(gameState);
         var controller = CreateController();
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
