@@ -9,7 +9,6 @@ public class WhatsUpTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
-    //todo test for 2nd player
     [Test]
     public void GettingSecondsLeft()
     {

@@ -12,7 +12,6 @@ public class Controller
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
-        //throw new Exception("Fuck yo momma");
         var userId = request.userId;
         var game = GamePool.GetGame(userId);
         if (game is not null) LogFleets(game);
