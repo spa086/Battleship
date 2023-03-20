@@ -120,6 +120,7 @@ public class Game
 
     private static void ProcessHit(Cell attackedLocation, Ship? attackedShip, ref AttackResult result)
     {
+        //todo tdd throw if null?
         if (attackedShip is not null)
         {
             attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
