@@ -24,6 +24,16 @@ public class Tests
         game.StandardSetup();
     }
 
+    [TestCase(1)]
+    [TestCase(2)]
+    public void GettingGameSimple(int userIdToSearchBy)
+    {
+        game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+
+        var result = GamePool.GetGame(userIdToSearchBy);
+        Assert.That(result, Is.EqualTo(game));
+    }
+
     [Test]
     public void StoppingTimerWhenLost()
     {
@@ -101,6 +111,7 @@ public class Tests
         Assert.That(deck.Value.Location, Is.EqualTo(new Cell(2, 2)));
     }
 
+    //todo move below
     private static Ship[] CreateSimpleShip(int x, int y)
     {
         return new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(x => x.Location) } };

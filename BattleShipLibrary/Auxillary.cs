@@ -40,7 +40,6 @@ public static class GamePool
 {
     public static Game? GetGame(int userId)
     {
-        //todo tdd throw if user participates in several games simultaneously
         var game = Games.Values.SingleOrDefault(x => 
             x.FirstUserId == userId || x.SecondUserId == userId);
         return game;
