@@ -40,9 +40,12 @@ public static class GamePool
 {
     public static Game? GetGame(int userId)
     {
-        var game = Games.Values.SingleOrDefault(x => 
+        var gamesByUserId = Games.Values.Where(x => 
             x.FirstUserId == userId || x.SecondUserId == userId);
-        return game;
+        if (gamesByUserId.Count() > 1)
+            throw new Exception($"User id = [{userId}] participates in several games. Game id's: " +
+                $"[{string.Join(", ", gamesByUserId.Select(x => x.Id))}].");
+        return gamesByUserId.SingleOrDefault();
     }
 
     //for testing

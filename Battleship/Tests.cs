@@ -26,6 +26,18 @@ public class Tests
 
     [TestCase(1)]
     [TestCase(2)]
+    public void GettingGameWhenDoubled(int userIdToSearchBy)
+    {
+        var game1 = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        var game2 = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+
+        var exception = Assert.Throws<Exception>(() => GamePool.GetGame(userIdToSearchBy));
+        Assert.That(exception.Message, Is.EqualTo($"User id = [{userIdToSearchBy}] participates " +
+            $"in several games. Game id's: [{game1.Id}, {game2.Id}]."));
+    }
+
+    [TestCase(1)]
+    [TestCase(2)]
     public void GettingGameSimple(int userIdToSearchBy)
     {
         game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
