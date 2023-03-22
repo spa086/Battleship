@@ -9,6 +9,19 @@ public class WebTests
     [SetUp]
     public void SetUp() => GamePool.ClearGames();
 
+    //todo tdd similar test for second user name
+    [Test]
+    public void SettingUserName()
+    {
+        var game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
+        var request = SingleShipFleetCreationRequest(1, new[] {new LocationModel { x = 1, y = 1} });
+        request.userName = "Boris";
+
+        CreateController().CreateFleet(request);
+
+        Assert.That(game.FirstUserName, Is.EqualTo("Boris"));
+    }
+
     [Test]
     public void SimpleGettingRequestModel()
     {

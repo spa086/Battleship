@@ -14,11 +14,12 @@ public class Game
     //todo tdd this field
     public int Id { get; private set; }
 
+    //todo make User class
     public int? FirstUserId { get; protected set; }
-    public string? FirstUserName { get; protected set; }
+    public string? FirstUserName { get; set; }
     public int? SecondUserId { get; protected set; }
     //todo tdd this field in whatsup tests
-    public string? SecondUserName { get; protected set; }
+    public string? SecondUserName { get; set; }
 
     public GameState State { get; protected set; }
     public int? TurnSecondsLeft => 

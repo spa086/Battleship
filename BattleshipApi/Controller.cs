@@ -42,13 +42,9 @@ public class Controller
             throw new Exception($"Two decks are at the same place: {firstGroupWithDuplicates.Key}.");
         //todo tdd what if did not find a game
         var game = GamePool.GetGame(request.userId);
-        game!.CreateAndSaveShips(request.userId,
-            request.ships.Select(ship =>
-                new Ship
-                {
-                    Decks = ship.decks.ToDictionary(x => ToCell(x),
-                deckModel => new Deck(deckModel.x, deckModel.y))
-                }).ToArray());
+        if (request.userId == game!.FirstUserId) game.FirstUserName = request.userName;
+        else if (request.userId == game.SecondUserId) game.SecondUserName = request.userName;
+        game!.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());
         return game.FirstUserId == request.userId;
     }
 
@@ -177,4 +173,11 @@ public class Controller
         Log.Info($"Whatsup got game. First fleet = [{firstFleetStr}], " +
             $"second fleet = [{secondFleetStr}]. State = [{game.State}].");
     }
+
+    private static Ship ToShip(ShipForCreationModel ship) =>
+        new()
+        {
+            Decks = ship.decks.ToDictionary(x => ToCell(x),
+                deckModel => new Deck(deckModel.x, deckModel.y))
+        };
 }

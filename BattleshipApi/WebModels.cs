@@ -49,6 +49,8 @@ public class FleetCreationRequestModel
 {
     public int userId { get; set; }
 
+    public string? userName { get; set; }
+
     public ShipForCreationModel[] ships { get; set; }
         = Array.Empty<ShipForCreationModel>();
 }
