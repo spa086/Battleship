@@ -61,6 +61,13 @@ public class TestableGame : Game
     }
 
     public void SetupNewTurn(int secondsLeft) => RenewTurnTimer(secondsLeft);
+
+    public void SetupUserName(int userId, string? userName)
+    {
+        if (userId == FirstUserId) FirstUserName = userName;
+        else if (userId == SecondUserId) SecondUserName = userName;
+        else throw new Exception($"User [{userId}] is not found.");
+    }
         
 
     public void SetupSimpleFleets(Cell[]? deckLocations1, int? firstUserId,

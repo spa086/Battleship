@@ -15,7 +15,10 @@ public class Game
     public int Id { get; private set; }
 
     public int? FirstUserId { get; protected set; }
+    public string? FirstUserName { get; protected set; }
     public int? SecondUserId { get; protected set; }
+    //todo tdd this field in whatsup tests
+    public string? SecondUserName { get; protected set; }
 
     public GameState State { get; protected set; }
     public int? TurnSecondsLeft => 

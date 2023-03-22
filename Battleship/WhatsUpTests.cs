@@ -10,6 +10,17 @@ public class WhatsUpTests
     public void SetUp() => GamePool.ClearGames();
 
     [Test]
+    public void UserNameIsReturned()
+    {
+        var game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2, true);
+        game.SetupUserName(1, "Admiral");
+
+        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(1));
+
+        Assert.That(result.userName, Is.EqualTo("Admiral"));
+    }
+
+    [Test]
     public void GettingSecondsLeft()
     {
         //todo is it needed to set last bool parameter?

@@ -15,23 +15,20 @@ public class Controller
         var userId = request.userId;
         var game = GamePool.GetGame(userId);
         if (game is not null) LogFleets(game);
-        else return StartPlaying(userId);
-        if (game!.FirstUserId.HasValue && !game.SecondUserId.HasValue) return WaitingForStartResult();
-        if (game.FirstUserId.HasValue && game.SecondUserId.HasValue &&
+        WhatsUpResponseModel? result;
+        if (game is null) (result, game) = (StartPlaying(userId), GamePool.GetGame(userId)!);
+        else if (game!.FirstUserId.HasValue && !game.SecondUserId.HasValue)
+            result = WaitingForStartResult();
+        else if (game.FirstUserId.HasValue && game.SecondUserId.HasValue &&
             (game.FirstFleet is null || game.SecondFleet is null))
-            return WhatsUpWhileCreatingFleets(game);
-        if (game.FirstFleet is not null && game.SecondFleet is not null)
-            return WhatsUpInBattle(request, game);
+            result = WhatsUpWhileCreatingFleets(game);
+        else if (game.FirstFleet is not null && game.SecondFleet is not null)
+            result = WhatsUpInBattle(request, game);
         //todo tdd this exception
-        throw new Exception("Unknown situation.");
-    }
-
-    private static void LogFleets(Game? game)
-    {
-        var firstFleetStr = string.Join<Ship>(",", game!.FirstFleet ?? Array.Empty<Ship>());
-        var secondFleetStr = string.Join<Ship>(",", game.SecondFleet ?? Array.Empty<Ship>());
-        Log.Info($"Whatsup got game. First fleet = [{firstFleetStr}], " +
-            $"second fleet = [{secondFleetStr}]. State = [{game.State}].");
+        else throw new Exception("Unknown situation.");
+        result.userName = 
+            request.userId == game!.FirstUserId ? game.FirstUserName : game.SecondUserName;
+        return result;
     }
 
     public bool CreateFleet(FleetCreationRequestModel request)
@@ -172,4 +169,12 @@ public class Controller
                     y = deck.Key.y
                 }).ToArray()
             }).ToArray();
+
+    private static void LogFleets(Game? game)
+    {
+        var firstFleetStr = string.Join<Ship>(",", game!.FirstFleet ?? Array.Empty<Ship>());
+        var secondFleetStr = string.Join<Ship>(",", game.SecondFleet ?? Array.Empty<Ship>());
+        Log.Info($"Whatsup got game. First fleet = [{firstFleetStr}], " +
+            $"second fleet = [{secondFleetStr}]. State = [{game.State}].");
+    }
 }

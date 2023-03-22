@@ -28,6 +28,7 @@ public class WhatsUpResponseModel
         this.secondsLeft = secondsLeft;
     }
 
+    public string? userName { get; set; }
     public int gameId { get; set; }
     public GameStateModel gameState { get; set; }
     //todo tdd filling

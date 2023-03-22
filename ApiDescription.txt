@@ -37,7 +37,8 @@ Returns object:
 		y - integer.
 	},
 	gameId - integer,
-	secondsLeft - integer.
+	secondsLeft - integer,
+	userName (optional) - string.
 }
 
 "/createFleet"
