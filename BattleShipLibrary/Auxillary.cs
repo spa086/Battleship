@@ -35,10 +35,9 @@ public enum AttackResult
     Win
 }
 
-//todo use DI instead
-public static class GamePool
+public class GamePool
 {
-    public static Game? GetGame(int userId)
+    public Game? GetGame(int userId)
     {
         var gamesByUserId = Games.Values.Where(x => 
             x.FirstUserId == userId || x.SecondUserId == userId);
@@ -48,8 +47,8 @@ public static class GamePool
         return gamesByUserId.SingleOrDefault();
     }
 
-    //for testing
-    public static void ClearGames()
+    //todo this was for testing - now we need to make it right
+    public void ClearGames()
     {
         Games = new Dictionary<int, Game>();
     }
@@ -58,10 +57,10 @@ public static class GamePool
     //todo make another method for non-testing purposes
     //for testing
 #pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-    public static void SetGame(Game? game) => Games[game.Id] = game;
+    public void SetGame(Game? game) => Games[game.Id] = game;
 #pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 
-    public static bool StartPlaying(int userId)
+    public bool StartPlaying(int userId)
     {
         var game = Games.Values.FirstOrDefault(x => !x.SecondUserId.HasValue);
         //todo tdd ensure id uniqueness
@@ -78,7 +77,7 @@ public static class GamePool
         }
     }
 
-    public static Dictionary<int, Game> Games { get; private set; } = new Dictionary<int, Game>();
+    public Dictionary<int, Game> Games { get; private set; } = new Dictionary<int, Game>();
 }
 
 public readonly struct Cell

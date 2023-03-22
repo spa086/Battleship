@@ -4,19 +4,26 @@ namespace BattleshipApi;
 
 public class Controller
 {
+    private readonly GamePool gamePool;
+
+    public Controller(GamePool gamePool)
+    {
+        this.gamePool = gamePool;
+    }
+
     public void AbortGame(int userId)
     {
-        var game = GamePool.GetGame(userId);
-        if (game is not null) GamePool.Games.Remove(game.Id);
+        var game = gamePool.GetGame(userId);
+        if (game is not null) gamePool.Games.Remove(game.Id);
     }
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
         var userId = request.userId;
-        var game = GamePool.GetGame(userId);
+        var game = gamePool.GetGame(userId);
         if (game is not null) LogFleets(game);
         WhatsUpResponseModel? result;
-        if (game is null) (result, game) = (StartPlaying(userId), GamePool.GetGame(userId)!);
+        if (game is null) (result, game) = (StartPlaying(userId), gamePool.GetGame(userId)!);
         else if (game.SecondUserId is null) result = WaitingForStartResult();
         else if (game.SecondUserId.HasValue &&
             (game.FirstFleet is null || game.SecondFleet is null))
@@ -40,7 +47,7 @@ public class Controller
         if (firstGroupWithDuplicates is not null)
             throw new Exception($"Two decks are at the same place: {firstGroupWithDuplicates.Key}.");
         //todo tdd what if did not find a game
-        var game = GamePool.GetGame(request.userId);
+        var game = gamePool.GetGame(request.userId);
         if (request.userId == game!.FirstUserId) game.FirstUserName = request.userName;
         else if (request.userId == game.SecondUserId) game.SecondUserName = request.userName;
         game!.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());
@@ -51,7 +58,7 @@ public class Controller
     {
         //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
-        var game = GamePool.GetGame(request.userId)!;
+        var game = gamePool.GetGame(request.userId)!;
         AssertYourTurn(request, game);
         var attackResult = game!.Attack(request.userId, ToCell(request.location));
         return new AttackResponse
@@ -120,12 +127,12 @@ public class Controller
 
     private static WhatsUpResponseModel StartPlaying(int userId)
     {
-        var secondPlayerJoined = GamePool.StartPlaying(userId);
+        var secondPlayerJoined = gamePool.StartPlaying(userId);
         return new()
         {
             gameState = secondPlayerJoined ? GameStateModel.CreatingFleet
                 : GameStateModel.WaitingForStart,
-            gameId = GamePool.GetGame(userId)!.Id
+            gameId = gamePool.GetGame(userId)!.Id
         };
     }
 

@@ -9,6 +9,7 @@ public static class MainApi
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.WebHost.UseUrls("http://0.0.0.0:5000");
+        builder.Services.AddSingleton<GamePool>(new GamePool());
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
         MapPostFunction<WhatsupRequestModel, WhatsUpResponseModel>(app, "whatsUp",
@@ -24,20 +25,22 @@ public static class MainApi
     private static void MapPostAction<TRequestModel>(WebApplication app,
         string urlWithoutSlash, Action<TRequestModel, Controller> action)
     {
-        app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context)
+        app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context, Controller controller, 
+            WebResult webResult)
         {
-            await ActionHandler(urlWithoutSlash, action, context);
+            await ActionHandler(urlWithoutSlash, action, context, controller, webResult);
         });
     }
 
     private static async Task ActionHandler<TRequestModel>(string urlWithoutSlash,
-        Action<TRequestModel, Controller> action, HttpContext context)
+        Action<TRequestModel, Controller> action, HttpContext context, Controller controller,
+        WebResult webResult)
     {
         Log.Info($"Starting to process POST request by URL [{urlWithoutSlash}]...");
         try
         {
             var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
-            action(WebResult.GetRequestModel<TRequestModel>(json), new Controller());
+            action(webResult.GetRequestModel<TRequestModel>(json), controller);
         }
         catch (Exception ex)
         {
@@ -51,16 +54,23 @@ public static class MainApi
         WebApplication app, string urlWithoutSlash,
         Func<TRequestModel, Controller, TResultModel> function) =>
         app.MapPost($"/{urlWithoutSlash}",
-            async delegate (HttpContext context)
+            async delegate (HttpContext context, Controller controller)
             {
                 var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
                 return WebResult.Prepare(urlWithoutSlash, function, json);
             });
 }
 
-public static class WebResult
+public class WebResult
 {
-    public static string Prepare<TRequestModel, TResultModel>(
+    private readonly Controller controller;
+
+    public WebResult(Controller controller)
+    {
+        this.controller = controller;
+    }
+
+    public string Prepare<TRequestModel, TResultModel>(
         string urlWithoutSlash, Func<TRequestModel, Controller, TResultModel> function,
         string requestBody)
     {
@@ -72,18 +82,18 @@ public static class WebResult
         return resultingJson;
     }
 
-    public static TRequestModel GetRequestModel<TRequestModel>(string json)
+    public TRequestModel GetRequestModel<TRequestModel>(string json)
     {
         Log.Info($"Input JSON: [{json}].\n");
         return JsonSerializer.Deserialize<TRequestModel>(json)!;
     }
 
-    private static object GetResultWithLogging<TRequestModel, TResultModel>(
+    private object GetResultWithLogging<TRequestModel, TResultModel>(
         Func<TRequestModel, Controller, TResultModel> function, string requestBody)
     {
         try
         {
-            return function(GetRequestModel<TRequestModel>(requestBody), new Controller())!;
+            return function(GetRequestModel<TRequestModel>(requestBody), controller)!;
         }
         catch (Exception ex)
         {
