@@ -23,8 +23,7 @@ public class WhatsUpTests
     [Test]
     public void GettingSecondsLeft()
     {
-        //todo is it needed to set last bool parameter?
-        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2, true);
+        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
 
         var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(1));
 

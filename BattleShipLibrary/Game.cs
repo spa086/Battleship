@@ -80,7 +80,6 @@ public class Game
         AssertThatShotIsInFieldBorders(attackedLocation);
         //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);
-        //todo tdd this condition
         //todo check for 3 times
         var player1Turn = State == GameState.Player1Turn;
         var attackedShips = player1Turn ?

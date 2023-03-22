@@ -13,7 +13,6 @@ public class AttackTests
 {
     //todo tdd throw if any location list is uninitialized
     //todo tdd throw if ships are adjacent
-    //todo tdd game cycle
     private TestableGame game = new(1);
 
     [SetUp]
