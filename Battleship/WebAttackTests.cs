@@ -14,7 +14,7 @@ public class WebAttackTests
     {
         TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
 
-        var exception = Assert.Throws<Exception>(() => CreateController().Attack(
+        var exception = Assert.Throws<Exception>(() => controller.Attack(
             new AttackRequestModel { location = new LocationModel { x = 5, y = 6 },userId = 2 }));
 
         Assert.That(exception.Message, Is.EqualTo("Not your turn."));
@@ -27,7 +27,7 @@ public class WebAttackTests
             firstPlayer ? GameState.Player1Turn : GameState.Player2Turn,
             1, 2);
 
-        var result = CreateController().Attack(
+        var result = controller.Attack(
             new AttackRequestModel 
             { 
                 location = new LocationModel { x = 5, y = 6 }, userId = firstPlayer ? 1 : 2
@@ -45,7 +45,7 @@ public class WebAttackTests
         var game = SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
             game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2));
 
-        var result = CreateController().Attack(new AttackRequestModel 
+        var result = controller.Attack(new AttackRequestModel 
             { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Missed));
@@ -58,11 +58,10 @@ public class WebAttackTests
         var game = SetupGameInPoolWithState(GameState.Player1Turn, 1, 2,
             game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
             new[] {new Cell(2, 2), new Cell(2, 3) }, 2));
-        //todo put controller into variable?
         var request = new AttackRequestModel
             { location = new LocationModel { x = 2, y = 2 }, userId = 1 };
 
-        var result = CreateController().Attack(request);
+        var result = controller.Attack(request);
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Hit));
         var decks = game.SecondFleet.AssertSingle().Decks.Values;
@@ -83,7 +82,7 @@ public class WebAttackTests
             },
             new List<Ship> {new Ship{Decks = GenerateDeckDictionary(2,2)}}));
 
-        var result = CreateController().Attack(
+        var result = controller.Attack(
             new AttackRequestModel { location = new LocationModel { x = 0, y = 0 }, userId = 2 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Killed));
@@ -96,8 +95,7 @@ public class WebAttackTests
             game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
             new[] { new Cell(2, 2) }, 2));
 
-        //todo put controller into field?
-        var result = CreateController().Attack(new AttackRequestModel
+        var result = controller.Attack(new AttackRequestModel
         { location = new LocationModel { x = 1, y = 1 }, userId = 2 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
@@ -114,8 +112,7 @@ public class WebAttackTests
             game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
             new[] { new Cell(2, 2)}, 2));
 
-        //todo put controller into variable?
-        var result = CreateController().Attack(new AttackRequestModel
+        var result = controller.Attack(new AttackRequestModel
             { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
@@ -124,6 +121,8 @@ public class WebAttackTests
         Assert.That(game.FirstFleet!.Single().Decks.Single().Value.Destroyed, Is.False);
         Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
     }
+
+    private Controller controller = CreateController();
 
     private static TestableGame SetupGameInPoolWithState(GameState state, int firstUserId,
         int? secondUserId = null, Action<TestableGame>? modifier = null)

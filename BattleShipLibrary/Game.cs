@@ -53,9 +53,7 @@ public class Game
                 .ToDictionary(x => x.Location)
         }).ToArray();
         UpdateState(userId, newShips);
-        //todo look for a helper to do this check:
-        if(battleStarts)
-            RenewTurnTimer();
+        if(battleStarts) RenewTurnTimer();
     }
 
     private void UpdateState(int userId, Ship[] newShips)
