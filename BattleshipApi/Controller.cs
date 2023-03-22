@@ -26,7 +26,6 @@ public class Controller
         throw new Exception("Unknown situation.");
     }
 
-    //todo kill?
     private static void LogFleets(Game? game)
     {
         var firstFleetStr = string.Join<Ship>(",", game!.FirstFleet ?? Array.Empty<Ship>());
