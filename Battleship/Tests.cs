@@ -154,7 +154,7 @@ public class Tests
     public void CreateShipsSimple()
     {
         game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
-        game.SetupSimpleFleets(null, null, null, null);
+        game.SetupSimpleFleets(null, 1, null, 2);
         var decks = new[] { new Deck(1, 1), new Deck(1, 2) }.ToDictionary(x => x.Location);
 
         game.CreateAndSaveShips(1, new[] { new Ship { Decks = decks } });

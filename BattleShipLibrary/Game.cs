@@ -15,7 +15,8 @@ public class Game
     public int Id { get; private set; }
 
     //todo make User class
-    public int? FirstUserId { get; protected set; }
+    public int FirstUserId { get; protected set; }
+    //todo persist user name between games
     public string? FirstUserName { get; set; }
     public int? SecondUserId { get; protected set; }
     //todo tdd this field in whatsup tests
@@ -46,7 +47,6 @@ public class Game
     {
         var battleStarts = (userId == FirstUserId && SecondFleet is not null) ||
             (userId == SecondUserId && FirstFleet is not null);
-        FirstUserId ??= userId; //todo kill this line, seemingly meaningless
         var newShips = ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))

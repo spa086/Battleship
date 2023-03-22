@@ -17,9 +17,8 @@ public class Controller
         if (game is not null) LogFleets(game);
         WhatsUpResponseModel? result;
         if (game is null) (result, game) = (StartPlaying(userId), GamePool.GetGame(userId)!);
-        else if (game!.FirstUserId.HasValue && !game.SecondUserId.HasValue)
-            result = WaitingForStartResult();
-        else if (game.FirstUserId.HasValue && game.SecondUserId.HasValue &&
+        else if (game.SecondUserId is null) result = WaitingForStartResult();
+        else if (game.SecondUserId.HasValue &&
             (game.FirstFleet is null || game.SecondFleet is null))
             result = WhatsUpWhileCreatingFleets(game);
         else if (game.FirstFleet is not null && game.SecondFleet is not null)
@@ -52,7 +51,6 @@ public class Controller
     {
         //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
-        //todo check 3 times
         var game = GamePool.GetGame(request.userId)!;
         AssertYourTurn(request, game);
         var attackResult = game!.Attack(request.userId, ToCell(request.location));

@@ -70,7 +70,7 @@ public class TestableGame : Game
     }
         
 
-    public void SetupSimpleFleets(Cell[]? deckLocations1, int? firstUserId,
+    public void SetupSimpleFleets(Cell[]? deckLocations1, int firstUserId,
         Cell[]? deckLocations2, int? secondUserId)
     {
         firstFleet = CreateSimpleFleet(deckLocations1);
