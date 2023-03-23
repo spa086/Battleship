@@ -21,8 +21,8 @@ public class AttackTests
     public AttackTests()
     {
         var services = new ServiceCollection();
-        services.AddTransient<GamePool>();
-        services.AddTransient<TestingEnvironment>();
+        services.AddSingleton<GamePool>();
+        services.AddSingleton<TestingEnvironment>();
 
         var serviceProvider = services.BuildServiceProvider();
 

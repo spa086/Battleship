@@ -15,9 +15,9 @@ public class WebAttackTests
     public WebAttackTests()
     {
         var services = new ServiceCollection();
-        services.AddTransient<GamePool>();
-        services.AddTransient<TestingEnvironment>();
-        services.AddTransient<Controller>();
+        services.AddSingleton<GamePool>();
+        services.AddSingleton<TestingEnvironment>();
+        services.AddSingleton<Controller>();
 
         var serviceProvider = services.BuildServiceProvider();
 

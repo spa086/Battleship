@@ -15,10 +15,10 @@ public class WebTests
     public WebTests()
     {
         var services = new ServiceCollection();
-        services.AddTransient<GamePool>();
-        services.AddTransient<TestingEnvironment>();
-        services.AddTransient<Controller>();
-        services.AddTransient<WebResult>();
+        services.AddSingleton<GamePool>();
+        services.AddSingleton<TestingEnvironment>();
+        services.AddSingleton<Controller>();
+        services.AddSingleton<WebResult>();
 
         var serviceProvider = services.BuildServiceProvider();
 
