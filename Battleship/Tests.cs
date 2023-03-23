@@ -28,8 +28,8 @@ public class Tests
 
         var serviceProvider = services.BuildServiceProvider();
 
-        gamePool = serviceProvider.GetService<GamePool>();
-        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
+        gamePool = serviceProvider.GetService<GamePool>()!;
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
     } 
 
     [SetUp]

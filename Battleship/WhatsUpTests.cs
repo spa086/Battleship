@@ -20,9 +20,9 @@ public class WhatsUpTests
 
         var serviceProvider = services.BuildServiceProvider();
 
-        gamePool = serviceProvider.GetService<GamePool>();
-        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
-        controller = serviceProvider.GetService<Controller>();
+        gamePool = serviceProvider.GetService<GamePool>()!;
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
+        controller = serviceProvider.GetService<Controller>()!;
     }
 
     [SetUp]

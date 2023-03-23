@@ -10,7 +10,6 @@ public class WebAttackTests
     private readonly Controller controller;
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
-    private readonly WebResult webResult;
 
     public WebAttackTests()
     {
@@ -21,9 +20,9 @@ public class WebAttackTests
 
         var serviceProvider = services.BuildServiceProvider();
 
-        gamePool = serviceProvider.GetService<GamePool>();
-        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
-        controller = serviceProvider.GetService<Controller>();
+        gamePool = serviceProvider.GetService<GamePool>()!;
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
+        controller = serviceProvider.GetService<Controller>()!;
     }
 
     [SetUp]
@@ -119,9 +118,8 @@ public class WebAttackTests
         { location = new LocationModel { x = 1, y = 1 }, userId = 2 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
-        //todo check 3 times
-        Assert.That(game.FirstFleet!.Single().Decks.Single().Value.Destroyed, Is.True);
-        Assert.That(game.SecondFleet!.Single().Decks.Single().Value.Destroyed, Is.False);
+        AssertSimpleDeckDestroyed(game.FirstFleet!, true);
+        AssertSimpleDeckDestroyed(game.SecondFleet!, false);
         Assert.That(game.State, Is.EqualTo(GameState.Player2Won));
     }
 
@@ -136,9 +134,8 @@ public class WebAttackTests
             { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
-        //todo check 3 times
-        Assert.That(game.SecondFleet!.Single().Decks.Single().Value.Destroyed, Is.True);
-        Assert.That(game.FirstFleet!.Single().Decks.Single().Value.Destroyed, Is.False);
+        AssertSimpleDeckDestroyed(game.FirstFleet, false);
+        AssertSimpleDeckDestroyed(game.SecondFleet, true);
         Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
     }
 
@@ -158,4 +155,8 @@ public class WebAttackTests
         var result = new Dictionary<Cell, Deck> { { new Cell(x, y), new Deck(x, y, false) } };
         return result;
     }
+
+    private static void AssertSimpleDeckDestroyed(Ship[] ships, bool expectingDestroyed) => 
+        Assert.That(ships.Single().Decks.Single().Value.Destroyed,
+            Is.EqualTo(expectingDestroyed));
 }

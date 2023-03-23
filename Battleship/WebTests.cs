@@ -22,10 +22,10 @@ public class WebTests
 
         var serviceProvider = services.BuildServiceProvider();
 
-        gamePool = serviceProvider.GetService<GamePool>();
-        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
-        controller = serviceProvider.GetService<Controller>();
-        webResult = serviceProvider.GetService<WebResult>();
+        gamePool = serviceProvider.GetService<GamePool>()!;
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
+        controller = serviceProvider.GetService<Controller>()!;
+        webResult = serviceProvider.GetService<WebResult>()!;
     }
 
     [SetUp]
