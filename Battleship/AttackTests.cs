@@ -22,7 +22,7 @@ public class AttackTests
     {
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
-        services.AddSingleton<TestingEnvironment>();
+        services.AddTransient<TestingEnvironment>();
 
         var serviceProvider = services.BuildServiceProvider();
 

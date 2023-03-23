@@ -9,7 +9,9 @@ public static class MainApi
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.WebHost.UseUrls("http://0.0.0.0:5000");
-        builder.Services.AddSingleton(new GamePool());
+        builder.Services.AddSingleton<GamePool>();
+        builder.Services.AddTransient<Controller>();
+        builder.Services.AddTransient<WebResult>();
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
         MapPostFunction<WhatsupRequestModel, WhatsUpResponseModel>(app, "whatsUp",

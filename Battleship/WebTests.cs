@@ -16,9 +16,9 @@ public class WebTests
     {
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
-        services.AddSingleton<TestingEnvironment>();
-        services.AddSingleton<Controller>();
-        services.AddSingleton<WebResult>();
+        services.AddTransient<TestingEnvironment>();
+        services.AddTransient<Controller>();
+        services.AddTransient<WebResult>();
 
         var serviceProvider = services.BuildServiceProvider();
 
