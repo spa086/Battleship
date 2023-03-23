@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using BattleshipLibrary;
 using System.Numerics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BattleshipTests;
 
@@ -16,11 +17,25 @@ public class Tests
     //todo tdd throw if ships are adjacent
     //todo tdd game cycle
     private TestableGame game = new(0);
+    private readonly GamePool gamePool;
+    private readonly TestingEnvironment testingEnvironment;
+
+    public Tests()
+    {
+        var services = new ServiceCollection();
+        services.AddTransient<GamePool>();
+        services.AddTransient<TestingEnvironment>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        gamePool = serviceProvider.GetService<GamePool>();
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
+    } 
 
     [SetUp]
     public void SetUp()
     {
-        GamePool.ClearGames();
+        gamePool.ClearGames();
         game.StandardSetup();
     }
 
@@ -28,10 +43,10 @@ public class Tests
     [TestCase(2)]
     public void GettingGameWhenDoubled(int userIdToSearchBy)
     {
-        var game1 = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
-        var game2 = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        var game1 = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        var game2 = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
 
-        var exception = Assert.Throws<Exception>(() => GamePool.GetGame(userIdToSearchBy));
+        var exception = Assert.Throws<Exception>(() => gamePool.GetGame(userIdToSearchBy));
         Assert.That(exception.Message, Is.EqualTo($"User id = [{userIdToSearchBy}] participates " +
             $"in several games. Game id's: [{game1.Id}, {game2.Id}]."));
     }
@@ -40,16 +55,16 @@ public class Tests
     [TestCase(2)]
     public void GettingGameSimple(int userIdToSearchBy)
     {
-        game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
 
-        var result = GamePool.GetGame(userIdToSearchBy);
+        var result = gamePool.GetGame(userIdToSearchBy);
         Assert.That(result, Is.EqualTo(game));
     }
 
     [Test]
     public void StoppingTimerWhenLost()
     {
-        game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
         game.SetupNewTurn(100);
 
@@ -62,7 +77,7 @@ public class Tests
     [Test]
     public void LosingWhenTimeIsOut()
     {
-        game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
         game.SetupTurnTime = 1;
 
         game.Attack(1, new Cell(1, 1));
@@ -76,7 +91,7 @@ public class Tests
     [Test]
     public void BatleTimer()
     {
-        game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
@@ -88,7 +103,7 @@ public class Tests
     public void FirstPlayerCreatesShipAfterSecondPlayer()
     {
         var game = 
-            TestingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 1, 2, false);
+            testingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 1, 2, false);
         game.SetupSimpleFleets(null, 1, new[] { new Cell(2, 2) }, 2);
 
         game.CreateAndSaveShips(1, CreateSimpleShip(1,1));
@@ -100,7 +115,7 @@ public class Tests
     public void SecondPlayerCreatesShipsWhenFirstHasNoShips()
     {
         var game = 
-            TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2, false);
+            testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2, false);
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
@@ -132,20 +147,20 @@ public class Tests
     [Test]
     public void SecondPlayerJoins()
     {
-        GamePool.SetGame(new Game(1));
+        gamePool.SetGame(new Game(1));
 
-        Assert.That(GamePool.StartPlaying(1), Is.True);
+        Assert.That(gamePool.StartPlaying(1), Is.True);
 
-        Assert.That(GamePool.Games.Values.Single().State, 
+        Assert.That(gamePool.Games.Values.Single().State, 
             Is.EqualTo(GameState.BothPlayersCreateFleets));
     }
 
     [Test]
     public void StartingAGame()
     {
-        Assert.That(GamePool.StartPlaying(1), Is.False);
+        Assert.That(gamePool.StartPlaying(1), Is.False);
 
-        var game = GamePool.Games.Values.AssertSingle();
+        var game = gamePool.Games.Values.AssertSingle();
         Assert.That(game, Is.Not.Null);
         Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2));
     }
@@ -153,7 +168,7 @@ public class Tests
     [Test]
     public void CreateShipsSimple()
     {
-        game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
         game.SetupSimpleFleets(null, 1, null, 2);
         var decks = new[] { new Deck(1, 1), new Deck(1, 2) }.ToDictionary(x => x.Location);
 

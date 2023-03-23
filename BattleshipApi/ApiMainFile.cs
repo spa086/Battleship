@@ -9,7 +9,7 @@ public static class MainApi
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.WebHost.UseUrls("http://0.0.0.0:5000");
-        builder.Services.AddSingleton<GamePool>(new GamePool());
+        builder.Services.AddSingleton(new GamePool());
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
         MapPostFunction<WhatsupRequestModel, WhatsUpResponseModel>(app, "whatsUp",
@@ -54,10 +54,10 @@ public static class MainApi
         WebApplication app, string urlWithoutSlash,
         Func<TRequestModel, Controller, TResultModel> function) =>
         app.MapPost($"/{urlWithoutSlash}",
-            async delegate (HttpContext context, Controller controller)
+            async delegate (HttpContext context, Controller controller, WebResult webResult)
             {
                 var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
-                return WebResult.Prepare(urlWithoutSlash, function, json);
+                return webResult.Prepare(urlWithoutSlash, function, json);
             });
 }
 

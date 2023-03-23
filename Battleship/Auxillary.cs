@@ -1,15 +1,23 @@
 ﻿using BattleshipLibrary;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace BattleshipTests;
 
-public static class TestingEnvironment
+public class TestingEnvironment
 {
-    public static TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForPlayer2,
+    private readonly GamePool gamePool;
+
+    public TestingEnvironment(GamePool gamePool)
+    {
+        this.gamePool = gamePool;
+    }
+
+    public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForPlayer2,
         int? firstUserId = null, int? secondUserId = null, bool firstPlayerHasFleet = true)
     {
         var game = new TestableGame(firstUserId ?? 1).SetState(state);
-        GamePool.SetGame(game);
+        gamePool.SetGame(game);
         if (game.CreatingFleets || game.BattleOngoing || game.ItsOver)
         {
             game.SetSecondUserId(secondUserId);

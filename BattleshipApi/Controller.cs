@@ -125,7 +125,7 @@ public class Controller
     private static WhatsUpResponseModel WaitingForStartResult() =>
         new() { gameState = GameStateModel.WaitingForStart };
 
-    private static WhatsUpResponseModel StartPlaying(int userId)
+    private WhatsUpResponseModel StartPlaying(int userId)
     {
         var secondPlayerJoined = gamePool.StartPlaying(userId);
         return new()

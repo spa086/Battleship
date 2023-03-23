@@ -1,18 +1,38 @@
 ﻿using BattleshipApi;
 using BattleshipLibrary;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace BattleshipTests;
 
 public class WebAttackTests
 {
+    private readonly Controller controller;
+    private readonly GamePool gamePool;
+    private readonly TestingEnvironment testingEnvironment;
+    private readonly WebResult webResult;
+
+    public WebAttackTests()
+    {
+        var services = new ServiceCollection();
+        services.AddTransient<GamePool>();
+        services.AddTransient<TestingEnvironment>();
+        services.AddTransient<Controller>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        gamePool = serviceProvider.GetService<GamePool>();
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
+        controller = serviceProvider.GetService<Controller>();
+    }
+
     [SetUp]
-    public void SetUp() => GamePool.ClearGames();
+    public void SetUp() => gamePool.ClearGames();
 
     [Test]
     public void AttackingInOpponentsTurn()
     {
-        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
 
         var exception = Assert.Throws<Exception>(() => controller.Attack(
             new AttackRequestModel { location = new LocationModel { x = 5, y = 6 },userId = 2 }));
@@ -23,7 +43,7 @@ public class WebAttackTests
     [Test]
     public void ReturningExcludedLocationsFor([Values] bool firstPlayer)
     {
-        TestingEnvironment.CreateNewTestableGame(
+        testingEnvironment.CreateNewTestableGame(
             firstPlayer ? GameState.Player1Turn : GameState.Player2Turn,
             1, 2);
 
@@ -122,20 +142,16 @@ public class WebAttackTests
         Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
     }
 
-    private Controller controller = CreateController();
-
-    private static TestableGame SetupGameInPoolWithState(GameState state, int firstUserId,
+    private TestableGame SetupGameInPoolWithState(GameState state, int firstUserId,
         int? secondUserId = null, Action<TestableGame>? modifier = null)
     {
         var game = new TestableGame(firstUserId);
         if (secondUserId != null) game.SetSecondUserId(secondUserId);
         game.SetState(state);
         modifier?.Invoke(game);
-        GamePool.SetGame(game);
+        gamePool.SetGame(game);
         return game;
     }
-
-    private static Controller CreateController() => new();
 
     private static Dictionary<Cell, Deck> GenerateDeckDictionary(int x, int y)
     {

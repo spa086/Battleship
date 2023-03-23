@@ -1,21 +1,40 @@
 ﻿using BattleshipApi;
 using BattleshipLibrary;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace BattleshipTests;
 
 public class WhatsUpTests
 {
+    private readonly Controller controller;
+    private readonly GamePool gamePool;
+    private readonly TestingEnvironment testingEnvironment;
+
+    public WhatsUpTests()
+    {
+        var services = new ServiceCollection();
+        services.AddTransient<GamePool>();
+        services.AddTransient<TestingEnvironment>();
+        services.AddTransient<Controller>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        gamePool = serviceProvider.GetService<GamePool>();
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
+        controller = serviceProvider.GetService<Controller>();
+    }
+
     [SetUp]
-    public void SetUp() => GamePool.ClearGames();
+    public void SetUp() => gamePool.ClearGames();
 
     [Test]
     public void UserNameIsReturned()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2, true);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2, true);
         game.SetupUserName(1, "Admiral");
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(1));
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
 
         Assert.That(result.userName, Is.EqualTo("Admiral"));
     }
@@ -23,9 +42,9 @@ public class WhatsUpTests
     [Test]
     public void GettingSecondsLeft()
     {
-        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(1));
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
 
         Assert.That(result.secondsLeft, Is.EqualTo(30));
     }
@@ -33,9 +52,8 @@ public class WhatsUpTests
     [Test]
     public void SecondPlayerCreatesFleetFirst()
     {
-        TestingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 
+        testingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 
             firstPlayerHasFleet: false);
-        var controller = CreateController();
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(2));
   
@@ -46,8 +64,7 @@ public class WhatsUpTests
     [TestCase(GameState.Player2Won, GameStateModel.OpponentWon)]
     public void WhatsupWhenWon(GameState gameState, GameStateModel expectedModel)
     {
-        TestingEnvironment.CreateNewTestableGame(gameState);
-        var controller = CreateController();
+        testingEnvironment.CreateNewTestableGame(gameState);
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
 
@@ -60,9 +77,9 @@ public class WhatsUpTests
     [TestCase(GameState.BothPlayersCreateFleets, false)]
     public void WhatsUpWhileCreatingShips(GameState state, bool firstPlayer)
     {
-        var game = TestingEnvironment.CreateNewTestableGame(state, 1, 2);
+        var game = testingEnvironment.CreateNewTestableGame(state, 1, 2);
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
         Assert.That(result.gameId, Is.EqualTo(game.Id));
@@ -71,10 +88,10 @@ public class WhatsUpTests
     [Test]
     public void OpponentExcludedLocations()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
         game.SetupExcludedLocations(1, new Cell(5, 6));
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(2));
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(2));
 
         var location = result.opponentExcludedLocations.AssertSingle();
         Assert.That(location.x, Is.EqualTo(5));
@@ -84,10 +101,10 @@ public class WhatsUpTests
     [Test]
     public void MyExcludedLocations()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
         game.SetupExcludedLocations(1, new Cell(5, 6));
 
-        var result = CreateController().WhatsUp(CreateWhatsUpRequestModel(1));
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
 
         var location = result.myExcludedLocations.AssertSingle();
         Assert.That(location.x, Is.EqualTo(5));
@@ -97,7 +114,7 @@ public class WhatsUpTests
     [Test]
     public void FirstPlayerWhatsupWhileWaitingForSecondPlayer()
     {
-        TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2, 1);
+        testingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2, 1);
 
         var result = CallWhatsupViaController(1);
 
@@ -107,7 +124,7 @@ public class WhatsUpTests
     [Test]
     public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
 
         var result = CallWhatsupViaController(2);
 
@@ -120,7 +137,7 @@ public class WhatsUpTests
     [Test]
     public void Player1WhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        TestingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
+        testingEnvironment.CreateNewTestableGame(GameState.Player1Turn);
 
         Assert.That(CallWhatsupViaController(1).gameState, 
             Is.EqualTo(GameStateModel.YourTurn));
@@ -129,7 +146,7 @@ public class WhatsUpTests
     [Test]
     public void SecondPlayerJoins()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2, 
+        var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForPlayer2, 
             1, 2);
 
         var result = CallWhatsupViaController(2);
@@ -142,14 +159,12 @@ public class WhatsUpTests
     [Test]
     public void FirstPlayerStarts()
     {
-        var result = CreateController().WhatsUp(new WhatsupRequestModel { userId =1 });
+        var result = controller.WhatsUp(new WhatsupRequestModel { userId =1 });
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
-        var gameId = GamePool.Games.Keys.AssertSingle();
+        var gameId = gamePool.Games.Keys.AssertSingle();
         Assert.That(result.gameId, Is.EqualTo(gameId));
     }
-
-    private static Controller CreateController() => new();
 
     private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) => 
         new() { userId = userIdParam };
@@ -164,6 +179,6 @@ public class WhatsUpTests
         Assert.That(deck1.y, Is.EqualTo(y));
     }
 
-    private static WhatsUpResponseModel CallWhatsupViaController(int userId) => 
-        CreateController().WhatsUp(CreateWhatsUpRequestModel(userId));
+    private WhatsUpResponseModel CallWhatsupViaController(int userId) => 
+        controller.WhatsUp(CreateWhatsUpRequestModel(userId));
 }

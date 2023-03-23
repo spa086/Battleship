@@ -37,6 +37,11 @@ public enum AttackResult
 
 public class GamePool
 {
+    public GamePool()
+    {
+
+    }
+
     public Game? GetGame(int userId)
     {
         var gamesByUserId = Games.Values.Where(x => 

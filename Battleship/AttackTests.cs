@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using BattleshipLibrary;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BattleshipTests;
 
@@ -14,11 +15,25 @@ public class AttackTests
     //todo tdd throw if any location list is uninitialized
     //todo tdd throw if ships are adjacent
     private TestableGame game = new(1);
+    private readonly GamePool gamePool;
+    private readonly TestingEnvironment testingEnvironment;
+
+    public AttackTests()
+    {
+        var services = new ServiceCollection();
+        services.AddTransient<GamePool>();
+        services.AddTransient<TestingEnvironment>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        gamePool = serviceProvider.GetService<GamePool>();
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
+    }
 
     [SetUp]
     public void SetUp()
     {
-        GamePool.ClearGames();
+        gamePool.ClearGames();
         game.StandardSetup();
     }
 
@@ -34,7 +49,7 @@ public class AttackTests
     [Test]
     public void TimerRenewal()
     {
-        game = TestingEnvironment.CreateNewTestableGame(GameState.Player2Turn, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.Player2Turn, 1, 2);
         game.SetupNewTurn(5);
 
         game.Attack(2, new Cell(0, 0));
@@ -45,7 +60,7 @@ public class AttackTests
     [Test]
     public void DamagingAMultideckShip()
     {
-        game = TestingEnvironment.CreateNewTestableGame(GameState.Player2Turn);
+        game = testingEnvironment.CreateNewTestableGame(GameState.Player2Turn);
         game.SetupSimpleFleets(
             new[] { new Cell(0, 1), new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 2);
 

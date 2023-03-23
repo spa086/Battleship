@@ -1,22 +1,44 @@
 ﻿using BattleshipApi;
 using BattleshipLibrary;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace BattleshipTests;
 
 public class WebTests
 {
+    private readonly Controller controller;
+    private readonly GamePool gamePool;
+    private readonly TestingEnvironment testingEnvironment;
+    private readonly WebResult webResult;
+
+    public WebTests()
+    {
+        var services = new ServiceCollection();
+        services.AddTransient<GamePool>();
+        services.AddTransient<TestingEnvironment>();
+        services.AddTransient<Controller>();
+        services.AddTransient<WebResult>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        gamePool = serviceProvider.GetService<GamePool>();
+        testingEnvironment = serviceProvider.GetService<TestingEnvironment>();
+        controller = serviceProvider.GetService<Controller>();
+        webResult = serviceProvider.GetService<WebResult>();
+    }
+
     [SetUp]
-    public void SetUp() => GamePool.ClearGames();
+    public void SetUp() => gamePool.ClearGames();
 
     [Test]
     public void SettingSecondUserName()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
         var request = SingleShipFleetCreationRequest(2, new[] { new LocationModel { x = 1, y = 1 } });
         request.userName = "Rachel";
 
-        CreateController().CreateFleet(request);
+        controller.CreateFleet(request);
 
         Assert.That(game.SecondUserName, Is.EqualTo("Rachel"));
     }
@@ -24,11 +46,11 @@ public class WebTests
     [Test]
     public void SettingFirstUserName()
     {
-        var game = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
         var request = SingleShipFleetCreationRequest(1, new[] {new LocationModel { x = 1, y = 1} });
         request.userName = "Boris";
 
-        CreateController().CreateFleet(request);
+        controller.CreateFleet(request);
 
         Assert.That(game.FirstUserName, Is.EqualTo("Boris"));
     }
@@ -36,7 +58,7 @@ public class WebTests
     [Test]
     public void SimpleGettingRequestModel()
     {
-        var result = WebResult.GetRequestModel<int>("5");
+        var result = webResult.GetRequestModel<int>("5");
 
         Assert.That(result, Is.EqualTo(5));
     }
@@ -44,7 +66,7 @@ public class WebTests
     [Test]
     public void PrepareErrorResult()
     {
-        var result = WebResult.Prepare<int, int>("", 
+        var result = webResult.Prepare<int, int>("", 
             (m, c) => throw new Exception("Some error."), "5");
 
         Assert.That(result, Is.EqualTo("\"Some error.\""));
@@ -53,7 +75,7 @@ public class WebTests
     [Test]
     public void PrepareResult()
     {
-        var result = WebResult.Prepare<int, int>("", (m, c) => 2, "5");
+        var result = webResult.Prepare<int, int>("", (m, c) => 2, "5");
 
         Assert.That(result, Is.EqualTo("2"));
     }
@@ -61,21 +83,21 @@ public class WebTests
     [Test]
     public void GameAbortion([Values] GameState state)
     {
-        TestingEnvironment.CreateNewTestableGame(state, 1, 2);
-        var gameId = GamePool.Games.Single().Key;
+        testingEnvironment.CreateNewTestableGame(state, 1, 2);
+        var gameId = gamePool.Games.Single().Key;
 
-        CreateController().AbortGame(1);
+        controller.AbortGame(1);
 
-        Assert.That(GamePool.Games.Keys, Does.Not.Contain(gameId));
+        Assert.That(gamePool.Games.Keys, Does.Not.Contain(gameId));
     }
 
     [Test]
     public void TwoDecksOfSameShipAreInTheSameLocation()
     {
-        TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1);
+        testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1);
 
         var exception = Assert.Throws<Exception>(() =>
-            CreateController().CreateFleet(SingleShipFleetCreationRequest(1,
+            controller.CreateFleet(SingleShipFleetCreationRequest(1,
             new[] { new LocationModel { x = 1, y = 1 }, new LocationModel { x = 1, y = 1 } })))!;
 
         Assert.That(exception.Message, Is.EqualTo("Two decks are at the same place: [1,1]."));
@@ -84,8 +106,7 @@ public class WebTests
     [Test]
     public void CannotCreateEmptyDecks()
     {
-        TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1);
-        var controller = CreateController();
+        testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1);
         var request = SingleShipFleetCreationRequest(1, null);
 
         var exception = Assert.Throws<Exception>(() => controller.CreateFleet(request));
@@ -96,10 +117,10 @@ public class WebTests
     [Test]
     public void SecondPlayerCreatesFleet()
     {
-        var testableGame = TestingEnvironment.CreateNewTestableGame(
+        var testableGame = testingEnvironment.CreateNewTestableGame(
             GameState.OnePlayerCreatesFleet, 1, 2);
 
-        var result = CreateController().CreateFleet(new FleetCreationRequestModel 
+        var result = controller.CreateFleet(new FleetCreationRequestModel 
             { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
 
         Assert.That(result, Is.False);
@@ -116,9 +137,9 @@ public class WebTests
     [Test]
     public void FirstPlayerCreatesFleet()
     {
-        var testableGame = TestingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
+        var testableGame = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
 
-        var result = CreateController().CreateFleet(new FleetCreationRequestModel
+        var result = controller.CreateFleet(new FleetCreationRequestModel
         { ships = new[] { NewSimpleShipForFleetCreationRequest(1, 1) }, userId = 1 });
 
         Assert.That(result, Is.True);
@@ -131,8 +152,6 @@ public class WebTests
         Assert.That(deck.Value.Destroyed, Is.False);
         Assert.That(testableGame.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
     }
-
-    private static Controller CreateController() => new();
 
     private static ShipForCreationModel NewSimpleShipForFleetCreationRequest(int x, int y) =>
         new() { decks = new[] { new LocationModel { x = x, y = y } } };
