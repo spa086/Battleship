@@ -33,7 +33,7 @@ public class Controller
         //todo tdd this exception
         else throw new Exception("Unknown situation.");
         result.userName = 
-            request.userId == game!.FirstUserId ? game.FirstUserName : game.SecondUserName;
+            request.userId == game!.FirstUserId ? game.SecondUserName : game.FirstUserName; 
         return result;
     }
 

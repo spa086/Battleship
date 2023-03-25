@@ -32,7 +32,7 @@ public class WhatsUpTests
     public void UserNameIsReturned()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2, true);
-        game.SetupUserName(1, "Admiral");
+        game.SetupUserName(2, "Admiral");
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
 
