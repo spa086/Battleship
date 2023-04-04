@@ -25,14 +25,10 @@ public static class MainApi
     }
 
     private static void MapPostAction<TRequestModel>(WebApplication app,
-        string urlWithoutSlash, Action<TRequestModel, Controller> action)
-    {
-        app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context, Controller controller, 
-            WebResult webResult)
-        {
-            await ActionHandler(action, context, controller, webResult);
-        });
-    }
+        string urlWithoutSlash, Action<TRequestModel, Controller> action) => 
+        app.MapPost($"/{urlWithoutSlash}",
+            async delegate (HttpContext context, Controller controller, WebResult webResult)
+            { await ActionHandler(action, context, controller, webResult); });
 
     private static async Task ActionHandler<TRequestModel>(Action<TRequestModel, Controller> action, 
         HttpContext context, Controller controller, WebResult webResult)
@@ -44,7 +40,7 @@ public static class MainApi
         }
         catch (Exception ex)
         {
-            Log.Error(ex);
+            Log.ger.Error(ex);
             throw;
         }
     }
@@ -77,10 +73,8 @@ public class WebResult
         return resultingJson;
     }
 
-    public TRequestModel GetRequestModel<TRequestModel>(string json)
-    {
-        return JsonSerializer.Deserialize<TRequestModel>(json)!;
-    }
+    public TRequestModel GetRequestModel<TRequestModel>(string json) => 
+        JsonSerializer.Deserialize<TRequestModel>(json)!;
 
     private object GetResultWithLogging<TRequestModel, TResultModel>(
         Func<TRequestModel, Controller, TResultModel> function, string requestBody)
@@ -91,7 +85,7 @@ public class WebResult
         }
         catch (Exception ex)
         {
-            Log.Error(ex);
+            Log.ger.Error(ex);
             return ex.Message;
         }
     }

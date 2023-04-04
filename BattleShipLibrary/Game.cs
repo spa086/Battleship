@@ -28,7 +28,7 @@ public class Game
         get => state; 
         protected set
         {
-            Log.Info($"Game with id [{Id}] has changed state. Previous state: [{state}]. " +
+            Log.ger.Info($"Game with id [{Id}] has changed state. Previous state: [{state}]. " +
                 $"New State: [{value}].");
             state = value;
         }

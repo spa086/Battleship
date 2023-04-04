@@ -13,14 +13,14 @@ public class Controller
 
     public void AbortGame(int userId)
     {
-        Log.Info($"User id=[{userId}] wants to abort game.");
+        Log.ger.Info($"User id=[{userId}] wants to abort game.");
         var game = gamePool.GetGame(userId);
         if (game is not null)
         {
             game.SetTechnicalWinner(game.SecondUserId == userId);
-            Log.Info($"Game id=[{game.Id}] is removed.");
+            Log.ger.Info($"Game id=[{game.Id}] is removed.");
         }
-        else Log.Info($"Game for abortion not found by user id=[{userId}].");
+        else Log.ger.Info($"Game for abortion not found by user id=[{userId}].");
     }
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
@@ -44,7 +44,7 @@ public class Controller
 
     public bool CreateFleet(FleetCreationRequestModel request)
     {
-        Log.Info($"User [{request.userId}|{request.userName}] wants to create ships.");
+        Log.ger.Info($"User [{request.userId}|{request.userName}] wants to create ships.");
         if (request.ships.Any(x => x.decks is null))
             throw new Exception("Empty decks are not allowed.");
         var firstGroupWithDuplicates = request.ships.SelectMany(x => x.decks)
@@ -57,20 +57,20 @@ public class Controller
         if (request.userId == game!.FirstUserId) game.FirstUserName = request.userName;
         else if (request.userId == game.SecondUserId) game.SecondUserName = request.userName;
         game!.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());
-        Log.Info($"Ships were created for user [{request.userId}|{request.userName}].");
+        Log.ger.Info($"Ships were created for user [{request.userId}|{request.userName}].");
         return game.FirstUserId == request.userId;
     }
 
     public AttackResponse Attack(AttackRequestModel request)
     {
-        Log.Info($"User id=[{request.userId}] wants to attack at " +
+        Log.ger.Info($"User id=[{request.userId}] wants to attack at " +
             $"[{request.location.x},{request.location.y}].");
         //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
         var game = gamePool.GetGame(request.userId)!;
         AssertYourTurn(request, game);
         var attackResult = game!.Attack(request.userId, ToCell(request.location));
-        Log.Info($"User id=[{request.userId}] performed attack at " +
+        Log.ger.Info($"User id=[{request.userId}] performed attack at " +
             $"[{request.location.x},{request.location.y}].");
         return new AttackResponse
         {
@@ -141,7 +141,7 @@ public class Controller
         var secondPlayerJoined = gamePool.StartPlaying(userId);
         var game = gamePool.GetGame(userId)!;
         var eventDescription = secondPlayerJoined ? "joined" : "started";
-        Log.Info($"User with id [{userId}] {eventDescription} a game with id [{game.Id}].");
+        Log.ger.Info($"User with id [{userId}] {eventDescription} a game with id [{game.Id}].");
         return new()
         {
             gameState = secondPlayerJoined ? GameStateModel.CreatingFleet

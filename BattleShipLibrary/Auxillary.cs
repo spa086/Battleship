@@ -3,21 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BattleshipLibrary;
 
+//todo use DI instead
 public static class Log
 {
-    public static void Error(Exception ex)
-    {
-        Logger.Error(ex);
-        Console.WriteLine(ex);
-    }
-
-    public static void Info(string message)
-    {
-        Logger.Info(message);
-        Console.WriteLine(message);
-    }
-
-    private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+    public static readonly ILogger ger = LogManager.GetCurrentClassLogger();
 }
 
 public enum GameState
