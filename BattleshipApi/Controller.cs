@@ -17,7 +17,7 @@ public class Controller
         var game = gamePool.GetGame(userId);
         if (game is not null)
         {
-            gamePool.Games.Remove(game.Id);
+            game.SetTechnicalWinner(game.SecondUserId == userId);
             Log.Info($"Game id=[{game.Id}] is removed.");
         }
         else Log.Info($"Game for abortion not found by user id=[{userId}].");

@@ -83,11 +83,11 @@ public class WebTests
     public void GameAbortion([Values] GameState state)
     {
         testingEnvironment.CreateNewTestableGame(state, 1, 2);
-        var gameId = gamePool.Games.Single().Key;
 
         controller.AbortGame(1);
 
-        Assert.That(gamePool.Games.Keys, Does.Not.Contain(gameId));
+        var game = gamePool.Games.Values.Single();
+        Assert.That(game.State, Is.EqualTo(GameState.Player2Won));
     }
 
     [Test]
