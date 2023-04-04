@@ -70,22 +70,6 @@ public class AttackTests
         Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
     }
 
-    //todo tdd this but for 1st player turn
-    [Test]
-    public void DestroyingAMultideckShip()
-    {
-        game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) }, 1, new[] { new Cell(2, 2)}, 
-            2);
-        game.FirstFleet!.Single().Decks[new Cell(0,0)].Destroyed = true;
-        game.SetTurn(false);
-
-        game.Attack(0, new Cell(0, 1));
-
-        var destroyedShip = game.FirstFleet.AssertSingle();
-        Assert.That(destroyedShip.Decks.Values.All(x => x.Destroyed));
-        Assert.That(Game.IsDestroyed(destroyedShip));
-    }
-
     //todo similar for 2nd player
     [Test]
     public void AttackSamePlaceTwice()

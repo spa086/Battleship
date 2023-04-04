@@ -81,7 +81,7 @@ public class Game
         //todo check for 3 times
         var player1Turn = State == GameState.Player1Turn;
         var attackedShips = player1Turn ?
-            secondFleet!.Where(x => !IsDestroyed(x)) : firstFleet!.Where(x => !IsDestroyed(x));
+            secondFleet!.Where(x => !IsDestroyed(x)).ToArray() : firstFleet!.Where(x => !IsDestroyed(x)).ToArray();
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
         ProcessBattleOrWin(player1Turn, attackedShips, ref result);
@@ -125,8 +125,7 @@ public class Game
         if (attackedShip is not null)
         {
             attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
-            if (attackedShip.Decks.All(x => x.Value.Destroyed)) result = AttackResult.Killed;
-            else result = AttackResult.Hit;
+            result = AttackResult.Hit;
         }
     }
 
@@ -151,6 +150,7 @@ public class Game
     protected Ship[]? secondFleet;
     protected TimerPlus? turnTimer;
 
+    //todo to Ship extension!!! 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);
 
     private static void AssertThatShotIsInFieldBorders(Cell attackedLocation)

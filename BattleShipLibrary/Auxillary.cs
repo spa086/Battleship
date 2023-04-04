@@ -30,7 +30,6 @@ public enum GameState
 public enum AttackResult
 {
     Hit,
-    Killed,
     Missed,
     Win
 }

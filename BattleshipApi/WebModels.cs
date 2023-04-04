@@ -81,6 +81,7 @@ public class ShipStateModel
 public class AttackResponse
 {
     public AttackResultTransportModel result { get; set; }
+    //todo RETURN FLEETS
     public LocationModel[] excludedLocations1 { get; set; } = Array.Empty<LocationModel>();
     public LocationModel[] excludedLocations2 { get; set; } = Array.Empty<LocationModel>();
 }
@@ -94,7 +95,6 @@ public class AttackResponse
 public enum AttackResultTransportModel
 {
     Hit,
-    Killed,
     Missed,
     Win
 }

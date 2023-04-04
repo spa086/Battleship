@@ -91,23 +91,6 @@ public class WebAttackTests
     }
 
     [Test]
-    public void AttackKillsAShip()
-    {
-        SetupGameInPoolWithState(GameState.Player2Turn, 1, 2, game => game.SetupFleets(
-            new List<Ship> 
-            {
-                new Ship{Decks = GenerateDeckDictionary(0,0) },
-                new Ship{Decks = GenerateDeckDictionary(2,2) }
-            },
-            new List<Ship> {new Ship{Decks = GenerateDeckDictionary(2,2)}}));
-
-        var result = controller.Attack(
-            new AttackRequestModel { location = new LocationModel { x = 0, y = 0 }, userId = 2 });
-
-        Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Killed));
-    }
-
-    [Test]
     public void Playe21AttacksAndWins()
     {
         var game = SetupGameInPoolWithState(GameState.Player2Turn, 1, 2,

@@ -152,7 +152,6 @@ public class Controller
         attackResult switch
         {
             AttackResult.Win => AttackResultTransportModel.Win,
-            AttackResult.Killed => AttackResultTransportModel.Killed,
             AttackResult.Missed => AttackResultTransportModel.Missed,
             AttackResult.Hit => AttackResultTransportModel.Hit,
             _ => throw new Exception($"Unknown attack result [{attackResult}].")

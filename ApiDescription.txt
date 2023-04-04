@@ -70,26 +70,6 @@ Request object:
 Returns object:
 {
 	result - string enum { "Hit","Killed","Missed","Win" },
-	myFleet - array of objects:
-	{
-		userId - integer.
-		decks - array of objects: 
-		{
-			x - integer,
-			y - integer,
-			destroyed - boolean.
-		}
-	}
-	opponentFleet - array of objects:
-	{
-		userId - integer.
-		decks - array of objects: 
-		{
-			x - integer,
-			y - integer,
-			destroyed - boolean.
-		}
-	},
 	myExcludedLocations - array of objects:
 	{
 		x - integer,
