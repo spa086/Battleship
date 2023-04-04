@@ -1,5 +1,6 @@
 ﻿namespace BattleshipLibrary;
 
+//todo possibility of infinite timers via configuration file.
 public class TimerPlus : IDisposable
 {
     public TimerPlus(TimerCallback callback, object state, TimeSpan dueTime, TimeSpan period)
