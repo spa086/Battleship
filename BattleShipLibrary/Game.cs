@@ -3,6 +3,7 @@ using System.Timers;
 
 namespace BattleshipLibrary;
 
+//todo make it IDisposable
 public class Game
 {
     public Game(int user1Id)

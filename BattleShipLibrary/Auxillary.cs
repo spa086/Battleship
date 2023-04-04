@@ -45,7 +45,7 @@ public class GamePool
     }
 
     //todo this was for testing - now we need to make it right
-    public void ClearGames() => Games = new Dictionary<int, Game>();
+    public void ClearGames() => Games.Clear();
 
     //todo if null do remove instead of assigning
     //todo make another method for non-testing purposes
@@ -71,6 +71,8 @@ public class GamePool
         }
     }
 
+    //todo make it private, get in tests some other way,
+    //maybe some for-testing method in GamePool or TestGamePool here
     public Dictionary<int, Game> Games { get; private set; } = new Dictionary<int, Game>();
 }
 

@@ -1,4 +1,5 @@
 ﻿using BattleshipLibrary;
+using System.Collections.Generic;
 
 namespace BattleshipApi;
 
@@ -17,8 +18,16 @@ public class Controller
         var game = gamePool.GetGame(userId);
         if (game is not null)
         {
-            game.SetTechnicalWinner(game.SecondUserId == userId);
-            Log.ger.Info($"Game id=[{game.Id}] is removed.");
+            if(game.State == GameState.Player1Won || game.State == GameState.Player2Won) 
+            {
+                gamePool.Games.Remove(game.Id);
+                Log.ger.Info($"Game id=[{game.Id}] is removed.");
+            }
+            else
+            {
+                game.SetTechnicalWinner(game.SecondUserId == userId);
+                Log.ger.Info($"Game id=[{game.Id}] is over. User id=[{userId}] has surrendered.");
+            }
         }
         else Log.ger.Info($"Game for abortion not found by user id=[{userId}].");
     }

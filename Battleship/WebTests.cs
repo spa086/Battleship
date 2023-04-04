@@ -32,6 +32,17 @@ public class WebTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
+    public void AbortionWhenVictoryHasAlreadyHappened()
+    {
+        gamePool.ClearGames();
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Player1Won, 1, 2);
+
+        controller.AbortGame(1);
+
+        Assert.That(gamePool.Games, Has.Count.Zero);
+    }
+
+    [Test]
     public void SettingSecondUserName()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
@@ -80,8 +91,9 @@ public class WebTests
     }
 
     [Test]
-    public void GameAbortion([Values] GameState state)
+    public void Surrendering([Values] GameState state)
     {
+        if (state == GameState.Player1Won || state == GameState.Player2Won) return;
         testingEnvironment.CreateNewTestableGame(state, 1, 2);
 
         controller.AbortGame(1);
