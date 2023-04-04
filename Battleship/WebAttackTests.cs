@@ -117,8 +117,8 @@ public class WebAttackTests
             { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
-        AssertSimpleDeckDestroyed(game.FirstFleet, false);
-        AssertSimpleDeckDestroyed(game.SecondFleet, true);
+        AssertSimpleDeckDestroyed(game.FirstFleet!, false);
+        AssertSimpleDeckDestroyed(game.SecondFleet!, true);
         Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
     }
 
@@ -131,12 +131,6 @@ public class WebAttackTests
         modifier?.Invoke(game);
         gamePool.SetGame(game);
         return game;
-    }
-
-    private static Dictionary<Cell, Deck> GenerateDeckDictionary(int x, int y)
-    {
-        var result = new Dictionary<Cell, Deck> { { new Cell(x, y), new Deck(x, y, false) } };
-        return result;
     }
 
     private static void AssertSimpleDeckDestroyed(Ship[] ships, bool expectingDestroyed) => 

@@ -30,15 +30,13 @@ public static class MainApi
         app.MapPost($"/{urlWithoutSlash}", async delegate (HttpContext context, Controller controller, 
             WebResult webResult)
         {
-            await ActionHandler(urlWithoutSlash, action, context, controller, webResult);
+            await ActionHandler(action, context, controller, webResult);
         });
     }
 
-    private static async Task ActionHandler<TRequestModel>(string urlWithoutSlash,
-        Action<TRequestModel, Controller> action, HttpContext context, Controller controller,
-        WebResult webResult)
+    private static async Task ActionHandler<TRequestModel>(Action<TRequestModel, Controller> action, 
+        HttpContext context, Controller controller, WebResult webResult)
     {
-        Log.Info($"Starting to process POST request by URL [{urlWithoutSlash}]...");
         try
         {
             var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
@@ -49,7 +47,6 @@ public static class MainApi
             Log.Error(ex);
             throw;
         }
-        Log.Info("Successfully handled POST action request.");
     }
 
     private static void MapPostFunction<TRequestModel, TResultModel>(
@@ -59,7 +56,7 @@ public static class MainApi
             async delegate (HttpContext context, Controller controller, WebResult webResult)
             {
                 var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
-                return webResult.Prepare(urlWithoutSlash, function, json);
+                return webResult.Prepare(function, json);
             });
 }
 
@@ -73,20 +70,15 @@ public class WebResult
     }
 
     public string Prepare<TRequestModel, TResultModel>(
-        string urlWithoutSlash, Func<TRequestModel, Controller, TResultModel> function,
-        string requestBody)
+        Func<TRequestModel, Controller, TResultModel> function, string requestBody)
     {
-        Log.Info($"Starting to process POST request by URL [{urlWithoutSlash}]...");
         var result = GetResultWithLogging(function, requestBody);
         var resultingJson = JsonSerializer.Serialize(result);
-        Log.Info($"Resulting JSON is: [{resultingJson}].");
-        Log.Info("Successfully handled POST function request.");
         return resultingJson;
     }
 
     public TRequestModel GetRequestModel<TRequestModel>(string json)
     {
-        Log.Info($"Input JSON: [{json}].\n");
         return JsonSerializer.Deserialize<TRequestModel>(json)!;
     }
 

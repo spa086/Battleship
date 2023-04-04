@@ -66,8 +66,7 @@ public class WebTests
     [Test]
     public void PrepareErrorResult()
     {
-        var result = webResult.Prepare<int, int>("", 
-            (m, c) => throw new Exception("Some error."), "5");
+        var result = webResult.Prepare<int, int>((m, c) => throw new Exception("Some error."), "5");
 
         Assert.That(result, Is.EqualTo("\"Some error.\""));
     }
@@ -75,7 +74,7 @@ public class WebTests
     [Test]
     public void PrepareResult()
     {
-        var result = webResult.Prepare<int, int>("", (m, c) => 2, "5");
+        var result = webResult.Prepare<int, int>((m, c) => 2, "5");
 
         Assert.That(result, Is.EqualTo("2"));
     }

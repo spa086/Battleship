@@ -1,4 +1,5 @@
-﻿using System.Timers;
+﻿using NLog;
+using System.Timers;
 
 namespace BattleshipLibrary;
 
@@ -22,9 +23,18 @@ public class Game
     //todo tdd this field in whatsup tests
     public string? SecondUserName { get; set; }
 
-    public GameState State { get; protected set; }
-    public int? TurnSecondsLeft => 
-        turnTimer is null ? null : (int)Math.Ceiling(turnTimer.DueTime.TotalMilliseconds/1000f);
+    public GameState State
+    {
+        get => state; 
+        protected set
+        {
+            Log.Info($"Game with id [{Id}] has changed state. Previous state: [{state}]. " +
+                $"New State: [{value}].");
+            state = value;
+        }
+    }
+    public int? TurnSecondsLeft =>
+        turnTimer is null ? null : (int)Math.Ceiling(turnTimer.DueTime.TotalMilliseconds / 1000f);
 
     public List<Cell> ExcludedLocations1 => excludedLocations1;
     public List<Cell> ExcludedLocations2 => excludedLocations2;
@@ -32,7 +42,7 @@ public class Game
     public Ship[]? SecondFleet => secondFleet;
 
     public bool BattleOngoing => State == GameState.Player1Turn || State == GameState.Player2Turn;
-    public bool CreatingFleets => 
+    public bool CreatingFleets =>
         State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
     public bool ItsOver => State == GameState.Player1Won || State == GameState.Player2Won;
 
@@ -41,7 +51,7 @@ public class Game
     {
         State = GameState.BothPlayersCreateFleets;
         SecondUserId = secondUserId;
-    } 
+    }
 
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
@@ -98,10 +108,10 @@ public class Game
             TimeSpan.FromSeconds(secondsLeft), Timeout.InfiniteTimeSpan);
     }
 
-    protected GameState WhoWillWinWhenTurnTimeEnds() => 
+    protected GameState WhoWillWinWhenTurnTimeEnds() =>
         State == GameState.Player1Turn ? GameState.Player2Won : GameState.Player1Won;
 
-    private void ProcessBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips, 
+    private void ProcessBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips,
         ref AttackResult result)
     {
         if (attackedShips.All(x => IsDestroyed(x)))
@@ -131,14 +141,14 @@ public class Game
 
     private static Ship? GetAttackedShip(Cell attackedLocation, IEnumerable<Ship> attackedShips) =>
         //todo tdd this condition
-        attackedShips.SingleOrDefault(ship => 
+        attackedShips.SingleOrDefault(ship =>
             ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
 
     private void Exclude(Cell location)
     {
         //todo check for 3 times
         var currentExcluded = State == GameState.Player1Turn ? excludedLocations1 : excludedLocations2;
-        if (currentExcluded.Contains(location)) 
+        if (currentExcluded.Contains(location))
             throw new Exception($"Location {location} is already excluded.");
         currentExcluded.Add(location);
     }
@@ -149,6 +159,7 @@ public class Game
     protected Ship[]? firstFleet;
     protected Ship[]? secondFleet;
     protected TimerPlus? turnTimer;
+    private GameState state;
 
     //todo to Ship extension!!! 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);

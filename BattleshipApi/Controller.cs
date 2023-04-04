@@ -13,15 +13,20 @@ public class Controller
 
     public void AbortGame(int userId)
     {
+        Log.Info($"User id=[{userId}] wants to abort game.");
         var game = gamePool.GetGame(userId);
-        if (game is not null) gamePool.Games.Remove(game.Id);
+        if (game is not null)
+        {
+            gamePool.Games.Remove(game.Id);
+            Log.Info($"Game id=[{game.Id}] is removed.");
+        }
+        else Log.Info($"Game for abortion not found by user id=[{userId}].");
     }
 
     public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
     {
         var userId = request.userId;
         var game = gamePool.GetGame(userId);
-        if (game is not null) LogFleets(game);
         WhatsUpResponseModel? result;
         if (game is null) (result, game) = (StartPlaying(userId), gamePool.GetGame(userId)!);
         else if (game.SecondUserId is null) result = WaitingForStartResult();
@@ -39,6 +44,7 @@ public class Controller
 
     public bool CreateFleet(FleetCreationRequestModel request)
     {
+        Log.Info($"User [{request.userId}|{request.userName}] wants to create ships.");
         if (request.ships.Any(x => x.decks is null))
             throw new Exception("Empty decks are not allowed.");
         var firstGroupWithDuplicates = request.ships.SelectMany(x => x.decks)
@@ -51,16 +57,21 @@ public class Controller
         if (request.userId == game!.FirstUserId) game.FirstUserName = request.userName;
         else if (request.userId == game.SecondUserId) game.SecondUserName = request.userName;
         game!.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());
+        Log.Info($"Ships were created for user [{request.userId}|{request.userName}].");
         return game.FirstUserId == request.userId;
     }
 
     public AttackResponse Attack(AttackRequestModel request)
     {
+        Log.Info($"User id=[{request.userId}] wants to attack at " +
+            $"[{request.location.x},{request.location.y}].");
         //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
         var game = gamePool.GetGame(request.userId)!;
         AssertYourTurn(request, game);
         var attackResult = game!.Attack(request.userId, ToCell(request.location));
+        Log.Info($"User id=[{request.userId}] performed attack at " +
+            $"[{request.location.x},{request.location.y}].");
         return new AttackResponse
         {
             result = ToAttackResultModel(attackResult),
@@ -128,11 +139,14 @@ public class Controller
     private WhatsUpResponseModel StartPlaying(int userId)
     {
         var secondPlayerJoined = gamePool.StartPlaying(userId);
+        var game = gamePool.GetGame(userId)!;
+        var eventDescription = secondPlayerJoined ? "joined" : "started";
+        Log.Info($"User with id [{userId}] {eventDescription} a game with id [{game.Id}].");
         return new()
         {
             gameState = secondPlayerJoined ? GameStateModel.CreatingFleet
                 : GameStateModel.WaitingForStart,
-            gameId = gamePool.GetGame(userId)!.Id
+            gameId = game.Id
         };
     }
 
@@ -169,14 +183,6 @@ public class Controller
                     y = deck.Key.y
                 }).ToArray()
             }).ToArray();
-
-    private static void LogFleets(Game? game)
-    {
-        var firstFleetStr = string.Join<Ship>(",", game!.FirstFleet ?? Array.Empty<Ship>());
-        var secondFleetStr = string.Join<Ship>(",", game.SecondFleet ?? Array.Empty<Ship>());
-        Log.Info($"Whatsup got game. First fleet = [{firstFleetStr}], " +
-            $"second fleet = [{secondFleetStr}]. State = [{game.State}].");
-    }
 
     private static Ship ToShip(ShipForCreationModel ship) =>
         new()

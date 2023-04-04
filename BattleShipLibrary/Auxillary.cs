@@ -5,12 +5,16 @@ namespace BattleshipLibrary;
 
 public static class Log
 {
-    public static void Error(Exception ex) => Logger.Error(ex);
+    public static void Error(Exception ex)
+    {
+        Logger.Error(ex);
+        Console.WriteLine(ex);
+    }
 
     public static void Info(string message)
     {
-        Console.WriteLine(message);
         Logger.Info(message);
+        Console.WriteLine(message);
     }
 
     private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
@@ -52,10 +56,7 @@ public class GamePool
     }
 
     //todo this was for testing - now we need to make it right
-    public void ClearGames()
-    {
-        Games = new Dictionary<int, Game>();
-    }
+    public void ClearGames() => Games = new Dictionary<int, Game>();
 
     //todo if null do remove instead of assigning
     //todo make another method for non-testing purposes
