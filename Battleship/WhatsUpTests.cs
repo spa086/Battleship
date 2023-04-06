@@ -68,6 +68,7 @@ public class WhatsUpTests
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(2));
   
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
+        Assert.That(result.secondsLeft, Is.EqualTo(60));
     }
 
     [TestCase(GameState.HostWon, GameStateModel.YouWon)]

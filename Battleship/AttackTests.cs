@@ -50,7 +50,7 @@ public class AttackTests
     public void TimerRenewal()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 1, 2);
-        game.SetupNewTurn(5);
+        game.SetupBattleTimer(5);
 
         game.Attack(2, new Cell(0, 0));
 

@@ -1,4 +1,5 @@
 ﻿using BattleshipLibrary;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using System.Collections.Generic;
 
 namespace BattleshipApi;
@@ -40,7 +41,7 @@ public class Controller
         else if (game.Guest is null) result = WaitingForStartResult();
         else if (game.Guest is not null&&
             (game.Host!.Fleet is null || game.Guest!.Fleet is null))
-            result = WhatsUpWhileCreatingFleets(game);
+            result = WhatsUpBeforeBattle(game);
         else if (game.Host!.Fleet is not null && game.Guest!.Fleet is not null)
             result = WhatsUpInBattle(request, game);
         //todo tdd this exception
@@ -90,9 +91,12 @@ public class Controller
         };
     }
 
-    private static WhatsUpResponseModel WhatsUpWhileCreatingFleets(Game game) =>
-        new(game.Id, GameStateModel.CreatingFleet, ToFleetStateModel(game.Host!.Fleet),
-            ToFleetStateModel(game.Guest!.Fleet), null, null, null);
+    private static WhatsUpResponseModel WhatsUpBeforeBattle(Game game)
+    {
+        var state = game.State == GameState.Cancelled ? GameStateModel.Cancelled : GameStateModel.CreatingFleet;
+        return new(game.Id, state, ToFleetStateModel(game.Host!.Fleet),
+            ToFleetStateModel(game.Guest!.Fleet), null, null, game.TimerSecondsLeft);
+    }
 
     private static LocationModel[] GetMyExcludedLocations(Game game, bool forFirstUser) =>
         forFirstUser ? ToExcludedLocationModels(game.Host!.ExcludedLocations) 

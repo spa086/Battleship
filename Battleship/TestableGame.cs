@@ -61,7 +61,8 @@ public class TestableGame : Game
                 foreach (var deck in ship.Decks.Values) deck.Destroyed = true;
     }
 
-    public void SetupNewTurn(int secondsLeft) => RenewBattleTimer(secondsLeft);
+    public void SetupBattleTimer(int secondsLeft) => RenewBattleTimer(secondsLeft);
+    public void SetupShipsCreationTimer(int secondsLeft) => SetShipsCreationTimer(secondsLeft);
 
     public void SetupUserName(int userId, string? userName)
     {

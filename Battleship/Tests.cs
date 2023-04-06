@@ -66,7 +66,7 @@ public class Tests
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
-        game.SetupNewTurn(100);
+        game.SetupBattleTimer(100);
 
         game.Attack(1, new Cell(2, 2));
 
@@ -179,7 +179,7 @@ public class Tests
         AssertNonDestroyedDeck(orderedDecks.First(), 1, 1);
         AssertNonDestroyedDeck(orderedDecks.Last(), 1, 2);
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
-        Assert.That(game.TimerSecondsLeft, Is.Null);
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(60));
     }
 
     private static void AssertNonDestroyedDeck(Deck deck, int x, int y)

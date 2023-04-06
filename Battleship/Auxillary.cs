@@ -25,16 +25,21 @@ public class TestingEnvironment
             if (game.BattleOngoing)
             {
                 game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
-                game.SetupNewTurn(30);
+                game.SetupBattleTimer(30);
             }
-            else if (game.CreatingFleets)
-                game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, 1,
-                    firstPlayerHasFleet ? null : SimpleCellArray(2), 2);
+            else if (game.CreatingFleets) SetupGameInCreatingFleets(firstPlayerHasFleet, game);
             else if (game.ItsOver) SetupGameOver(state, game);
         }
         else if (game.State == GameState.WaitingForGuest) { }
         else throw new Exception("Unknown situation.");
         return game;
+    }
+
+    private static void SetupGameInCreatingFleets(bool firstPlayerHasFleet, TestableGame game)
+    {
+        game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, 1,
+            firstPlayerHasFleet ? null : SimpleCellArray(2), 2);
+        game.SetupShipsCreationTimer(60);
     }
 
     private static void SetupGameOver(GameState state, TestableGame game)
@@ -46,10 +51,7 @@ public class TestingEnvironment
         else throw new Exception($"Unknown state: [{state}].");
     }
 
-    private static Cell[] SimpleCellArray(int content)
-    {
-        return new[] { new Cell(content, content) };
-    }
+    private static Cell[] SimpleCellArray(int content) => new[] { new Cell(content, content) };
 }
 
 public static class Extensions
