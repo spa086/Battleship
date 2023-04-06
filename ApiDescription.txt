@@ -79,7 +79,8 @@ Returns object:
 	{
 		x - integer,
 		y - integer.
-	}
+	},
+	opponentName - string.
 }
 
 "\abortGame"

@@ -77,6 +77,7 @@ public class Controller
         //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
         var game = gamePool.GetGame(request.userId)!;
+        var userName = game.State == GameState.Player1Turn ? game.FirstUserName : game.SecondUserName;
         AssertYourTurn(request, game);
         var attackResult = game!.Attack(request.userId, ToCell(request.location));
         Log.ger.Info($"User id=[{request.userId}] performed attack at " +
@@ -85,7 +86,8 @@ public class Controller
         {
             result = ToAttackResultModel(attackResult),
             excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
-            excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray()
+            excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray(),
+            userName = userName
         };
     }
 

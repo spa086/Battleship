@@ -29,6 +29,17 @@ public class WebAttackTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
+    public void AttackReturnsUserName()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game.SetupUserName(1, "space ranger");
+
+        var result = controller.Attack(new AttackRequestModel { userId = 1});
+
+        Assert.That(result.userName, Is.EqualTo("space ranger"));
+    }
+
+    [Test]
     public void AttackingInOpponentsTurn()
     {
         testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);

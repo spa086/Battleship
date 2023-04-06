@@ -80,6 +80,7 @@ public class ShipStateModel
 
 public class AttackResponse
 {
+    public string? userName { get; set; }
     public AttackResultTransportModel result { get; set; }
     //todo RETURN FLEETS
     public LocationModel[] excludedLocations1 { get; set; } = Array.Empty<LocationModel>();
