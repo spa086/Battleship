@@ -109,7 +109,7 @@ public class AttackTests
     {
         game.Attack(0, new Cell(1, 1));
 
-        Assert.That(game.ExcludedLocations1.AssertSingle(), Is.EqualTo(new Cell(1, 1)));
+        Assert.That(game.HostExcludedLocations.AssertSingle(), Is.EqualTo(new Cell(1, 1)));
     }
 
     [Test]
@@ -119,7 +119,7 @@ public class AttackTests
 
         game.Attack(1, new Cell(2, 2));
 
-        game.ExcludedLocations1.AssertSingle();
+        game.HostExcludedLocations.AssertSingle();
         Assert.That(Game.IsDestroyed(game.GuestFleet.AssertSingle()));
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
     }

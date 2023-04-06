@@ -37,8 +37,8 @@ public class Game
     public int? TurnSecondsLeft =>
         turnTimer is null ? null : (int)Math.Ceiling(turnTimer.DueTime.TotalMilliseconds / 1000f);
 
-    public List<Cell> ExcludedLocations1 => excludedLocations1;
-    public List<Cell> ExcludedLocations2 => excludedLocations2;
+    public List<Cell> HostExcludedLocations => hostExcludedLocations;
+    public List<Cell> GuestExcludedLocations => guestExcludedLocations;
     public Ship[]? HostFleet => hostFleet;
     public Ship[]? GuestFleet => guestFleet;
 
@@ -156,14 +156,14 @@ public class Game
     private void Exclude(Cell location)
     {
         //todo check for 3 times
-        var currentExcluded = State == GameState.HostTurn ? excludedLocations1 : excludedLocations2;
+        var currentExcluded = State == GameState.HostTurn ? hostExcludedLocations : guestExcludedLocations;
         if (currentExcluded.Contains(location))
             throw new Exception($"Location {location} is already excluded.");
         currentExcluded.Add(location);
     }
 
-    protected List<Cell> excludedLocations1 = new();
-    protected List<Cell> excludedLocations2 = new();
+    protected List<Cell> hostExcludedLocations = new();
+    protected List<Cell> guestExcludedLocations = new();
     //todo tdd validate ship shape
     protected Ship[]? hostFleet;
     protected Ship[]? guestFleet;

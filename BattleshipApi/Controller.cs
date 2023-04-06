@@ -18,7 +18,7 @@ public class Controller
         var game = gamePool.GetGame(userId);
         if (game is not null)
         {
-            if(game.State == GameState.HostWon || game.State == GameState.GuestWon) 
+            if (game.State == GameState.HostWon || game.State == GameState.GuestWon)
             {
                 gamePool.Games.Remove(game.Id);
                 Log.ger.Info($"Game id=[{game.Id}] is removed.");
@@ -46,8 +46,8 @@ public class Controller
             result = WhatsUpInBattle(request, game);
         //todo tdd this exception
         else throw new Exception("Unknown situation.");
-        result.userName = 
-            request.userId == game!.HostId ? game.GuestName : game.HostName; 
+        result.userName =
+            request.userId == game!.HostId ? game.GuestName : game.HostName;
         return result;
     }
 
@@ -85,39 +85,35 @@ public class Controller
         return new AttackResponse
         {
             result = ToAttackResultModel(attackResult),
-            excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
-            excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray(),
+            excludedLocations1 = game.HostExcludedLocations.Select(ToLocationModel).ToArray(),
+            excludedLocations2 = game.GuestExcludedLocations.Select(ToLocationModel).ToArray(),
             opponentName = userName
         };
     }
 
     private static WhatsUpResponseModel WhatsUpWhileCreatingFleets(Game game) =>
-        new()
-        {
-            gameState = GameStateModel.CreatingFleet,
-            myFleet = ToFleetStateModel(game.HostFleet),
-            opponentFleet = ToFleetStateModel(game.GuestFleet),
-            gameId = game.Id
-        };
+        new(game.Id, GameStateModel.CreatingFleet, ToFleetStateModel(game.HostFleet),
+            ToFleetStateModel(game.GuestFleet), null, null, null);
 
     private static LocationModel[] GetMyExcludedLocations(Game game, bool forFirstUser) =>
-        forFirstUser
-            ? game.ExcludedLocations1.Select(ToLocationModel).ToArray()
-            : game.ExcludedLocations2.Select(ToLocationModel).ToArray();
+        forFirstUser ? ToExcludedLocationModels(game.HostExcludedLocations) 
+            : ToExcludedLocationModels(game.GuestExcludedLocations);
 
-    private static LocationModel[] GetOpponentExcludedLocations(Game game, bool forFirstUser) =>
-        forFirstUser
-            ? game.ExcludedLocations2.Select(ToLocationModel).ToArray()
-            : game.ExcludedLocations1.Select(ToLocationModel).ToArray();
+    private static LocationModel[] GetOpponentExcludedLocations(Game game, bool forHost) =>
+        forHost ? ToExcludedLocationModels(game.GuestExcludedLocations) : 
+            ToExcludedLocationModels(game.HostExcludedLocations);
+
+    private static LocationModel[] ToExcludedLocationModels(List<Cell> locations) =>
+        locations.Select(ToLocationModel).ToArray();
 
     private static WhatsUpResponseModel WhatsUpInBattle(WhatsupRequestModel request, Game game)
     {
-        var forFirstUser = request.userId == game.HostId;
-        var myExcludedLocations = GetMyExcludedLocations(game, forFirstUser);
-        var opponentExcludedLocations = GetOpponentExcludedLocations(game, forFirstUser);
-        var myFleet = forFirstUser ? ToFleetStateModel(game.HostFleet)
+        var forHost = request.userId == game.HostId;
+        var myExcludedLocations = GetMyExcludedLocations(game, forHost);
+        var opponentExcludedLocations = GetOpponentExcludedLocations(game, forHost);
+        var myFleet = forHost ? ToFleetStateModel(game.HostFleet)
             : ToFleetStateModel(game.GuestFleet);
-        var opponentFleet = forFirstUser ? ToFleetStateModel(game.GuestFleet)
+        var opponentFleet = forHost ? ToFleetStateModel(game.GuestFleet)
             : ToFleetStateModel(game.HostFleet);
         GameStateModel? stateModel = GetStateModel(request, game);
         var result = new WhatsUpResponseModel(game.Id, stateModel!.Value, myFleet, opponentFleet,
@@ -140,7 +136,7 @@ public class Controller
             game.State == GameState.GuestWon && game.HostId == request.userId)
             return GameStateModel.OpponentWon;
         throw new Exception($"Unknown situation. State = [{game.State}], " +
-            $"user 1 id = [{game.HostId}], user 2 id = [{game.GuestId}], " +
+            $"host id = [{game.HostId}], guest id = [{game.GuestId}], " +
             $"requester user id = [{request.userId}].");
     }
 
@@ -187,12 +183,8 @@ public class Controller
             new ShipStateModel
             {
                 decks = ship.Decks.Select(deck =>
-                new DeckStateModel
-                {
-                    destroyed = deck.Value.Destroyed,
-                    x = deck.Key.x,
-                    y = deck.Key.y
-                }).ToArray()
+                    new DeckStateModel
+                        { destroyed = deck.Value.Destroyed, x = deck.Key.x, y = deck.Key.y }).ToArray()
             }).ToArray();
 
     private static Ship ToShip(ShipForCreationModel ship) =>

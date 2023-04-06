@@ -29,8 +29,8 @@ public class TestableGame : Game
 
     public void SetupExcludedLocations(int userId, params Cell[] locations)
     {
-        if (userId == HostId) excludedLocations1 = CreateLocationList(locations);
-        else if (userId == GuestId) excludedLocations2 = CreateLocationList(locations);
+        if (userId == HostId) hostExcludedLocations = CreateLocationList(locations);
+        else if (userId == GuestId) guestExcludedLocations = CreateLocationList(locations);
         else throw new Exception("Incorrect userId");
     }
 
@@ -40,8 +40,8 @@ public class TestableGame : Game
 
     public void StandardSetup()
     {
-        excludedLocations1 = CreateLocationList();
-        excludedLocations2 = CreateLocationList();
+        hostExcludedLocations = CreateLocationList();
+        guestExcludedLocations = CreateLocationList();
         State = GameState.HostTurn;
         SetupTurnTime = 30;
         SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  
