@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace BattleshipApi;
 
+//todo refactor long file
 public class Controller
 {
     private readonly GamePool gamePool;
