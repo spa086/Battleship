@@ -87,7 +87,7 @@ public class Controller
             result = ToAttackResultModel(attackResult),
             excludedLocations1 = game.ExcludedLocations1.Select(ToLocationModel).ToArray(),
             excludedLocations2 = game.ExcludedLocations2.Select(ToLocationModel).ToArray(),
-            userName = userName
+            opponentName = userName
         };
     }
 

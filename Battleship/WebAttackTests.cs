@@ -36,7 +36,7 @@ public class WebAttackTests
 
         var result = controller.Attack(new AttackRequestModel { userId = 1});
 
-        Assert.That(result.userName, Is.EqualTo("space ranger"));
+        Assert.That(result.opponentName, Is.EqualTo("space ranger"));
     }
 
     [Test]
