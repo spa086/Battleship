@@ -80,7 +80,7 @@ Returns object:
 		x - integer,
 		y - integer.
 	},
-	opponentName - string.
+	opponentName (optional) - string.
 }
 
 "\abortGame"
