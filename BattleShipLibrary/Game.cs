@@ -48,8 +48,12 @@ public class Game
     public bool ItsOver => State == GameState.Player1Won || State == GameState.Player2Won;
 
     //todo tdd
-    public void SetTechnicalWinner(bool player1Won) => 
+    public void SetTechnicalWinner(bool player1Won)
+    {
+        turnTimer?.Dispose();
+        turnTimer = null;
         State = player1Won ? GameState.Player1Won : GameState.Player2Won;
+    }
 
     //todo test
     public void Start(int secondUserId)

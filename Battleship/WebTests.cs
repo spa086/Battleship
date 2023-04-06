@@ -94,12 +94,12 @@ public class WebTests
     public void Surrendering([Values] GameState state)
     {
         if (state == GameState.Player1Won || state == GameState.Player2Won) return;
-        testingEnvironment.CreateNewTestableGame(state, 1, 2);
+        var game = testingEnvironment.CreateNewTestableGame(state, 1, 2);
 
         controller.AbortGame(1);
 
-        var game = gamePool.Games.Values.Single();
         Assert.That(game.State, Is.EqualTo(GameState.Player2Won));
+        Assert.That(game.Timer, Is.Null);
     }
 
     [Test]

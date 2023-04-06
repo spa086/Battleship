@@ -9,6 +9,8 @@ public class TestableGame : Game
 
     }
 
+    public TimerPlus? Timer => turnTimer;
+
     public TestableGame SetSecondUserId(int? secondUserId = null)
     {
         SecondUserId = secondUserId;
