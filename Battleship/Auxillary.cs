@@ -13,7 +13,7 @@ public class TestingEnvironment
         this.gamePool = gamePool;
     }
 
-    public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForPlayer2,
+    public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
         int? firstUserId = null, int? secondUserId = null, bool firstPlayerHasFleet = true)
     {
         var game = new TestableGame(firstUserId ?? 1).SetState(state);
@@ -37,7 +37,7 @@ public class TestingEnvironment
     private static void SetupGameOver(GameState state, TestableGame game)
     {
         game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
-        if (state == GameState.Player1Won) game.DestroyFleet(2);
+        if (state == GameState.HostWon) game.DestroyFleet(2);
         else game.DestroyFleet(1);
     }
 

@@ -43,8 +43,8 @@ public class Tests
     [TestCase(2)]
     public void GettingGameWhenDoubled(int userIdToSearchBy)
     {
-        var game1 = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
-        var game2 = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        var game1 = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        var game2 = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
         var exception = Assert.Throws<Exception>(() => gamePool.GetGame(userIdToSearchBy));
         Assert.That(exception.Message, Is.EqualTo($"User id = [{userIdToSearchBy}] participates " +
@@ -55,7 +55,7 @@ public class Tests
     [TestCase(2)]
     public void GettingGameSimple(int userIdToSearchBy)
     {
-        game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
         var result = gamePool.GetGame(userIdToSearchBy);
         Assert.That(result, Is.EqualTo(game));
@@ -64,7 +64,7 @@ public class Tests
     [Test]
     public void StoppingTimerWhenLost()
     {
-        game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
         game.SetupNewTurn(100);
 
@@ -77,19 +77,19 @@ public class Tests
     [Test]
     public void LosingWhenTimeIsOut()
     {
-        game = testingEnvironment.CreateNewTestableGame(GameState.Player1Turn, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         game.SetupTurnTime = 1;
 
         game.Attack(1, new Cell(1, 1));
         Thread.Sleep(1100);
 
         Assert.That(game.ItsOver, Is.True);
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
+        Assert.That(game.State, Is.EqualTo(GameState.HostWon));
         Assert.That(game.TurnSecondsLeft, Is.LessThanOrEqualTo(0));
     }
 
     [Test]
-    public void BatleTimer()
+    public void BattleTimer()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
 
@@ -108,7 +108,7 @@ public class Tests
 
         game.CreateAndSaveShips(1, CreateSimpleShip(1,1));
 
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
     }
 
     [Test]
@@ -130,9 +130,9 @@ public class Tests
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2,2));
 
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
         Assert.That(game.TurnSecondsLeft, Is.EqualTo(30));
-        var deck = game.SecondFleet.AssertSingle().Decks.AssertSingle();
+        var deck = game.GuestFleet.AssertSingle().Decks.AssertSingle();
         Assert.That(deck.Key, Is.EqualTo(new Cell(2, 2)));
         Assert.That(deck.Value.Destroyed, Is.False);
         Assert.That(deck.Value.Location, Is.EqualTo(new Cell(2, 2)));
@@ -162,7 +162,7 @@ public class Tests
 
         var game = gamePool.Games.Values.AssertSingle();
         Assert.That(game, Is.Not.Null);
-        Assert.That(game.State, Is.EqualTo(GameState.WaitingForPlayer2));
+        Assert.That(game.State, Is.EqualTo(GameState.WaitingForGuest));
     }
 
     [Test]
@@ -175,7 +175,7 @@ public class Tests
         game.CreateAndSaveShips(1, new[] { new Ship { Decks = decks } });
 
         //todo use separate collection
-        var ship = game.FirstFleet!.AssertSingle();
+        var ship = game.HostFleet!.AssertSingle();
         Assert.That(decks, Has.Count.EqualTo(2));
         var orderedDecks = decks.Values.OrderBy(x => x.Location.y);
         AssertNonDestroyedDeck(orderedDecks.First(), 1, 1);

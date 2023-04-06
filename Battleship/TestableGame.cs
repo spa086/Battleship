@@ -13,7 +13,7 @@ public class TestableGame : Game
 
     public TestableGame SetSecondUserId(int? secondUserId = null)
     {
-        SecondUserId = secondUserId;
+        GuestId = secondUserId;
         return this;
     }
 
@@ -29,20 +29,20 @@ public class TestableGame : Game
 
     public void SetupExcludedLocations(int userId, params Cell[] locations)
     {
-        if (userId == FirstUserId) excludedLocations1 = CreateLocationList(locations);
-        else if (userId == SecondUserId) excludedLocations2 = CreateLocationList(locations);
+        if (userId == HostId) excludedLocations1 = CreateLocationList(locations);
+        else if (userId == GuestId) excludedLocations2 = CreateLocationList(locations);
         else throw new Exception("Incorrect userId");
     }
 
     //todo check for 3 times
     public void SetTurn(bool setPlayer1Turn) => 
-        State = setPlayer1Turn ? GameState.Player1Turn : GameState.Player2Turn;
+        State = setPlayer1Turn ? GameState.HostTurn : GameState.GuestTurn;
 
     public void StandardSetup()
     {
         excludedLocations1 = CreateLocationList();
         excludedLocations2 = CreateLocationList();
-        State = GameState.Player1Turn;
+        State = GameState.HostTurn;
         SetupTurnTime = 30;
         SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  
             new[] { new Cell(3, 3) }, 2);
@@ -50,14 +50,14 @@ public class TestableGame : Game
 
     public void SetupFleets(IEnumerable<Ship> fleet1, IEnumerable<Ship> fleet2)
     {
-        firstFleet = fleet1.ToArray();
-        secondFleet = fleet2.ToArray();
+        hostFleet = fleet1.ToArray();
+        guestFleet = fleet2.ToArray();
     }
 
     public void DestroyFleet(int userId)
     {
-        if(userId == FirstUserId)
-            foreach (var ship in FirstFleet!)
+        if(userId == HostId)
+            foreach (var ship in HostFleet!)
                 foreach (var deck in ship.Decks.Values)
                     deck.Destroyed = true;
     }
@@ -66,8 +66,8 @@ public class TestableGame : Game
 
     public void SetupUserName(int userId, string? userName)
     {
-        if (userId == FirstUserId) FirstUserName = userName;
-        else if (userId == SecondUserId) SecondUserName = userName;
+        if (userId == HostId) HostName = userName;
+        else if (userId == GuestId) GuestName = userName;
         else throw new Exception($"User [{userId}] is not found.");
     }
         
@@ -75,10 +75,10 @@ public class TestableGame : Game
     public void SetupSimpleFleets(Cell[]? deckLocations1, int firstUserId,
         Cell[]? deckLocations2, int? secondUserId)
     {
-        firstFleet = CreateSimpleFleet(deckLocations1);
-        FirstUserId = firstUserId;
-        secondFleet = CreateSimpleFleet(deckLocations2);
-        SecondUserId = secondUserId;
+        hostFleet = CreateSimpleFleet(deckLocations1);
+        HostId = firstUserId;
+        guestFleet = CreateSimpleFleet(deckLocations2);
+        GuestId = secondUserId;
     }
 
     protected override void RenewTurnTimer(int secondsLeft = 30) => 

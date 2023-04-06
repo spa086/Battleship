@@ -11,13 +11,13 @@ public static class Log
 
 public enum GameState
 {
-    WaitingForPlayer2,
+    WaitingForGuest,
     BothPlayersCreateFleets,
     OnePlayerCreatesFleet,
-    Player1Turn,
-    Player2Turn,
-    Player1Won,
-    Player2Won
+    HostTurn,
+    GuestTurn,
+    HostWon,
+    GuestWon
 }
 
 public enum AttackResult
@@ -37,7 +37,7 @@ public class GamePool
     public Game? GetGame(int userId)
     {
         var gamesByUserId = Games.Values.Where(x => 
-            x.FirstUserId == userId || x.SecondUserId == userId);
+            x.HostId == userId || x.GuestId == userId);
         if (gamesByUserId.Count() > 1)
             throw new Exception($"User id = [{userId}] participates in several games. Game id's: " +
                 $"[{string.Join(", ", gamesByUserId.Select(x => x.Id))}].");
@@ -56,7 +56,7 @@ public class GamePool
 
     public bool StartPlaying(int userId)
     {
-        var game = Games.Values.FirstOrDefault(x => !x.SecondUserId.HasValue);
+        var game = Games.Values.FirstOrDefault(x => !x.GuestId.HasValue);
         //todo tdd ensure id uniqueness
         if (game is null)
         {

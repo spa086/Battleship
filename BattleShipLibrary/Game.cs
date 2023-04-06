@@ -8,7 +8,7 @@ public class Game
 {
     public Game(int user1Id)
     {
-        FirstUserId = user1Id;
+        HostId = user1Id;
         var random = new Random();
         Id = random.Next();
     }
@@ -17,12 +17,12 @@ public class Game
     public int Id { get; private set; }
 
     //todo make User class
-    public int FirstUserId { get; protected set; }
+    public int HostId { get; protected set; }
     //todo persist user name between games
-    public string? FirstUserName { get; set; }
-    public int? SecondUserId { get; protected set; }
+    public string? HostName { get; set; }
+    public int? GuestId { get; protected set; }
     //todo tdd this field in whatsup tests
-    public string? SecondUserName { get; set; }
+    public string? GuestName { get; set; }
 
     public GameState State
     {
@@ -39,33 +39,33 @@ public class Game
 
     public List<Cell> ExcludedLocations1 => excludedLocations1;
     public List<Cell> ExcludedLocations2 => excludedLocations2;
-    public Ship[]? FirstFleet => firstFleet;
-    public Ship[]? SecondFleet => secondFleet;
+    public Ship[]? HostFleet => hostFleet;
+    public Ship[]? GuestFleet => guestFleet;
 
-    public bool BattleOngoing => State == GameState.Player1Turn || State == GameState.Player2Turn;
+    public bool BattleOngoing => State == GameState.HostTurn || State == GameState.GuestTurn;
     public bool CreatingFleets =>
         State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
-    public bool ItsOver => State == GameState.Player1Won || State == GameState.Player2Won;
+    public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon;
 
     //todo tdd
     public void SetTechnicalWinner(bool player1Won)
     {
         turnTimer?.Dispose();
         turnTimer = null;
-        State = player1Won ? GameState.Player1Won : GameState.Player2Won;
+        State = player1Won ? GameState.HostWon : GameState.GuestWon;
     }
 
     //todo test
     public void Start(int secondUserId)
     {
         State = GameState.BothPlayersCreateFleets;
-        SecondUserId = secondUserId;
+        GuestId = secondUserId;
     }
 
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
-        var battleStarts = (userId == FirstUserId && SecondFleet is not null) ||
-            (userId == SecondUserId && FirstFleet is not null);
+        var battleStarts = (userId == HostId && guestFleet is not null) ||
+            (userId == GuestId && HostFleet is not null);
         var newShips = ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
@@ -77,15 +77,15 @@ public class Game
 
     private void UpdateState(int userId, Ship[] newShips)
     {
-        if (userId == FirstUserId)
+        if (userId == HostId)
         {
-            firstFleet = newShips;
-            State = secondFleet is not null ? GameState.Player1Turn : GameState.OnePlayerCreatesFleet;
+            hostFleet = newShips;
+            State = guestFleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
         }
         else
         {
-            secondFleet = newShips;
-            State = firstFleet is not null ? GameState.Player1Turn : GameState.OnePlayerCreatesFleet;
+            guestFleet = newShips;
+            State = hostFleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
         }
     }
 
@@ -98,9 +98,9 @@ public class Game
         //todo tdd that we can't get here with playerNShips == null
         Exclude(attackedLocation);
         //todo check for 3 times
-        var player1Turn = State == GameState.Player1Turn;
+        var player1Turn = State == GameState.HostTurn;
         var attackedShips = player1Turn ?
-            secondFleet!.Where(x => !IsDestroyed(x)).ToArray() : firstFleet!.Where(x => !IsDestroyed(x)).ToArray();
+            guestFleet!.Where(x => !IsDestroyed(x)).ToArray() : hostFleet!.Where(x => !IsDestroyed(x)).ToArray();
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
         ProcessBattleOrWin(player1Turn, attackedShips, ref result);
@@ -118,14 +118,14 @@ public class Game
     }
 
     protected GameState WhoWillWinWhenTurnTimeEnds() =>
-        State == GameState.Player1Turn ? GameState.Player2Won : GameState.Player1Won;
+        State == GameState.HostTurn ? GameState.GuestWon : GameState.HostWon;
 
     private void ProcessBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips,
         ref AttackResult result)
     {
         if (attackedShips.All(x => IsDestroyed(x)))
         {
-            State = player1Turn ? GameState.Player1Won : GameState.Player2Won;
+            State = player1Turn ? GameState.HostWon : GameState.GuestWon;
             result = AttackResult.Win;
             turnTimer?.Dispose();
             turnTimer = null;
@@ -133,8 +133,8 @@ public class Game
         else
         {
             var hit = result == AttackResult.Hit;
-            if(player1Turn && hit || !player1Turn && !hit) State = GameState.Player1Turn;
-            if(!player1Turn && hit || player1Turn && !hit) State = GameState.Player2Turn;
+            if(player1Turn && hit || !player1Turn && !hit) State = GameState.HostTurn;
+            if(!player1Turn && hit || player1Turn && !hit) State = GameState.GuestTurn;
         }
     }
 
@@ -156,7 +156,7 @@ public class Game
     private void Exclude(Cell location)
     {
         //todo check for 3 times
-        var currentExcluded = State == GameState.Player1Turn ? excludedLocations1 : excludedLocations2;
+        var currentExcluded = State == GameState.HostTurn ? excludedLocations1 : excludedLocations2;
         if (currentExcluded.Contains(location))
             throw new Exception($"Location {location} is already excluded.");
         currentExcluded.Add(location);
@@ -165,8 +165,8 @@ public class Game
     protected List<Cell> excludedLocations1 = new();
     protected List<Cell> excludedLocations2 = new();
     //todo tdd validate ship shape
-    protected Ship[]? firstFleet;
-    protected Ship[]? secondFleet;
+    protected Ship[]? hostFleet;
+    protected Ship[]? guestFleet;
     protected TimerPlus? turnTimer;
     private GameState state;
 

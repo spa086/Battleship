@@ -49,7 +49,7 @@ public class AttackTests
     [Test]
     public void TimerRenewal()
     {
-        game = testingEnvironment.CreateNewTestableGame(GameState.Player2Turn, 1, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 1, 2);
         game.SetupNewTurn(5);
 
         game.Attack(2, new Cell(0, 0));
@@ -60,14 +60,14 @@ public class AttackTests
     [Test]
     public void DamagingAMultideckShip()
     {
-        game = testingEnvironment.CreateNewTestableGame(GameState.Player2Turn);
+        game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn);
         game.SetupSimpleFleets(
             new[] { new Cell(0, 1), new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 2);
 
         game.Attack(1, new Cell(0, 1));
 
-        Assert.That(game.FirstFleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
-        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
+        Assert.That(game.HostFleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
+        Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
     }
 
     //todo similar for 2nd player
@@ -83,14 +83,14 @@ public class AttackTests
     [Test]
     public void SecondPlayerMisses()
     {
-        game.SetState(GameState.Player2Turn);
+        game.SetState(GameState.GuestTurn);
 
         game.Attack(0, new Cell(0, 0));
 
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Turn));
+        Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
         //todo tdd player ship desctruction
         //todo check 3 times
-        game.FirstFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle(); 
+        game.HostFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle(); 
     }
 
     [Test]
@@ -98,8 +98,8 @@ public class AttackTests
     {
         game.Attack(0, new Cell(0, 0));
 
-        Assert.That(game.State, Is.EqualTo(GameState.Player2Turn));
-        game.SecondFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
+        Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
+        game.GuestFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
     }
 
     //todo does exclusion actually work?
@@ -120,8 +120,8 @@ public class AttackTests
         game.Attack(1, new Cell(2, 2));
 
         game.ExcludedLocations1.AssertSingle();
-        Assert.That(Game.IsDestroyed(game.SecondFleet.AssertSingle()));
-        Assert.That(game.State, Is.EqualTo(GameState.Player1Won));
+        Assert.That(Game.IsDestroyed(game.GuestFleet.AssertSingle()));
+        Assert.That(game.State, Is.EqualTo(GameState.HostWon));
     }
 
     [Test]
@@ -132,8 +132,8 @@ public class AttackTests
 
         game.Attack(0, new Cell(0, 0));
 
-        game.SecondFleet.AssertSingle();
-        Assert.That(Game.IsDestroyed(game.FirstFleet.AssertSingle()));
-        Assert.That(game.State, Is.EqualTo(GameState.Player2Won));
+        game.GuestFleet.AssertSingle();
+        Assert.That(Game.IsDestroyed(game.HostFleet.AssertSingle()));
+        Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
     }
 }
