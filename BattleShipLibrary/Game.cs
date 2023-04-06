@@ -7,21 +7,15 @@ public class Game
 {
     public Game(int user1Id)
     {
-        HostId = user1Id;
-        var random = new Random();
-        Id = random.Next();
+        Host = new User { Id = user1Id };
+        Id = new Random().Next();
     }
+
+    public User Host { get; set; }
+    public User? Guest { get; set; }
 
     //todo tdd this field
     public int Id { get; private set; }
-
-    //todo make User class
-    public int HostId { get; protected set; }
-    //todo persist user name between games
-    public string? HostName { get; set; }
-    public int? GuestId { get; protected set; }
-    //todo tdd this field in whatsup tests
-    public string? GuestName { get; set; }
 
     public GameState State
     {
@@ -33,64 +27,61 @@ public class Game
             state = value;
         }
     }
-    public int? TurnSecondsLeft =>
-        turnTimer is null ? null : (int)Math.Ceiling(turnTimer.DueTime.TotalMilliseconds / 1000f);
-
-    public List<Cell> HostExcludedLocations => hostExcludedLocations;
-    public List<Cell> GuestExcludedLocations => guestExcludedLocations;
-    public Ship[]? HostFleet => hostFleet;
-    public Ship[]? GuestFleet => guestFleet;
+    public int? TimerSecondsLeft =>
+        timer is null ? null : (int)Math.Ceiling(timer.DueTime.TotalMilliseconds / 1000f);
 
     public bool BattleOngoing => State == GameState.HostTurn || State == GameState.GuestTurn;
     public bool CreatingFleets =>
         State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
+
     public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon;
 
     //todo tdd
     public void DisposeOfTimer()
     {
-        turnTimer?.Dispose();
-        turnTimer = null;
+        timer?.Dispose();
+        timer = null;
     }
 
     //todo tdd
-    public void SetTechnicalWinner(bool player1Won)
+    public void SetTechnicalWinner(bool hostWon)
     {
         DisposeOfTimer();
-        State = player1Won ? GameState.HostWon : GameState.GuestWon;
+        State = hostWon ? GameState.HostWon : GameState.GuestWon;
     }
 
     //todo tdd
-    public void Start(int secondUserId)
+    public void Start(int guestId)
     {
         State = GameState.BothPlayersCreateFleets;
-        GuestId = secondUserId;
+        Guest = new User { Id = guestId };
+        SetShipsCreationTimer(60);
     }
 
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
-        var battleStarts = (userId == HostId && guestFleet is not null) ||
-            (userId == GuestId && HostFleet is not null);
+        var battleStarts = (userId == Host!.Id && Guest!.Fleet is not null) ||
+            (userId == Guest!.Id && Host.Fleet is not null);
         var newShips = ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
                 .ToDictionary(x => x.Location)
         }).ToArray();
         UpdateState(userId, newShips);
-        if(battleStarts) RenewTurnTimer();
+        if(battleStarts) RenewBattleTimer();
     }
 
     private void UpdateState(int userId, Ship[] newShips)
     {
-        if (userId == HostId)
+        if (userId == Host.Id)
         {
-            hostFleet = newShips;
-            State = guestFleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
+            Host!.Fleet = newShips;
+            State = Guest!.Fleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
         }
         else
         {
-            guestFleet = newShips;
-            State = hostFleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
+            Guest!.Fleet = newShips;
+            State = Host!.Fleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
         }
     }
 
@@ -104,23 +95,38 @@ public class Game
         Exclude(attackedLocation);
         //todo check for 3 times
         var player1Turn = State == GameState.HostTurn;
-        var attackedShips = player1Turn ?
-            guestFleet!.Where(x => !IsDestroyed(x)).ToArray() : hostFleet!.Where(x => !IsDestroyed(x)).ToArray();
+        var attackedShips = player1Turn 
+            ? Guest!.Fleet!.Where(x => !IsDestroyed(x)).ToArray() 
+            : Host!.Fleet!.Where(x => !IsDestroyed(x)).ToArray();
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
         ProcessBattleOrWin(player1Turn, attackedShips, ref result);
-        if (this.BattleOngoing) RenewTurnTimer();
+        if (this.BattleOngoing) RenewBattleTimer();
         return result; //todo tdd correct result
     }
 
-    protected virtual void RenewTurnTimer(int secondsLeft = 30) => RenewTimerInternal(secondsLeft);
+    //todo was it really needed to make it virtual?
+    protected virtual void SetShipsCreationTimer(int secondsLeft = 30)
+    {
+        timer?.Dispose();
+        timer = new TimerWithDueTime(() =>
+        {
+            if(Host.Fleet is not null && Guest!.Fleet is null) SetTechnicalWinner(true);
+            else if (Host.Fleet is null && Guest!.Fleet is not null) SetTechnicalWinner(false);
+            //todo tdd what if both fleets are still absent?
+            //todo throw if unknown situation
+        }, TimeSpan.FromSeconds(secondsLeft));
+    }
+
+    protected virtual void RenewBattleTimer(int secondsLeft = 30) => 
+        RenewBattleTimerInternal(secondsLeft);
 
     //todo mb I shouldn't call it from test setups
-    protected void RenewTimerInternal(int secondsLeft = 30)
+    protected void RenewBattleTimerInternal(int secondsLeft = 30)
     {
-        turnTimer?.Dispose();
-        turnTimer = new TimerPlus(state => State = WhoWillWinWhenTurnTimeEnds(), this,
-            TimeSpan.FromSeconds(secondsLeft), Timeout.InfiniteTimeSpan);
+        timer?.Dispose();
+        timer = new TimerWithDueTime(() => State = WhoWillWinWhenTurnTimeEnds(),
+            TimeSpan.FromSeconds(secondsLeft));
     }
 
     protected GameState WhoWillWinWhenTurnTimeEnds() =>
@@ -161,18 +167,14 @@ public class Game
     private void Exclude(Cell location)
     {
         //todo check for 3 times
-        var currentExcluded = State == GameState.HostTurn ? hostExcludedLocations : guestExcludedLocations;
+        var currentExcluded = 
+            State == GameState.HostTurn ? Host!.ExcludedLocations : Guest!.ExcludedLocations;
         if (currentExcluded.Contains(location))
             throw new Exception($"Location {location} is already excluded.");
         currentExcluded.Add(location);
     }
 
-    protected List<Cell> hostExcludedLocations = new();
-    protected List<Cell> guestExcludedLocations = new();
-    //todo tdd validate ship shape
-    protected Ship[]? hostFleet;
-    protected Ship[]? guestFleet;
-    protected TimerPlus? turnTimer;
+    protected TimerWithDueTime? timer;
     private GameState state;
 
     //todo to Ship extension!!! 

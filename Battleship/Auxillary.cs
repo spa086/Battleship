@@ -17,7 +17,7 @@ public class TestingEnvironment
         int? firstUserId = null, int? secondUserId = null, bool firstPlayerHasFleet = true)
     {
         var game = new TestableGame(firstUserId ?? 1).SetState(state);
-        gamePool.SetGame(game);
+        gamePool.AddGame(game);
         if (game.CreatingFleets || game.BattleOngoing || game.ItsOver)
         {
             game.SetSecondUserId(secondUserId);
@@ -36,7 +36,6 @@ public class TestingEnvironment
 
     private static void SetupGameOver(GameState state, TestableGame game)
     {
-        game.SetupNewTurn(0);
         game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
         if (state == GameState.HostWon) game.DestroyFleet(2);
         else game.DestroyFleet(1);

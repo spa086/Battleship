@@ -54,7 +54,7 @@ public class AttackTests
 
         game.Attack(2, new Cell(0, 0));
 
-        Assert.That(game.TurnSecondsLeft, Is.EqualTo(30));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
     }
 
     [Test]
@@ -66,7 +66,7 @@ public class AttackTests
 
         game.Attack(1, new Cell(0, 1));
 
-        Assert.That(game.HostFleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
+        Assert.That(game.Host!.Fleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
         Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
     }
 
@@ -90,7 +90,7 @@ public class AttackTests
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
         //todo tdd player ship desctruction
         //todo check 3 times
-        game.HostFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle(); 
+        game.Host!.Fleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle(); 
     }
 
     [Test]
@@ -99,7 +99,7 @@ public class AttackTests
         game.Attack(0, new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
-        game.GuestFleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
+        game.Guest!.Fleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
     }
 
     //todo does exclusion actually work?
@@ -109,7 +109,7 @@ public class AttackTests
     {
         game.Attack(0, new Cell(1, 1));
 
-        Assert.That(game.HostExcludedLocations.AssertSingle(), Is.EqualTo(new Cell(1, 1)));
+        Assert.That(game.Host!.ExcludedLocations.AssertSingle(), Is.EqualTo(new Cell(1, 1)));
     }
 
     [Test]
@@ -119,8 +119,8 @@ public class AttackTests
 
         game.Attack(1, new Cell(2, 2));
 
-        game.HostExcludedLocations.AssertSingle();
-        Assert.That(Game.IsDestroyed(game.GuestFleet.AssertSingle()));
+        game.Host!.ExcludedLocations.AssertSingle();
+        Assert.That(Game.IsDestroyed(game.Guest!.Fleet.AssertSingle()));
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
     }
 
@@ -132,8 +132,8 @@ public class AttackTests
 
         game.Attack(0, new Cell(0, 0));
 
-        game.GuestFleet.AssertSingle();
-        Assert.That(Game.IsDestroyed(game.HostFleet.AssertSingle()));
+        game.Guest!.Fleet.AssertSingle();
+        Assert.That(Game.IsDestroyed(game.Host!.Fleet.AssertSingle()));
         Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
     }
 }

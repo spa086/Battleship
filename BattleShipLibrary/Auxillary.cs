@@ -37,7 +37,7 @@ public class GamePool
     public Game? GetGame(int userId)
     {
         var gamesByUserId = Games.Values.Where(x => 
-            x.HostId == userId || x.GuestId == userId);
+            x.Host.Id == userId || x.Guest?.Id == userId);
         if (gamesByUserId.Count() > 1)
             throw new Exception($"User id = [{userId}] participates in several games. Game id's: " +
                 $"[{string.Join(", ", gamesByUserId.Select(x => x.Id))}].");
@@ -51,12 +51,12 @@ public class GamePool
     //todo make another method for non-testing purposes
     //for testing
 #pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-    public void SetGame(Game? game) => Games[game.Id] = game;
+    public void AddGame(Game? game) => Games[game.Id] = game;
 #pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 
     public bool StartPlaying(int userId)
     {
-        var game = Games.Values.FirstOrDefault(x => !x.GuestId.HasValue);
+        var game = Games.Values.FirstOrDefault(x => x.Guest is null);
         //todo tdd ensure id uniqueness
         if (game is null)
         {

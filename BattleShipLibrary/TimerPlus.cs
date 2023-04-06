@@ -1,14 +1,11 @@
 ﻿namespace BattleshipLibrary;
 
-//todo possibility of infinite timers via configuration file.
-public class TimerPlus : IDisposable
+//todo possibility of infinite timers via configuration file (for manual testing)
+public class TimerWithDueTime : IDisposable
 {
-    //todo last parameter isn't needed
-    public TimerPlus(TimerCallback callback, object state, TimeSpan dueTime, TimeSpan period)
+    public TimerWithDueTime(Action callback, TimeSpan dueTime)
     {
-        timer = new System.Threading.Timer(Callback, state, dueTime, period);
-        realCallback = callback;
-        this.period = period;
+        timer = new System.Threading.Timer(_ => { callback(); }, new object(), dueTime, Timeout.InfiniteTimeSpan);
         next = DateTime.Now.Add(dueTime);
     }
 
@@ -20,14 +17,6 @@ public class TimerPlus : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private void Callback(object? state)
-    {
-        next = DateTime.Now.Add(period);
-        realCallback(state);
-    }
-
-    private readonly TimerCallback realCallback;
     private readonly System.Threading.Timer timer;
-    private readonly TimeSpan period;
-    private DateTime next;
+    private readonly DateTime next;
 }

@@ -94,7 +94,7 @@ public class WebAttackTests
         var result = controller.Attack(request);
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Hit));
-        var decks = game.GuestFleet.AssertSingle().Decks.Values;
+        var decks = game.Guest!.Fleet.AssertSingle().Decks.Values;
         Assert.That(decks, Has.Count.EqualTo(2));
         Assert.That(decks.Where(x => x.Location == new Cell(2,2)).AssertSingle().Destroyed, Is.True);
         Assert.That(decks.Where(x => x.Location == new Cell(2,3)).AssertSingle().Destroyed, Is.False);
@@ -112,8 +112,8 @@ public class WebAttackTests
         { location = new LocationModel { x = 1, y = 1 }, userId = 2 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
-        AssertSimpleDeckDestroyed(game.HostFleet!, true);
-        AssertSimpleDeckDestroyed(game.GuestFleet!, false);
+        AssertSimpleDeckDestroyed(game.Host!.Fleet!, true);
+        AssertSimpleDeckDestroyed(game.Guest!.Fleet!, false);
         Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
     }
 
@@ -128,8 +128,8 @@ public class WebAttackTests
             { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
-        AssertSimpleDeckDestroyed(game.HostFleet!, false);
-        AssertSimpleDeckDestroyed(game.GuestFleet!, true);
+        AssertSimpleDeckDestroyed(game.Host!.Fleet!, false);
+        AssertSimpleDeckDestroyed(game.Guest!.Fleet!, true);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
     }
 
@@ -140,7 +140,7 @@ public class WebAttackTests
         if (secondUserId != null) game.SetSecondUserId(secondUserId);
         game.SetState(state);
         modifier?.Invoke(game);
-        gamePool.SetGame(game);
+        gamePool.AddGame(game);
         return game;
     }
 

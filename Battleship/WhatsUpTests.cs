@@ -64,7 +64,7 @@ public class WhatsUpTests
     [TestCase(GameState.GuestWon, GameStateModel.OpponentWon)]
     public void WhatsupWhenWon(GameState gameState, GameStateModel expectedModel)
     {
-        testingEnvironment.CreateNewTestableGame(gameState);
+        testingEnvironment.CreateNewTestableGame(gameState, 1, 2);
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
 
@@ -153,7 +153,7 @@ public class WhatsUpTests
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
-        Assert.That(game.GuestId, Is.EqualTo(2));
+        Assert.That(game.Guest!.Id, Is.EqualTo(2));
     }
 
     [Test]

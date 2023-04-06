@@ -44,7 +44,7 @@ public class WebTests
     }
 
     [Test]
-    public void SettingSecondUserName()
+    public void SettingGuestName()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
         var request = SingleShipFleetCreationRequest(2, new[] { new LocationModel { x = 1, y = 1 } });
@@ -52,11 +52,11 @@ public class WebTests
 
         controller.CreateFleet(request);
 
-        Assert.That(game.GuestName, Is.EqualTo("Rachel"));
+        Assert.That(game.Guest!.Name, Is.EqualTo("Rachel"));
     }
 
     [Test]
-    public void SettingFirstUserName()
+    public void SettingHostName()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
         var request = SingleShipFleetCreationRequest(1, new[] {new LocationModel { x = 1, y = 1} });
@@ -64,7 +64,7 @@ public class WebTests
 
         controller.CreateFleet(request);
 
-        Assert.That(game.HostName, Is.EqualTo("Boris"));
+        Assert.That(game.Host!.Name, Is.EqualTo("Boris"));
     }
 
     [Test]
@@ -127,7 +127,7 @@ public class WebTests
     }
 
     [Test]
-    public void SecondPlayerCreatesFleet()
+    public void GuestCreatesFleet()
     {
         var testableGame = testingEnvironment.CreateNewTestableGame(
             GameState.OnePlayerCreatesFleet, 1, 2);
@@ -136,7 +136,7 @@ public class WebTests
             { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
 
         Assert.That(result, Is.False);
-        var ship = testableGame!.GuestFleet.AssertSingle();
+        var ship = testableGame!.Guest!.Fleet.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var pair = ship.Decks.AssertSingle();
         Assert.That(pair.Key, Is.EqualTo(new Cell(5,5)));
@@ -147,7 +147,7 @@ public class WebTests
     }
 
     [Test]
-    public void FirstPlayerCreatesFleet()
+    public void HostCreatesFleet()
     {
         var testableGame = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
 
@@ -155,7 +155,7 @@ public class WebTests
         { ships = new[] { NewSimpleShipForFleetCreationRequest(1, 1) }, userId = 1 });
 
         Assert.That(result, Is.True);
-        var ship = testableGame!.HostFleet.AssertSingle();
+        var ship = testableGame!.Host!.Fleet.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var deck = ship.Decks.AssertSingle();
         Assert.That(deck.Key, Is.EqualTo(new Cell(1, 1)));

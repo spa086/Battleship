@@ -70,7 +70,7 @@ public class Tests
 
         game.Attack(1, new Cell(2, 2));
 
-        Assert.That(game.TurnSecondsLeft, Is.Null);
+        Assert.That(game.TimerSecondsLeft, Is.Null);
         Assert.That(game.GetTimer(), Is.Null);
     }
 
@@ -85,7 +85,7 @@ public class Tests
 
         Assert.That(game.ItsOver, Is.True);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
-        Assert.That(game.TurnSecondsLeft, Is.LessThanOrEqualTo(0));
+        Assert.That(game.TimerSecondsLeft, Is.LessThanOrEqualTo(0));
     }
 
     [Test]
@@ -96,7 +96,7 @@ public class Tests
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
         Thread.Sleep(1000);
-        Assert.That(game.TurnSecondsLeft, Is.EqualTo(29));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(29));
     }
 
     [Test]
@@ -131,28 +131,23 @@ public class Tests
         game.CreateAndSaveShips(2, CreateSimpleShip(2,2));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
-        Assert.That(game.TurnSecondsLeft, Is.EqualTo(30));
-        var deck = game.GuestFleet.AssertSingle().Decks.AssertSingle();
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
+        var deck = game.Guest!.Fleet.AssertSingle().Decks.AssertSingle();
         Assert.That(deck.Key, Is.EqualTo(new Cell(2, 2)));
         Assert.That(deck.Value.Destroyed, Is.False);
         Assert.That(deck.Value.Location, Is.EqualTo(new Cell(2, 2)));
     }
 
-    //todo move below
-    private static Ship[] CreateSimpleShip(int x, int y)
-    {
-        return new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(x => x.Location) } };
-    }
-
     [Test]
     public void SecondPlayerJoins()
     {
-        gamePool.SetGame(new Game(1));
+        var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1, null);
+        gamePool.AddGame(game);
 
         Assert.That(gamePool.StartPlaying(1), Is.True);
 
-        Assert.That(gamePool.Games.Values.Single().State, 
-            Is.EqualTo(GameState.BothPlayersCreateFleets));
+        Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(60));
     }
 
     [Test]
@@ -175,18 +170,23 @@ public class Tests
         game.CreateAndSaveShips(1, new[] { new Ship { Decks = decks } });
 
         //todo use separate collection
-        var ship = game.HostFleet!.AssertSingle();
+        var ship = game.Host!.Fleet!.AssertSingle();
         Assert.That(decks, Has.Count.EqualTo(2));
         var orderedDecks = decks.Values.OrderBy(x => x.Location.y);
         AssertNonDestroyedDeck(orderedDecks.First(), 1, 1);
         AssertNonDestroyedDeck(orderedDecks.Last(), 1, 2);
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
-        Assert.That(game.TurnSecondsLeft, Is.Null);
+        Assert.That(game.TimerSecondsLeft, Is.Null);
     }
 
     private static void AssertNonDestroyedDeck(Deck deck, int x, int y)
     {
         Assert.That(deck.Destroyed, Is.False);
         Assert.That(deck.Location, Is.EqualTo(new Cell(x, y)));
+    }
+
+    private static Ship[] CreateSimpleShip(int x, int y)
+    {
+        return new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(x => x.Location) } };
     }
 }

@@ -9,11 +9,12 @@ public class TestableGame : Game
 
     }
 
-    public TimerPlus? Timer => turnTimer;
+    public TimerWithDueTime? Timer => timer;
 
-    public TestableGame SetSecondUserId(int? secondUserId = null)
+    public TestableGame SetSecondUserId(int? guestId = null)
     {
-        GuestId = secondUserId;
+        if(guestId is null) Guest = null;
+        else if (Guest is null) Guest = new User { Id = guestId.Value };
         return this;
     }
 
@@ -23,14 +24,14 @@ public class TestableGame : Game
         return this;
     }
 
-    public TimerPlus? GetTimer() => turnTimer;
+    public TimerWithDueTime? GetTimer() => timer;
 
     public int? SetupTurnTime { get; set; }
 
     public void SetupExcludedLocations(int userId, params Cell[] locations)
     {
-        if (userId == HostId) hostExcludedLocations = CreateLocationList(locations);
-        else if (userId == GuestId) guestExcludedLocations = CreateLocationList(locations);
+        if (userId == Host.Id) Host.ExcludedLocations = CreateLocationList(locations);
+        else if (userId == Guest!.Id) Guest.ExcludedLocations = CreateLocationList(locations);
         else throw new Exception("Incorrect userId");
     }
 
@@ -40,49 +41,49 @@ public class TestableGame : Game
 
     public void StandardSetup()
     {
-        hostExcludedLocations = CreateLocationList();
-        guestExcludedLocations = CreateLocationList();
+        Host.ExcludedLocations = CreateLocationList();
+        Guest = new User { ExcludedLocations = CreateLocationList() };
         State = GameState.HostTurn;
         SetupTurnTime = 30;
-        SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  
-            new[] { new Cell(3, 3) }, 2);
+        SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  new[] { new Cell(3, 3) }, 2);
     }
 
     public void SetupFleets(IEnumerable<Ship> fleet1, IEnumerable<Ship> fleet2)
     {
-        hostFleet = fleet1.ToArray();
-        guestFleet = fleet2.ToArray();
+        Host.Fleet = fleet1.ToArray();
+        Guest!.Fleet = fleet2.ToArray();
     }
 
     public void DestroyFleet(int userId)
     {
-        if(userId == HostId)
-            foreach (var ship in HostFleet!)
-                foreach (var deck in ship.Decks.Values)
-                    deck.Destroyed = true;
+        if(userId == Host.Id)
+            foreach (var ship in Host.Fleet!)
+                foreach (var deck in ship.Decks.Values) deck.Destroyed = true;
     }
 
-    public void SetupNewTurn(int secondsLeft) => RenewTurnTimer(secondsLeft);
+    public void SetupNewTurn(int secondsLeft) => RenewBattleTimer(secondsLeft);
 
     public void SetupUserName(int userId, string? userName)
     {
-        if (userId == HostId) HostName = userName;
-        else if (userId == GuestId) GuestName = userName;
+        if (userId == Host.Id) Host.Name = userName;
+        else if (userId == Guest!.Id) Guest.Name = userName;
         else throw new Exception($"User [{userId}] is not found.");
     }
         
 
-    public void SetupSimpleFleets(Cell[]? deckLocations1, int firstUserId,
-        Cell[]? deckLocations2, int? secondUserId)
+    public void SetupSimpleFleets(Cell[]? hostDeckLocations, int hostId,
+        Cell[]? giestDeckLocations, int? guestId)
     {
-        hostFleet = CreateSimpleFleet(deckLocations1);
-        HostId = firstUserId;
-        guestFleet = CreateSimpleFleet(deckLocations2);
-        GuestId = secondUserId;
+        Host!.Fleet = CreateSimpleFleet(hostDeckLocations);
+        Host.Id = hostId;
+        if (guestId.HasValue && Guest is null) Guest = new User();
+        Guest!.Fleet = CreateSimpleFleet(giestDeckLocations);
+        if (guestId is null) Guest = null;
+        else Guest.Id = guestId.Value;
     }
 
-    protected override void RenewTurnTimer(int secondsLeft = 30) => 
-        RenewTimerInternal(SetupTurnTime ?? secondsLeft);
+    protected override void RenewBattleTimer(int secondsLeft = 30) => 
+        RenewBattleTimerInternal(SetupTurnTime ?? secondsLeft);
 
     private static Ship[]? CreateSimpleFleet(Cell[]? deckLocations)
     {
