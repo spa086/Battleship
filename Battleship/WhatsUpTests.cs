@@ -29,6 +29,16 @@ public class WhatsUpTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
+    public void CancelledGame()
+    {
+        testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 1, 2);
+
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
+
+        Assert.That(result.gameState, Is.EqualTo(GameStateModel.Cancelled));
+    }
+
+    [Test]
     public void UserNameIsReturned()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2, true);

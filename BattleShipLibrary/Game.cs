@@ -34,7 +34,8 @@ public class Game
     public bool CreatingFleets =>
         State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
 
-    public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon;
+    public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon ||
+        State == GameState.Cancelled;
 
     //todo tdd
     public void DisposeOfTimer()
@@ -106,28 +107,11 @@ public class Game
     }
 
     //todo was it really needed to make it virtual?
-    protected virtual void SetShipsCreationTimer(int secondsLeft = 30)
-    {
-        timer?.Dispose();
-        timer = new TimerWithDueTime(() =>
-        {
-            if(Host.Fleet is not null && Guest!.Fleet is null) SetTechnicalWinner(true);
-            else if (Host.Fleet is null && Guest!.Fleet is not null) SetTechnicalWinner(false);
-            //todo tdd what if both fleets are still absent?
-            //todo throw if unknown situation
-        }, TimeSpan.FromSeconds(secondsLeft));
-    }
+    protected virtual void SetShipsCreationTimer(int secondsLeft = 30) =>
+        SetShipsCreationTimerInternal(secondsLeft);
 
     protected virtual void RenewBattleTimer(int secondsLeft = 30) => 
         RenewBattleTimerInternal(secondsLeft);
-
-    //todo mb I shouldn't call it from test setups
-    protected void RenewBattleTimerInternal(int secondsLeft = 30)
-    {
-        timer?.Dispose();
-        timer = new TimerWithDueTime(() => State = WhoWillWinWhenTurnTimeEnds(),
-            TimeSpan.FromSeconds(secondsLeft));
-    }
 
     protected GameState WhoWillWinWhenTurnTimeEnds() =>
         State == GameState.HostTurn ? GameState.GuestWon : GameState.HostWon;
@@ -147,6 +131,30 @@ public class Game
             if(player1Turn && hit || !player1Turn && !hit) State = GameState.HostTurn;
             if(!player1Turn && hit || player1Turn && !hit) State = GameState.GuestTurn;
         }
+    }
+
+    private void SetShipsCreationTimerInternal(int secondsLeft = 30)
+    {
+        timer?.Dispose();
+        timer = new TimerWithDueTime(() =>
+        {
+            //todo tdd first 2 branches of this if statement
+            if (Host.Fleet is not null && Guest!.Fleet is null) SetTechnicalWinner(true);
+            else if (Host.Fleet is null && Guest!.Fleet is not null) SetTechnicalWinner(false);
+            else if (Host.Fleet is null && Guest!.Fleet is null)
+            {
+                DisposeOfTimer();
+                State = GameState.Cancelled;
+            }
+        }, TimeSpan.FromSeconds(secondsLeft));
+    }
+
+    //todo mb I shouldn't call it from test setups
+    private void RenewBattleTimerInternal(int secondsLeft = 30)
+    {
+        timer?.Dispose();
+        timer = new TimerWithDueTime(() => State = WhoWillWinWhenTurnTimeEnds(),
+            TimeSpan.FromSeconds(secondsLeft));
     }
 
     private static void ProcessHit(Cell attackedLocation, Ship? attackedShip, ref AttackResult result)

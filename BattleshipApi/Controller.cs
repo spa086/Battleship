@@ -134,6 +134,7 @@ public class Controller
         if (game.State == GameState.HostWon && game.Guest!.Id == request.userId ||
             game.State == GameState.GuestWon && game.Host.Id == request.userId)
             return GameStateModel.OpponentWon;
+        if (game.State == GameState.Cancelled) return GameStateModel.Cancelled;
         throw new Exception($"Unknown situation. State = [{game.State}], " +
             $"host id = [{game.Host.Id}], guest id = [{game.Guest!.Id}], " +
             $"requester user id = [{request.userId}].");

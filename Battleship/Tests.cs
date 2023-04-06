@@ -142,12 +142,15 @@ public class Tests
     public void SecondPlayerJoins()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1, null);
+        game.SetupTurnTime = 1;
         gamePool.AddGame(game);
 
         Assert.That(gamePool.StartPlaying(1), Is.True);
 
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
-        Assert.That(game.TimerSecondsLeft, Is.EqualTo(60));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(1));
+        Thread.Sleep(1100); //todo can we do without sleeping?
+        Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
     }
 
     [Test]
@@ -185,8 +188,6 @@ public class Tests
         Assert.That(deck.Location, Is.EqualTo(new Cell(x, y)));
     }
 
-    private static Ship[] CreateSimpleShip(int x, int y)
-    {
-        return new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(x => x.Location) } };
-    }
+    private static Ship[] CreateSimpleShip(int x, int y) => 
+        new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(x => x.Location) } };
 }

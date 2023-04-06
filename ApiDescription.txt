@@ -5,7 +5,7 @@ Request object:
 }
 Returns object:
 {
-	gameState - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn", "YouWon", "OpponentWon" }
+	gameState - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn", "YouWon", "OpponentWon", "Cancelled" }
 	myFleet (optional) - array of objects:
 	{
 		userId - integer.

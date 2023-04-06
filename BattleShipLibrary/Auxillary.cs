@@ -17,7 +17,8 @@ public enum GameState
     HostTurn,
     GuestTurn,
     HostWon,
-    GuestWon
+    GuestWon,
+    Cancelled
 }
 
 public enum AttackResult

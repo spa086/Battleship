@@ -83,7 +83,10 @@ public class TestableGame : Game
     }
 
     protected override void RenewBattleTimer(int secondsLeft = 30) => 
-        RenewBattleTimerInternal(SetupTurnTime ?? secondsLeft);
+        base.RenewBattleTimer(SetupTurnTime ?? secondsLeft);
+
+    protected override void SetShipsCreationTimer(int secondsLeft = 30) =>
+        base.SetShipsCreationTimer(SetupTurnTime ?? secondsLeft);
 
     private static Ship[]? CreateSimpleFleet(Cell[]? deckLocations)
     {

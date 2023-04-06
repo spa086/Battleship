@@ -13,6 +13,7 @@ public class TestingEnvironment
         this.gamePool = gamePool;
     }
 
+    //todo refactor long method
     public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
         int? firstUserId = null, int? secondUserId = null, bool firstPlayerHasFleet = true)
     {
@@ -26,11 +27,13 @@ public class TestingEnvironment
                 game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
                 game.SetupNewTurn(30);
             }
-            else if (game.CreatingFleets) 
-                game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, 1, 
+            else if (game.CreatingFleets)
+                game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, 1,
                     firstPlayerHasFleet ? null : SimpleCellArray(2), 2);
             else if (game.ItsOver) SetupGameOver(state, game);
         }
+        else if (game.State == GameState.WaitingForGuest) { }
+        else throw new Exception("Unknown situation.");
         return game;
     }
 
@@ -38,7 +41,9 @@ public class TestingEnvironment
     {
         game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
         if (state == GameState.HostWon) game.DestroyFleet(2);
-        else game.DestroyFleet(1);
+        else if (state == GameState.GuestWon) game.DestroyFleet(1);
+        else if (state == GameState.Cancelled) { }
+        else throw new Exception($"Unknown state: [{state}].");
     }
 
     private static Cell[] SimpleCellArray(int content)
@@ -57,4 +62,3 @@ public static class Extensions
         return collection.Single();
     }
 }
-

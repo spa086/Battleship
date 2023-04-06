@@ -108,5 +108,6 @@ public enum GameStateModel
     YourTurn,
     OpponentsTurn,
     YouWon,
-    OpponentWon
+    OpponentWon,
+    Cancelled
 }
