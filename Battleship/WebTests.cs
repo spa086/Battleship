@@ -35,11 +35,12 @@ public class WebTests
     public void AbortionWhenVictoryHasAlreadyHappened()
     {
         gamePool.ClearGames();
-        testingEnvironment.CreateNewTestableGame(GameState.HostWon, 1, 2);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostWon, 1, 2);
 
         controller.AbortGame(1);
 
         Assert.That(gamePool.Games, Has.Count.Zero);
+        Assert.That(game.Timer, Is.Null);
     }
 
     [Test]

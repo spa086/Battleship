@@ -3,6 +3,7 @@
 //todo possibility of infinite timers via configuration file.
 public class TimerPlus : IDisposable
 {
+    //todo last parameter isn't needed
     public TimerPlus(TimerCallback callback, object state, TimeSpan dueTime, TimeSpan period)
     {
         timer = new System.Threading.Timer(Callback, state, dueTime, period);

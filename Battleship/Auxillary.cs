@@ -36,6 +36,7 @@ public class TestingEnvironment
 
     private static void SetupGameOver(GameState state, TestableGame game)
     {
+        game.SetupNewTurn(0);
         game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
         if (state == GameState.HostWon) game.DestroyFleet(2);
         else game.DestroyFleet(1);

@@ -17,9 +17,9 @@ public class Controller
         Log.ger.Info($"User id=[{userId}] wants to abort game.");
         var game = gamePool.GetGame(userId);
         if (game is not null)
-        {
             if (game.State == GameState.HostWon || game.State == GameState.GuestWon)
             {
+                game.DisposeOfTimer();
                 gamePool.Games.Remove(game.Id);
                 Log.ger.Info($"Game id=[{game.Id}] is removed.");
             }
@@ -28,7 +28,6 @@ public class Controller
                 game.SetTechnicalWinner(game.GuestId == userId);
                 Log.ger.Info($"Game id=[{game.Id}] is over. User id=[{userId}] has surrendered.");
             }
-        }
         else Log.ger.Info($"Game for abortion not found by user id=[{userId}].");
     }
 

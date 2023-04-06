@@ -3,7 +3,6 @@ using System.Timers;
 
 namespace BattleshipLibrary;
 
-//todo make it IDisposable
 public class Game
 {
     public Game(int user1Id)
@@ -48,14 +47,20 @@ public class Game
     public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon;
 
     //todo tdd
-    public void SetTechnicalWinner(bool player1Won)
+    public void DisposeOfTimer()
     {
         turnTimer?.Dispose();
         turnTimer = null;
+    }
+
+    //todo tdd
+    public void SetTechnicalWinner(bool player1Won)
+    {
+        DisposeOfTimer();
         State = player1Won ? GameState.HostWon : GameState.GuestWon;
     }
 
-    //todo test
+    //todo tdd
     public void Start(int secondUserId)
     {
         State = GameState.BothPlayersCreateFleets;
@@ -110,6 +115,7 @@ public class Game
 
     protected virtual void RenewTurnTimer(int secondsLeft = 30) => RenewTimerInternal(secondsLeft);
 
+    //todo mb I shouldn't call it from test setups
     protected void RenewTimerInternal(int secondsLeft = 30)
     {
         turnTimer?.Dispose();
@@ -127,8 +133,7 @@ public class Game
         {
             State = player1Turn ? GameState.HostWon : GameState.GuestWon;
             result = AttackResult.Win;
-            turnTimer?.Dispose();
-            turnTimer = null;
+            DisposeOfTimer();
         }
         else
         {
