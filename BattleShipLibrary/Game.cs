@@ -3,6 +3,7 @@ using System.Timers;
 
 namespace BattleshipLibrary;
 
+//todo refactor long file
 public class Game
 {
     public Game(int user1Id)
@@ -17,6 +18,7 @@ public class Game
     //todo tdd this field
     public int Id { get; private set; }
 
+    //todo test
     public GameState State
     {
         get => state; 
@@ -27,13 +29,19 @@ public class Game
             state = value;
         }
     }
+
+    //todo test
     public int? TimerSecondsLeft =>
         timer is null ? null : (int)Math.Ceiling(timer.DueTime.TotalMilliseconds / 1000f);
 
+    //todo test
     public bool BattleOngoing => State == GameState.HostTurn || State == GameState.GuestTurn;
+
+    //todo test
     public bool CreatingFleets =>
         State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
 
+    //todo test
     public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon ||
         State == GameState.Cancelled;
 
@@ -44,14 +52,14 @@ public class Game
         timer = null;
     }
 
-    //todo tdd
+    //todo test
     public void SetTechnicalWinner(bool hostWon)
     {
         DisposeOfTimer();
         State = hostWon ? GameState.HostWon : GameState.GuestWon;
     }
 
-    //todo tdd
+    //todo test
     public void Start(int guestId)
     {
         State = GameState.BothPlayersCreateFleets;

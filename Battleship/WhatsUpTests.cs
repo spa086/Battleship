@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace BattleshipTests;
 
+//todo refactor long method
 public class WhatsUpTests
 {
     private readonly Controller controller;
@@ -27,6 +28,20 @@ public class WhatsUpTests
 
     [SetUp]
     public void SetUp() => gamePool.ClearGames();
+
+    [TestCase(GameState.GuestWon)]
+    [TestCase(GameState.HostWon)]
+    public void GameInVictoryStateButWithoutShips(GameState state)
+    {
+        var game = testingEnvironment.CreateNewTestableGame(state, 1, 2, false);
+        game.SetupFleets(null, null);
+
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
+
+        var expectedState = 
+            state == GameState.HostWon ? GameStateModel.YouWon : GameStateModel.OpponentWon;
+        Assert.That(result.gameState, Is.EqualTo(expectedState));
+    }
 
     [Test]
     public void CancelledGame()
@@ -82,15 +97,17 @@ public class WhatsUpTests
         Assert.That(result.gameState, Is.EqualTo(expectedModel));
     }
 
+    //todo make Host-Guest enum??
+
     [TestCase(GameState.OnePlayerCreatesFleet, true)]
     [TestCase(GameState.OnePlayerCreatesFleet, false)]
     [TestCase(GameState.BothPlayersCreateFleets, true)]
     [TestCase(GameState.BothPlayersCreateFleets, false)]
-    public void WhatsUpWhileCreatingShips(GameState state, bool firstPlayer)
+    public void WhatsUpWhileCreatingShips(GameState state, bool forHost)
     {
         var game = testingEnvironment.CreateNewTestableGame(state, 1, 2);
 
-        var result = controller.WhatsUp(CreateWhatsUpRequestModel(firstPlayer ? 1 : 2));
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(forHost ? 1 : 2));
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
         Assert.That(result.gameId, Is.EqualTo(game.Id));

@@ -48,10 +48,10 @@ public class TestableGame : Game
         SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  new[] { new Cell(3, 3) }, 2);
     }
 
-    public void SetupFleets(IEnumerable<Ship> fleet1, IEnumerable<Ship> fleet2)
+    public void SetupFleets(IEnumerable<Ship>? fleet1, IEnumerable<Ship>? fleet2)
     {
-        Host.Fleet = fleet1.ToArray();
-        Guest!.Fleet = fleet2.ToArray();
+        Host.Fleet = fleet1?.ToArray();
+        Guest!.Fleet = fleet2?.ToArray();
     }
 
     public void DestroyFleet(int userId)
