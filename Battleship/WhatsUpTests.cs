@@ -78,7 +78,7 @@ public class WhatsUpTests
     public void SecondPlayerCreatesFleetFirst()
     {
         testingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 
-            firstPlayerHasFleet: false);
+            hostHasFleet: false);
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(2));
   

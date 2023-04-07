@@ -15,7 +15,7 @@ public class TestingEnvironment
 
     //todo refactor long method
     public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
-        int? firstUserId = null, int? secondUserId = null, bool firstPlayerHasFleet = true)
+        int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true)
     {
         var game = new TestableGame(firstUserId ?? 1).SetState(state);
         gamePool.AddGame(game);
@@ -27,7 +27,7 @@ public class TestingEnvironment
                 game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
                 game.SetupBattleTimer(30);
             }
-            else if (game.CreatingFleets) SetupGameInCreatingFleets(firstPlayerHasFleet, game);
+            else if (game.CreatingFleets) SetupGameInCreatingFleets(hostHasFleet, game);
             else if (game.ItsOver) SetupGameOver(state, game);
         }
         else if (game.State == GameState.WaitingForGuest) { }
