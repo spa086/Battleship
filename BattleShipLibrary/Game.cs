@@ -118,7 +118,7 @@ public class Game
         SetTimerWithAction(() =>
         {
             State = GameState.OnePlayerCreatesFleet;
-            Guest = new User { IsBot = true, Fleet = aiShips };
+            Guest = new User { IsBot = true, Fleet = aiShips, Name = "General Chaos" };
         }, secondsLeft);
 
     protected virtual void SetShipsCreationTimer(int secondsLeft = 30) =>
@@ -196,7 +196,7 @@ public class Game
     private static void AssertThatShotIsInFieldBorders(Cell attackedLocation)
     {
         if (attackedLocation.x < 0 || attackedLocation.x > 9 ||
-                    attackedLocation.y < 0 || attackedLocation.y > 9)
+            attackedLocation.y < 0 || attackedLocation.y > 9)
             throw new Exception(
                 "Target cannot be outside the game field. Available coordinates are 0-9.");
     }

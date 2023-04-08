@@ -23,6 +23,8 @@ public class TestingEnvironment
         this.gamePool = gamePool;
     }
 
+    public void SleepMinimalTime() => Thread.Sleep(1100);
+
     public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
         int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true)
     {

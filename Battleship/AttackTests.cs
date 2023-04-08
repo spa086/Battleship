@@ -11,7 +11,6 @@ public class AttackTests
     private TestableGame game = new(1);
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
-    private readonly TestRandomFleet testRandomFleet;
 
     public AttackTests()
     {
@@ -25,7 +24,6 @@ public class AttackTests
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
-        testRandomFleet = (serviceProvider.GetService<IRandomFleet>() as TestRandomFleet)!;
     }
 
     [SetUp]
@@ -55,8 +53,8 @@ public class AttackTests
         game.SetupTurnTime = 1;
 
         game.Attack(1, new Cell(1, 1));
-        Thread.Sleep(1100);
 
+        testingEnvironment.SleepMinimalTime();
         Assert.That(game.ItsOver, Is.True);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
         Assert.That(game.TimerSecondsLeft, Is.LessThanOrEqualTo(0));

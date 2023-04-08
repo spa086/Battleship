@@ -50,13 +50,13 @@ public class Tests
 
         gamePool.StartPlaying(1);
 
-        //todo refactor 3 times
-        Thread.Sleep(1100);
+        testingEnvironment.SleepMinimalTime();
         var game = gamePool.Games.Values.Single();
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
         var botUser = game.Guest;
         Assert.That(botUser, Is.Not.Null);
         Assert.That(botUser.IsBot);
+        Assert.That(botUser.Name, Is.EqualTo("General Chaos"));
         var ship = botUser.Fleet.AssertSingle();
         var deck = ship.Decks.Values.AssertSingle();
         Assert.That(deck.Destroyed, Is.False);
@@ -92,7 +92,7 @@ public class Tests
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
-        Thread.Sleep(1000);
+        testingEnvironment.SleepMinimalTime();
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(29));
     }
 
@@ -146,7 +146,7 @@ public class Tests
 
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(1));
-        Thread.Sleep(1100); //todo can we do without sleeping?
+        testingEnvironment.SleepMinimalTime();
         Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
     }
 
