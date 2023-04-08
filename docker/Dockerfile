@@ -1,5 +1,5 @@
 # Set the base image as the .NET runtime
-FROM mcr.microsoft.com/dotnet/runtime:7.0-bullseye-slim
+FROM mcr.microsoft.com/dotnet/runtime:7.0.4-jammy
 
 # Set the working directory
 WORKDIR /app
