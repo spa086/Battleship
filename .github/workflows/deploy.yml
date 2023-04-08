@@ -21,7 +21,7 @@ jobs:
         dotnet-version: 7.0.x
 
     - name: Verify path to project file
-      run: ls /home/runner/work/Battleship/Battleship/BattleShipLibrary/BattleshipLibrary.csproj
+      run: ls /home/runner/work/Battleship/Battleship/BattleShipLibrary/BattleShipLibrary.csproj
 
     - name: Restore dependencies
       run: dotnet restore Battleship.sln      
