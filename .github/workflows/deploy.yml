@@ -48,7 +48,7 @@ jobs:
       run: ls -R
       
     - name: Build Docker image
-      run: docker build -t game-server:${{ github.sha }} .
+      run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
 
     - name: Install and setup rsync
       run: |
