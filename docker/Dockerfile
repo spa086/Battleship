@@ -1,5 +1,5 @@
-# Set the base image as the .NET runtime for Ubuntu 22.04
-FROM mcr.microsoft.com/dotnet/runtime:7.0-focal
+# Set the base image as the .NET runtime
+FROM mcr.microsoft.com/dotnet/runtime:7.0-bullseye-slim
 
 # Set the working directory
 WORKDIR /app
@@ -11,4 +11,4 @@ COPY ./publish /app
 EXPOSE 80
 
 # Start the application
-ENTRYPOINT ["dotnet", "BattleShipLibrary.dll"]
+ENTRYPOINT ["dotnet", "BattleshipApi.dll"]
