@@ -34,7 +34,7 @@ jobs:
       with:
         host: your-digital-ocean-ip-address
         username: your-digital-ocean-username
-        ssh_private_key: |-
+        ssh-key: |-
         -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABCDcg94q3
 qmUv6NzgOegUcwAAAAEAAAAAEAAAGXAAAAB3NzaC1yc2EAAAADAQABAAABgQDEKDFlkFHN
@@ -82,7 +82,7 @@ FkdU23hhrQR6IWx1BGytW3BYKmZPuzcsdvVHKm+98a0lOOV9A7OoYGzfRYANNyivFgT1EU
       with:
         host: your-digital-ocean-ip-address
         username: your-digital-ocean-username
-        ssh_private_key: |-
+        ssh-key: |-
         -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABCDcg94q3
 qmUv6NzgOegUcwAAAAEAAAAAEAAAGXAAAAB3NzaC1yc2EAAAADAQABAAABgQDEKDFlkFHN
