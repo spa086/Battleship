@@ -44,6 +44,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y docker-ce
 
+    - name: List repository files
+      run: ls -R
+      
     - name: Build Docker image
       run: docker build -t game-server:${{ github.sha }} .
 
