@@ -20,17 +20,20 @@ jobs:
       with:
         dotnet-version: 7.0.x
 
-#    - name: Restore dependencies
-#      run: dotnet restore Battleship.sln
-      
-#    - name: Build .NET app
-#      run: dotnet build --configuration release --no-restore
+    - name: Verify path to project file
+      run: ls /home/runner/work/Battleship/Battleship/BattleShipLibrary/BattleshipLibrary.csproj
 
-    - name: Check project file existence
-      run: ls /home/runner/work/Battleship/Battleship/BattleShipLibrary/BattleShipLibrary.csproj
+    - name: Restore dependencies
+      run: dotnet restore Battleship.sln      
+
+    - name: Build .NET app
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Publish .NET app
+      run: dotnet publish --configuration Release --no-restore --output ./publish
       
     - name: Build .NET app
-      run: dotnet publish --configuration release -r ubuntu.22.04-x64 --self-contained true
+      run: dotnet publish --configuration Release -r ubuntu.22.04-x64 --self-contained true
       
     - name: Install Docker
       run: |
