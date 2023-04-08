@@ -19,7 +19,7 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore Battleship.sln
 
     - name: Build .NET app
       run: dotnet build --configuration Release --no-restore
