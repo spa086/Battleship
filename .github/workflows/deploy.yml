@@ -45,13 +45,6 @@ jobs:
       
     - name: Build Docker image
       run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
-      
-    - name: Start SSH agent
-      run: |
-        eval "$(ssh-agent -s)"
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-        chmod 600 private_key
-        echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add private_key -
     
     - name: Install sshpass
       run: sudo apt-get install -y sshpass
