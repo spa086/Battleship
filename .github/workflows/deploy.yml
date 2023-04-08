@@ -1,177 +1,61 @@
-name: .NET
+name: Deploy Star battle to production
 
 on:
   push:
-    branches: [ "release" ]
-  pull_request:
-    branches: [ "release" ]
+    branches:
+      - release
 
 jobs:
-  build:
-
+  build_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
+
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
+
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+
+    - name: Build .NET app
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test .NET app
+      run: dotnet test --no-restore --verbosity normal
+
+    - name: Publish .NET app
+      run: dotnet publish --configuration Release --no-restore --output ./publish
+
+    - name: Install Docker
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        sudo apt-get update
+        sudo apt-get install -y docker-ce
+
     - name: Build Docker image
+      run: docker build -t game-server:${{ github.sha }} .
+
+    - name: Install and setup rsync
       run: |
-        docker build -t your-docker-image-name .
-    - name: Save Docker image to file
+        sudo apt-get update
+        sudo apt-get install -y rsync
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        chmod 600 private_key
+
+    - name: Transfer Docker image to DigitalOcean instance
       run: |
-        docker save your-docker-image-name > image.tar
-    - name: Copy Docker image to remote DigitalOcean instance
-      uses: appleboy/scp-action@master
-      with:
-        host: your-digital-ocean-ip-address
-        username: your-digital-ocean-username
-        ssh-key: |-
-        -----BEGIN OPENSSH PRIVATE KEY-----
-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
-9MTzfIrwkvnUE/wVlDqcHy2FHb4=
------END OPENSSH PRIVATE KEY-----
+        docker save game-server:${{ github.sha }} | gzip > game-server.tar.gz
+        rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
 
-        source: ./image.tar
-        target: /tmp/image.tar
-    - name: Load Docker image on remote DigitalOcean instance
-      uses: appleboy/ssh-action@master
-      with:
-        host: your-digital-ocean-ip-address
-        username: your-digital-ocean-username
-        ssh-key: |-
-        -----BEGIN OPENSSH PRIVATE KEY-----
-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
-9MTzfIrwkvnUE/wVlDqcHy2FHb4=
------END OPENSSH PRIVATE KEY-----
-
-        script: |
-          docker load -i /tmp/image.tar
-    - name: SSH into DigitalOcean Droplet
-      uses: appleboy/ssh-action@master
-      with:
-        host: your-digital-ocean-ip-address
-        username: your-digital-ocean-username
-        ssh_private_key: |-
-        -----BEGIN OPENSSH PRIVATE KEY-----
-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
-9MTzfIrwkvnUE/wVlDqcHy2FHb4=
------END OPENSSH PRIVATE KEY-----
-
-        script: |
-          docker stop your-docker-container-name || true
-          docker rm your-docker-container-name || true
-          docker run -d -p 80:80 --name your-docker-container-name your-docker-image-name
+    - name: Deploy to DigitalOcean
+      run: |
+        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker load < /tmp/game-server.tar.gz"
+        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker stop game-server || true && docker rm game-server || true"
+        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker run -d -p 80:80 --name game-server game-server:${{ github.sha }}"
