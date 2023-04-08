@@ -25,6 +25,9 @@ jobs:
       
 #    - name: Build .NET app
 #      run: dotnet build --configuration release --no-restore
+
+    - name: Check project file existence
+      run: ls /home/runner/work/Battleship/Battleship/BattleShipLibrary/BattleshipLibrary.csproj
       
     - name: Build .NET app
       run: dotnet publish --configuration release -r ubuntu.22.04-x64 --self-contained true
