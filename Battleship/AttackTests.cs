@@ -4,12 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BattleshipTests;
 
-//lines 105 chars
-//methods 20 lines
-//files 200 lines
-//no partial
-//folder 5 files
-
 public class AttackTests
 {
     //todo tdd throw if any location list is uninitialized
@@ -17,17 +11,21 @@ public class AttackTests
     private TestableGame game = new(1);
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
+    private readonly TestRandomFleet testRandomFleet;
 
     public AttackTests()
     {
+        //todo 3 times
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
+        services.AddSingleton<IRandomFleet, TestRandomFleet>();
 
         var serviceProvider = services.BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
+        testRandomFleet = (serviceProvider.GetService<IRandomFleet>() as TestRandomFleet)!;
     }
 
     [SetUp]
@@ -35,6 +33,33 @@ public class AttackTests
     {
         gamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void StoppingTimerWhenLost()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupBattleTimer(100);
+
+        game.Attack(1, new Cell(2, 2));
+
+        Assert.That(game.TimerSecondsLeft, Is.Null);
+        Assert.That(game.GetTimer(), Is.Null);
+    }
+
+    [Test]
+    public void LosingWhenTimeIsOut()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.SetupTurnTime = 1;
+
+        game.Attack(1, new Cell(1, 1));
+        Thread.Sleep(1100);
+
+        Assert.That(game.ItsOver, Is.True);
+        Assert.That(game.State, Is.EqualTo(GameState.HostWon));
+        Assert.That(game.TimerSecondsLeft, Is.LessThanOrEqualTo(0));
     }
 
     [Test]

@@ -3,6 +3,19 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BattleshipLibrary;
 
+public class RandomFleet : IRandomFleet
+{
+    public Ship[] Generate()
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public interface IRandomFleet
+{
+    Ship[] Generate();
+}
+
 //todo use DI instead
 public static class Log
 {
@@ -28,12 +41,18 @@ public enum AttackResult
     Win
 }
 
+//todo inherit TestableGamePool
 public class GamePool
 {
-    public GamePool()
-    {
+    private readonly IRandomFleet randomFleet;
 
+    public GamePool(IRandomFleet randomFleet)
+    {
+        this.randomFleet = randomFleet;
     }
+
+    //for testing
+    public int? SetupMatchingTimeSeconds { get; set; }
 
     public Game? GetGame(int userId)
     {
@@ -45,7 +64,7 @@ public class GamePool
         return gamesByUserId.SingleOrDefault();
     }
 
-    //todo this was for testing - now we need to make it right
+    //for testing
     public void ClearGames() => Games.Clear();
 
     //todo if null do remove instead of assigning
@@ -61,7 +80,8 @@ public class GamePool
         //todo tdd ensure id uniqueness
         if (game is null)
         {
-            var newGame = new Game(userId);
+            var aiShips = randomFleet.Generate();
+            var newGame = new Game(userId, aiShips, SetupMatchingTimeSeconds ?? 30);
             Games[newGame.Id] = newGame;
             return false;
         }

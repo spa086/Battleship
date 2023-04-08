@@ -4,6 +4,16 @@ using NUnit.Framework;
 
 namespace BattleshipTests;
 
+public class TestRandomFleet : IRandomFleet
+{
+    public Ship[]? SetupAiShips { get; set; }
+
+    public Ship[] Generate()
+    {
+        return SetupAiShips ?? throw new Exception($"No ships were set up.");
+    }
+}
+
 public class TestingEnvironment
 {
     private readonly GamePool gamePool;
@@ -13,26 +23,28 @@ public class TestingEnvironment
         this.gamePool = gamePool;
     }
 
-    //todo refactor long method
     public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
         int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true)
     {
         var game = new TestableGame(firstUserId ?? 1).SetState(state);
         gamePool.AddGame(game);
         if (game.CreatingFleets || game.BattleOngoing || game.ItsOver)
-        {
-            game.SetSecondUserId(secondUserId);
-            if (game.BattleOngoing)
-            {
-                game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
-                game.SetupBattleTimer(30);
-            }
-            else if (game.CreatingFleets) SetupGameInCreatingFleets(hostHasFleet, game);
-            else if (game.ItsOver) SetupGameOver(state, game);
-        }
-        else if (game.State == GameState.WaitingForGuest) { }
-        else throw new Exception("Unknown situation.");
+            MutateGame(game, state, secondUserId, hostHasFleet);
+        else if (game.State != GameState.WaitingForGuest) throw new Exception("Unknown situation.");
         return game;
+    }
+
+    private static void MutateGame(
+        TestableGame game, GameState state, int? secondUserId, bool hostHasFleet)
+    {
+        game.SetSecondUserId(secondUserId);
+        if (game.BattleOngoing)
+        {
+            game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
+            game.SetupBattleTimer(30);
+        }
+        else if (game.CreatingFleets) SetupGameInCreatingFleets(hostHasFleet, game);
+        else if (game.ItsOver) SetupGameOver(state, game);
     }
 
     private static void SetupGameInCreatingFleets(bool firstPlayerHasFleet, TestableGame game)

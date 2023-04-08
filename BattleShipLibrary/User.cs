@@ -8,6 +8,7 @@ namespace BattleshipLibrary;
 
 public class User
 {
+    public bool IsBot { get; set; }
     public int Id { get; set; }
 
     //todo persist user name between games

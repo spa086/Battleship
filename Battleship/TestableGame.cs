@@ -4,7 +4,9 @@ namespace BattleshipTests;
 
 public class TestableGame : Game
 {
-    public TestableGame(int userId) : base(userId)
+#pragma warning disable CS8625 // Литерал, равный NULL, не может быть преобразован в ссылочный тип, не допускающий значение NULL.
+    public TestableGame(int userId) : base(userId, null)
+#pragma warning restore CS8625 // Литерал, равный NULL, не может быть преобразован в ссылочный тип, не допускающий значение NULL.
     {
 
     }
@@ -14,7 +16,7 @@ public class TestableGame : Game
     public TestableGame SetSecondUserId(int? guestId = null)
     {
         if(guestId is null) Guest = null;
-        else if (Guest is null) Guest = new User { Id = guestId.Value };
+        else Guest ??= new User { Id = guestId.Value };
         return this;
     }
 
@@ -27,6 +29,7 @@ public class TestableGame : Game
     public TimerWithDueTime? GetTimer() => timer;
 
     public int? SetupTurnTime { get; set; }
+    public int? SetupMatchingTime { get; set; }
 
     public void SetupExcludedLocations(int userId, params Cell[] locations)
     {
@@ -61,16 +64,16 @@ public class TestableGame : Game
                 foreach (var deck in ship.Decks.Values) deck.Destroyed = true;
     }
 
-    public void SetupBattleTimer(int secondsLeft) => RenewBattleTimer(secondsLeft);
+    public void SetupBattleTimer(int secondsLeft) => SetBattleTimer(secondsLeft);
     public void SetupShipsCreationTimer(int secondsLeft) => SetShipsCreationTimer(secondsLeft);
+    public void SetupMatchingTimer(int secondsLeft) => SetShipsCreationTimer(secondsLeft);
 
     public void SetupUserName(int userId, string? userName)
     {
         if (userId == Host.Id) Host.Name = userName;
         else if (userId == Guest!.Id) Guest.Name = userName;
         else throw new Exception($"User [{userId}] is not found.");
-    }
-        
+    }    
 
     public void SetupSimpleFleets(Cell[]? hostDeckLocations, int hostId,
         Cell[]? giestDeckLocations, int? guestId)
@@ -83,11 +86,14 @@ public class TestableGame : Game
         else Guest.Id = guestId.Value;
     }
 
-    protected override void RenewBattleTimer(int secondsLeft = 30) => 
-        base.RenewBattleTimer(SetupTurnTime ?? secondsLeft);
+    protected override void SetBattleTimer(int secondsLeft = 30) => 
+        base.SetBattleTimer(SetupTurnTime ?? secondsLeft);
 
     protected override void SetShipsCreationTimer(int secondsLeft = 30) =>
         base.SetShipsCreationTimer(SetupTurnTime ?? secondsLeft);
+
+    protected override void SetMatchingTimer(int secondsLeft = 30) =>
+        base.SetMatchingTimer(SetupMatchingTime ?? secondsLeft);
 
     private static Ship[]? CreateSimpleFleet(Cell[]? deckLocations)
     {

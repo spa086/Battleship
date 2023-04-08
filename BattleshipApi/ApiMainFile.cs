@@ -12,6 +12,7 @@ public static class MainApi
         builder.Services.AddSingleton<GamePool>();
         builder.Services.AddTransient<Controller>();
         builder.Services.AddTransient<WebResult>();
+        builder.Services.AddTransient<IRandomFleet, RandomFleet>();
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
         MapPostFunction<WhatsupRequestModel, WhatsUpResponseModel>(app, "whatsUp",

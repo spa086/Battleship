@@ -6,10 +6,12 @@ namespace BattleshipLibrary;
 //todo refactor long file
 public class Game
 {
-    public Game(int user1Id)
+    public Game(int user1Id, Ship[] aiShips, int matchingTimeSeconds = 30)
     {
         Host = new User { Id = user1Id };
         Id = new Random().Next();
+        SetMatchingTimer(matchingTimeSeconds);
+        this.aiShips = aiShips;
     }
 
     public User Host { get; set; }
@@ -37,11 +39,9 @@ public class Game
     //todo test
     public bool BattleOngoing => State == GameState.HostTurn || State == GameState.GuestTurn;
 
-    //todo test
     public bool CreatingFleets =>
         State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
 
-    //todo test
     public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon ||
         State == GameState.Cancelled;
 
@@ -77,7 +77,7 @@ public class Game
                 .ToDictionary(x => x.Location)
         }).ToArray();
         UpdateState(userId, newShips);
-        if(battleStarts) RenewBattleTimer();
+        if(battleStarts) SetBattleTimer();
     }
 
     private void UpdateState(int userId, Ship[] newShips)
@@ -110,19 +110,39 @@ public class Game
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
         ProcessBattleOrWin(player1Turn, attackedShips, ref result);
-        if (this.BattleOngoing) RenewBattleTimer();
+        if (this.BattleOngoing) SetBattleTimer();
         return result; //todo tdd correct result
     }
 
-    //todo was it really needed to make it virtual?
+    protected virtual void SetMatchingTimer(int secondsLeft = 30) =>
+        SetTimerWithAction(() =>
+        {
+            State = GameState.OnePlayerCreatesFleet;
+            Guest = new User { IsBot = true, Fleet = aiShips };
+        }, secondsLeft);
+
     protected virtual void SetShipsCreationTimer(int secondsLeft = 30) =>
-        SetShipsCreationTimerInternal(secondsLeft);
+        SetTimerWithAction(() =>
+        {
+            if (Host.Fleet is not null && Guest!.Fleet is null) SetTechnicalWinner(true);
+            else if (Host.Fleet is null && Guest!.Fleet is not null) SetTechnicalWinner(false);
+            else if (Host.Fleet is null && Guest!.Fleet is null)
+            {
+                DisposeOfTimer();
+                State = GameState.Cancelled;
+            }
+        }, secondsLeft);
 
-    protected virtual void RenewBattleTimer(int secondsLeft = 30) => 
-        RenewBattleTimerInternal(secondsLeft);
+    protected virtual void SetBattleTimer(int secondsLeft = 30) => 
+        SetTimerWithAction(() => 
+            State = State == GameState.HostTurn ? GameState.GuestWon : GameState.HostWon, 
+            secondsLeft);
 
-    protected GameState WhoWillWinWhenTurnTimeEnds() =>
-        State == GameState.HostTurn ? GameState.GuestWon : GameState.HostWon;
+    private void SetTimerWithAction(Action action, int secondsLeft)
+    {
+        timer?.Dispose();
+        timer = new TimerWithDueTime(action, TimeSpan.FromSeconds(secondsLeft));
+    }
 
     private void ProcessBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips,
         ref AttackResult result)
@@ -139,30 +159,6 @@ public class Game
             if(player1Turn && hit || !player1Turn && !hit) State = GameState.HostTurn;
             if(!player1Turn && hit || player1Turn && !hit) State = GameState.GuestTurn;
         }
-    }
-
-    private void SetShipsCreationTimerInternal(int secondsLeft = 30)
-    {
-        timer?.Dispose();
-        timer = new TimerWithDueTime(() =>
-        {
-            //todo tdd first 2 branches of this if statement
-            if (Host.Fleet is not null && Guest!.Fleet is null) SetTechnicalWinner(true);
-            else if (Host.Fleet is null && Guest!.Fleet is not null) SetTechnicalWinner(false);
-            else if (Host.Fleet is null && Guest!.Fleet is null)
-            {
-                DisposeOfTimer();
-                State = GameState.Cancelled;
-            }
-        }, TimeSpan.FromSeconds(secondsLeft));
-    }
-
-    //todo mb I shouldn't call it from test setups
-    private void RenewBattleTimerInternal(int secondsLeft = 30)
-    {
-        timer?.Dispose();
-        timer = new TimerWithDueTime(() => State = WhoWillWinWhenTurnTimeEnds(),
-            TimeSpan.FromSeconds(secondsLeft));
     }
 
     private static void ProcessHit(Cell attackedLocation, Ship? attackedShip, ref AttackResult result)
@@ -192,6 +188,7 @@ public class Game
 
     protected TimerWithDueTime? timer;
     private GameState state;
+    private readonly Ship[] aiShips;
 
     //todo to Ship extension!!! 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);

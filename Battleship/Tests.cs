@@ -19,24 +19,48 @@ public class Tests
     private TestableGame game = new(0);
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
+    private readonly TestRandomFleet testRandomFleet;
 
     public Tests()
     {
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
+        services.AddSingleton<IRandomFleet, TestRandomFleet>();
 
         var serviceProvider = services.BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
-    } 
+        testRandomFleet = (serviceProvider.GetService<IRandomFleet>() as TestRandomFleet)!;
+    }
 
     [SetUp]
     public void SetUp()
     {
         gamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void MatchingTimer()
+    {
+        gamePool.SetupMatchingTimeSeconds = 1;
+        testRandomFleet.SetupAiShips = CreateSimpleShip(1, 1);
+
+        gamePool.StartPlaying(1);
+
+        //todo refactor 3 times
+        Thread.Sleep(1100);
+        var game = gamePool.Games.Values.Single();
+        Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
+        var botUser = game.Guest;
+        Assert.That(botUser, Is.Not.Null);
+        Assert.That(botUser.IsBot);
+        var ship = botUser.Fleet.AssertSingle();
+        var deck = ship.Decks.Values.AssertSingle();
+        Assert.That(deck.Destroyed, Is.False);
+        Assert.That(deck.Location, Is.EqualTo(new Cell(1, 1)));
     }
 
     [TestCase(1)]
@@ -59,33 +83,6 @@ public class Tests
 
         var result = gamePool.GetGame(userIdToSearchBy);
         Assert.That(result, Is.EqualTo(game));
-    }
-
-    [Test]
-    public void StoppingTimerWhenLost()
-    {
-        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
-        game.SetupBattleTimer(100);
-
-        game.Attack(1, new Cell(2, 2));
-
-        Assert.That(game.TimerSecondsLeft, Is.Null);
-        Assert.That(game.GetTimer(), Is.Null);
-    }
-
-    [Test]
-    public void LosingWhenTimeIsOut()
-    {
-        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupTurnTime = 1;
-
-        game.Attack(1, new Cell(1, 1));
-        Thread.Sleep(1100);
-
-        Assert.That(game.ItsOver, Is.True);
-        Assert.That(game.State, Is.EqualTo(GameState.HostWon));
-        Assert.That(game.TimerSecondsLeft, Is.LessThanOrEqualTo(0));
     }
 
     [Test]
@@ -156,6 +153,8 @@ public class Tests
     [Test]
     public void StartingAGame()
     {
+        testRandomFleet.SetupAiShips = Array.Empty<Ship>();
+
         Assert.That(gamePool.StartPlaying(1), Is.False);
 
         var game = gamePool.Games.Values.AssertSingle();

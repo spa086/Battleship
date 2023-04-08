@@ -3,21 +3,22 @@ using BattleshipLibrary;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
-namespace BattleshipTests;
+namespace BattleshipTests.Web;
 
-//todo refactor long method
-public class WhatsUpTests
+public class WhatsUpBattleTests
 {
     private readonly Controller controller;
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
 
-    public WhatsUpTests()
+    public WhatsUpBattleTests()
     {
+        //todo 3 times
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
         services.AddTransient<Controller>();
+        services.AddSingleton<IRandomFleet, TestRandomFleet>();
 
         var serviceProvider = services.BuildServiceProvider();
 
@@ -28,30 +29,6 @@ public class WhatsUpTests
 
     [SetUp]
     public void SetUp() => gamePool.ClearGames();
-
-    [TestCase(GameState.GuestWon)]
-    [TestCase(GameState.HostWon)]
-    public void GameInVictoryStateButWithoutShips(GameState state)
-    {
-        var game = testingEnvironment.CreateNewTestableGame(state, 1, 2, false);
-        game.SetupFleets(null, null);
-
-        var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
-
-        var expectedState = 
-            state == GameState.HostWon ? GameStateModel.YouWon : GameStateModel.OpponentWon;
-        Assert.That(result.gameState, Is.EqualTo(expectedState));
-    }
-
-    [Test]
-    public void CancelledGame()
-    {
-        testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 1, 2);
-
-        var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.Cancelled));
-    }
 
     [Test]
     public void UserNameIsReturned()
@@ -74,18 +51,6 @@ public class WhatsUpTests
         Assert.That(result.secondsLeft, Is.EqualTo(30));
     }
 
-    [Test]
-    public void SecondPlayerCreatesFleetFirst()
-    {
-        testingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 
-            hostHasFleet: false);
-
-        var result = controller.WhatsUp(CreateWhatsUpRequestModel(2));
-  
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
-        Assert.That(result.secondsLeft, Is.EqualTo(60));
-    }
-
     [TestCase(GameState.HostWon, GameStateModel.YouWon)]
     [TestCase(GameState.GuestWon, GameStateModel.OpponentWon)]
     public void WhatsupWhenWon(GameState gameState, GameStateModel expectedModel)
@@ -98,20 +63,6 @@ public class WhatsUpTests
     }
 
     //todo make Host-Guest enum??
-
-    [TestCase(GameState.OnePlayerCreatesFleet, true)]
-    [TestCase(GameState.OnePlayerCreatesFleet, false)]
-    [TestCase(GameState.BothPlayersCreateFleets, true)]
-    [TestCase(GameState.BothPlayersCreateFleets, false)]
-    public void WhatsUpWhileCreatingShips(GameState state, bool forHost)
-    {
-        var game = testingEnvironment.CreateNewTestableGame(state, 1, 2);
-
-        var result = controller.WhatsUp(CreateWhatsUpRequestModel(forHost ? 1 : 2));
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
-        Assert.That(result.gameId, Is.EqualTo(game.Id));
-    }
 
     [Test]
     public void OpponentExcludedLocations()
@@ -140,17 +91,7 @@ public class WhatsUpTests
     }
 
     [Test]
-    public void FirstPlayerWhatsupWhileWaitingForSecondPlayer()
-    {
-        testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1);
-
-        var result = CallWhatsupViaController(1);
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
-    }
-
-    [Test]
-    public void Player2WhatsupAfterShipsOfBothPlayersAreSaved()
+    public void GuestWhatsupAfterShipsOfBothPlayersAreSaved()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn);
 
@@ -167,34 +108,11 @@ public class WhatsUpTests
     {
         testingEnvironment.CreateNewTestableGame(GameState.HostTurn);
 
-        Assert.That(CallWhatsupViaController(1).gameState, 
+        Assert.That(CallWhatsupViaController(1).gameState,
             Is.EqualTo(GameStateModel.YourTurn));
     }
 
-    [Test]
-    public void SecondPlayerJoins()
-    {
-        var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 
-            1, 2);
-
-        var result = CallWhatsupViaController(2);
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
-        Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
-        Assert.That(game.Guest!.Id, Is.EqualTo(2));
-    }
-
-    [Test]
-    public void FirstPlayerStarts()
-    {
-        var result = controller.WhatsUp(new WhatsupRequestModel { userId =1 });
-
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
-        var gameId = gamePool.Games.Keys.AssertSingle();
-        Assert.That(result.gameId, Is.EqualTo(gameId));
-    }
-
-    private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) => 
+    private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) =>
         new() { userId = userIdParam };
 
     private static void AssertSimpleFleet(ShipStateModel[]? fleet, int x, int y)
@@ -207,6 +125,6 @@ public class WhatsUpTests
         Assert.That(deck1.y, Is.EqualTo(y));
     }
 
-    private WhatsUpResponseModel CallWhatsupViaController(int userId) => 
+    private WhatsUpResponseModel CallWhatsupViaController(int userId) =>
         controller.WhatsUp(CreateWhatsUpRequestModel(userId));
 }

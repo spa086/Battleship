@@ -3,7 +3,7 @@ using BattleshipLibrary;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
-namespace BattleshipTests;
+namespace BattleshipTests.Web;
 
 public class WebTests
 {
@@ -11,14 +11,17 @@ public class WebTests
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
     private readonly WebResult webResult;
+    private readonly TestRandomFleet testRandomFleet;
 
     public WebTests()
     {
+        //todo 3 times
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
         services.AddTransient<Controller>();
         services.AddTransient<WebResult>();
+        services.AddSingleton<IRandomFleet, TestRandomFleet>();
 
         var serviceProvider = services.BuildServiceProvider();
 
@@ -26,6 +29,7 @@ public class WebTests
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
         controller = serviceProvider.GetService<Controller>()!;
         webResult = serviceProvider.GetService<WebResult>()!;
+        testRandomFleet = (serviceProvider.GetService<IRandomFleet>() as TestRandomFleet)!;
     }
 
     [SetUp]
@@ -59,7 +63,7 @@ public class WebTests
     public void SettingHostName()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
-        var request = SingleShipFleetCreationRequest(1, new[] {new LocationModel { x = 1, y = 1} });
+        var request = SingleShipFleetCreationRequest(1, new[] { new LocationModel { x = 1, y = 1 } });
         request.userName = "Boris";
 
         controller.CreateFleet(request);
@@ -132,14 +136,14 @@ public class WebTests
         var testableGame = testingEnvironment.CreateNewTestableGame(
             GameState.OnePlayerCreatesFleet, 1, 2);
 
-        var result = controller.CreateFleet(new FleetCreationRequestModel 
-            { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
+        var result = controller.CreateFleet(new FleetCreationRequestModel
+        { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
 
         Assert.That(result, Is.False);
         var ship = testableGame!.Guest!.Fleet.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var pair = ship.Decks.AssertSingle();
-        Assert.That(pair.Key, Is.EqualTo(new Cell(5,5)));
+        Assert.That(pair.Key, Is.EqualTo(new Cell(5, 5)));
         Assert.That(pair.Value, Is.Not.Null);
         Assert.That(pair.Value.Location, Is.EqualTo(new Cell(5, 5)));
         Assert.That(pair.Value.Destroyed, Is.False);
