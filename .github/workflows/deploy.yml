@@ -42,13 +42,17 @@ jobs:
         sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         sudo apt-get update
         sudo apt-get install -y docker-ce
-
-    - name: List repository files
-      run: ls -R
       
     - name: Build Docker image
       run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
-
+      
+    - name: Start SSH agent
+      run: |
+        eval "$(ssh-agent -s)"
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        chmod 600 private_key
+        echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add private_key -
+    
     - name: Install and setup rsync
       run: |
         sudo apt-get update
