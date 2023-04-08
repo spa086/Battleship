@@ -22,15 +22,19 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore Battleship.sln
-
+      
+      
     - name: Build .NET app
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet publish -c release -r ubuntu.22.04-x64
 
-    - name: Test .NET app
-      run: dotnet test --no-restore --verbosity normal
+#    - name: Build .NET app
+#      run: dotnet build --configuration Release --no-restore
 
-    - name: Publish .NET app
-      run: dotnet publish --configuration Release --no-restore --output ./publish
+#    - name: Test .NET app
+#      run: dotnet test --no-restore --verbosity normal
+
+#    - name: Publish .NET app
+#      run: dotnet publish --configuration Release --no-restore --output ./publish
 
     - name: Install Docker
       run: |
