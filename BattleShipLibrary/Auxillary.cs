@@ -7,10 +7,19 @@ public class RandomFleet : IAi
 {
     public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations)
     {
-        throw new NotImplementedException();
+        var shotDeckLocations = enemyShips.SelectMany(x => x.Decks.Values).Where(x => x.Destroyed).Select(x => x.Location);
+        var unavailableLocations = shotDeckLocations.Concat(excludedLocations);
+        var allLocations = from xCoord in Enumerable.Range(0, 10)
+            join yCoord in Enumerable.Range(0, 10) on true equals true
+            select new Cell(xCoord, yCoord);
+        var availableLocations = allLocations.Except(unavailableLocations).ToArray();
+        var choice = availableLocations[random.Next(availableLocations.Length)];
+        return choice;
     }
 
     public Ship[] GenerateShips() => throw new NotImplementedException();
+
+    private Random random = new Random();
 }
 
 public interface IAi
