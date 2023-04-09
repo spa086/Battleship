@@ -22,16 +22,7 @@ jobs:
       run: ls /home/runner/work/Battleship/Battleship/BattleShipLibrary/BattleShipLibrary.csproj
 
     - name: Restore dependencies
-      run: dotnet restore Battleship.sln      
-
-#    - name: Build .NET app
-#      run: dotnet build --configuration Release --no-restore
-
-#    - name: Publish .NET app
-#      run: dotnet publish --configuration Release --no-restore --output ./publish
-      
-#    - name: Build .NET app
-#      run: dotnet publish --configuration Release -r ubuntu.22.04-x64 --self-contained true --output ./publish
+      run: dotnet restore Battleship.sln
 
     - name: Build app
       run: dotnet publish --configuration Release -r ubuntu.22.04-x64 --self-contained true --output ./publish
@@ -47,13 +38,6 @@ jobs:
     - name: Build Docker image
       run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
 
-#    - name: Install and setup rsync
-#      run: |
-#        sudo apt-get update
-#        sudo apt-get install -y rsync
-#        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-#        chmod 600 private_key
-
     - name: Setting key
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
@@ -65,8 +49,11 @@ jobs:
     - name: Calculating size of image
       run: du -h game-server.tar.gz
 
+    - name: Check network connectivity
+      run: ping -c 3 167.172.102.146
+
     - name: Transfer Docker image to DigitalOcean instance
-      run: sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
+      run: sshpass -e scp -i private_key -o StrictHostKeyChecking=no -C -p game-server.tar.gz root@167.172.102.146:/tmp
         
       env:
         SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
