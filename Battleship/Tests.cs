@@ -37,6 +37,26 @@ public class Tests
     }
 
     [Test]
+    public void MatchingTimerCreatesBot()
+    {
+        gamePool.SetupMatchingTimeSeconds = 1;
+        testAi.SetupAiShips = CreateSimpleShip(1, 1);
+
+        gamePool.StartPlaying(1);
+
+        testingEnvironment.SleepMinimalTime();
+        var game = gamePool.Games.Values.Single();
+        var botUser = game.Guest;
+        Assert.That(botUser, Is.Not.Null);
+        Assert.That(botUser.IsBot);
+        Assert.That(botUser.Name, Is.EqualTo("General Chaos"));
+        var ship = botUser.Fleet.AssertSingle();
+        var deck = ship.Decks.Values.AssertSingle();
+        Assert.That(deck.Destroyed, Is.False);
+        Assert.That(deck.Location, Is.EqualTo(new Cell(1, 1)));
+    }
+
+    [Test]
     public void MatchingTimer()
     {
         gamePool.SetupMatchingTimeSeconds = 1;
@@ -47,14 +67,7 @@ public class Tests
         testingEnvironment.SleepMinimalTime();
         var game = gamePool.Games.Values.Single();
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
-        var botUser = game.Guest;
-        Assert.That(botUser, Is.Not.Null);
-        Assert.That(botUser.IsBot);
-        Assert.That(botUser.Name, Is.EqualTo("General Chaos"));
-        var ship = botUser.Fleet.AssertSingle();
-        var deck = ship.Decks.Values.AssertSingle();
-        Assert.That(deck.Destroyed, Is.False);
-        Assert.That(deck.Location, Is.EqualTo(new Cell(1, 1)));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(60));
     }
 
     [TestCase(1)]

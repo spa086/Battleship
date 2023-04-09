@@ -99,6 +99,7 @@ public class Game
         {
             State = GameState.OnePlayerCreatesFleet;
             Guest = new User { IsBot = true, Fleet = ai.GenerateShips(), Name = "General Chaos" };
+            SetShipsCreationTimer(60);
         }, secondsLeft);
 
     protected virtual void SetShipsCreationTimer(int secondsLeft = 30) =>
