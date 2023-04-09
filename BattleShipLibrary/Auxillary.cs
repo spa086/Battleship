@@ -5,7 +5,10 @@ namespace BattleshipLibrary;
 
 public class RandomFleet : IAi
 {
-    public Cell ChooseAttackLocation() => throw new NotImplementedException();
+    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations)
+    {
+        throw new NotImplementedException();
+    }
 
     public Ship[] GenerateShips() => throw new NotImplementedException();
 }
@@ -14,7 +17,7 @@ public interface IAi
 {
     Ship[] GenerateShips();
 
-    Cell ChooseAttackLocation();
+    Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations);
 }
 
 //todo use DI instead

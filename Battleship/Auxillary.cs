@@ -9,7 +9,7 @@ public class TestAi : IAi
     public Ship[]? SetupAiShips { get; set; }
     public Cell? SetupAttackLocation { get; set; }
 
-    public Cell ChooseAttackLocation() => 
+    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations) => 
         SetupAttackLocation ?? throw new Exception($"Attack location is not set up.");
 
     public Ship[] GenerateShips()

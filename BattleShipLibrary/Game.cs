@@ -168,7 +168,7 @@ public class Game
 
     private void PerformAiAttack()
     {
-        var aiAttackLocation = ai.ChooseAttackLocation();
+        var aiAttackLocation = ai.ChooseAttackLocation(Host.Fleet!, Guest!.ExcludedLocations);
         Exclude(aiAttackLocation);
         var aiAttackedShips = Host.Fleet!;
         var aiAttackedShip = GetAttackedShip(aiAttackLocation, aiAttackedShips);
