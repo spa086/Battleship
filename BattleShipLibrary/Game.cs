@@ -88,8 +88,12 @@ public class Game
         var result = PerformAttackByUser(attackedLocation);
         if (BattleOngoing)
         {
-            if (Guest!.IsBot && result != AttackResult.Hit) 
+            if (Guest!.IsBot && result != AttackResult.Hit)
+            {
+                State = GameState.GuestTurn;
                 while (PerformAiAttack() && BattleOngoing) { }
+                if (BattleOngoing) State = GameState.HostTurn;
+            }
             SetBattleTimer();
         }
         return result; //todo tdd correct result
@@ -180,7 +184,6 @@ public class Game
             State = GameState.GuestWon;
             DisposeOfTimer();
         }
-        else State = GameState.HostTurn;
         return aiAttackedShip is not null;
     }
 
