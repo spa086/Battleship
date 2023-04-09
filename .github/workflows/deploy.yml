@@ -13,15 +13,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Test SSH authentication
-      run: sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "echo 'SSH authentication successful'"
-      env:
-        SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
-
     - name: Setting key
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
+        
+    - name: Test SSH authentication
+      run: sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "echo 'SSH authentication successful'"
+      env:
+        SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
 
     - name: Test transfer with a smaller file using scp
       run: echo "test" > test.txt && sshpass -e scp -i private_key -o StrictHostKeyChecking=no -C -p test.txt root@167.172.102.146:/tmp
