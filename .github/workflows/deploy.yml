@@ -45,13 +45,13 @@ jobs:
 #        export SSH_ASKPASS=./passphrase_script.sh
 #        ssh -i private_key -o StrictHostKeyChecking=no -o "BatchMode yes" root@167.172.102.146 "echo 'SSH connection with passphrase script successful'"
 
-    - name: Test SSH authentication with ssh-agent
-      run: |
-        eval "$(ssh-agent -s)"
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" | fold -w 64 > private_key
-        chmod 600 private_key
-        echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add private_key -
-        ssh -o StrictHostKeyChecking=no -v root@167.172.102.146 "echo 'SSH authentication with ssh-agent successful'"
+#    - name: Test SSH authentication with ssh-agent
+#      run: |
+#        eval "$(ssh-agent -s)"
+#        echo "${{ secrets.SSH_PRIVATE_KEY }}" | fold -w 64 > private_key
+#        chmod 600 private_key
+#        echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add private_key -
+#        ssh -o StrictHostKeyChecking=no -v root@167.172.102.146 "echo 'SSH authentication with ssh-agent successful'"
 
     - name: Start SSH agent and add private key
       run: |
