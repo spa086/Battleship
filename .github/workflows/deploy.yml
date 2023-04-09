@@ -59,13 +59,15 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
 
+    - name: Create archive
+      run: docker save game-server:${{ github.sha }} | gzip > game-server.tar.gz
+
     - name: Calculating size of image
       run: du -h game-server.tar.gz
 
     - name: Transfer Docker image to DigitalOcean instance
-      run: |
-        docker save game-server:${{ github.sha }} | gzip > game-server.tar.gz
-        sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
+      run: sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
+        
       env:
         SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
 
