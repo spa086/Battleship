@@ -18,6 +18,19 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
 
+    - name: Create passphrase script and make it executable
+      run: |
+        echo 'echo $SSHPASS' > passphrase_script.sh
+        chmod +x passphrase_script.sh
+
+    - name: Test SSH connection using passphrase script
+      env:
+        SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
+      run: |
+        export SSH_ASKPASS=./passphrase_script.sh
+        ssh -i private_key -o StrictHostKeyChecking=no -o "BatchMode yes" root@167.172.102.146 "echo 'SSH connection with passphrase script successful'"
+
+
     - name: Test SSH authentication with ssh-agent
       run: |
         eval "$(ssh-agent -s)"
