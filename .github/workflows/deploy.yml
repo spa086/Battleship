@@ -12,50 +12,50 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
+      
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore Battleship.sln
 
-    - name: Build .NET app
-      run: dotnet build --configuration Release --no-restore
-
-    - name: Test .NET app
-      run: dotnet test --no-restore --verbosity normal
-
-    - name: Publish .NET app
-      run: dotnet publish --configuration Release --no-restore --output ./publish
-
+    - name: Build app
+      run: dotnet publish --configuration Release -r ubuntu.22.04-x64 --self-contained true --output ./publish
+      
     - name: Install Docker
       run: |
-        sudo apt-get update
         sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
         sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         sudo apt-get update
-        sudo apt-get install -y docker-ce
-
+        sudo apt-get install -y docker-ce   
+      
     - name: Build Docker image
-      run: docker build -t game-server:${{ github.sha }} .
+      run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
 
-    - name: Install and setup rsync
+    - name: Create archive
+      run: docker save game-server:${{ github.sha }} | gzip > game-server.tar.gz
+
+    - name: Calculating size of image
+      run: du -h game-server.tar.gz
+      
+    - name: Setting key
       run: |
-        sudo apt-get update
-        sudo apt-get install -y rsync
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
 
-    - name: Transfer Docker image to DigitalOcean instance
+    - name: Start SSH agent and add private key
       run: |
-        docker save game-server:${{ github.sha }} | gzip > game-server.tar.gz
-        rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
+        eval "$(ssh-agent -s)"
+        ssh-add private_key
+
+    - name: Transfer Docker image to DigitalOcean instance
+      run: rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
 
     - name: Deploy to DigitalOcean
       run: |
-        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker load < /tmp/game-server.tar.gz"
-        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker stop game-server || true && docker rm game-server || true"
-        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker run -d -p 80:80 --name game-server game-server:${{ github.sha }}"
+        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker load < /tmp/game-server.tar.gz"
+        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker stop game-server || true && docker rm game-server || true"
+        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker run -d -p 5000:5000 --name game-server game-server:${{ github.sha }}"
