@@ -88,7 +88,7 @@ public class Game
         var result = PerformAttackByUser(attackedLocation);
         if (BattleOngoing)
         {
-            if (Guest!.IsBot) PerformAiAttack();
+            if (Guest!.IsBot && result != AttackResult.Hit) PerformAiAttack();
             SetBattleTimer();
         }
         return result; //todo tdd correct result

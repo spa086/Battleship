@@ -34,6 +34,20 @@ public class AttackTests
     }
 
     [Test]
+    public void AttackAgainWithAi()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        SetAi(game);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
+            new[] { new Cell(2, 2), new Cell(2, 3) }, 2);
+        game.SetupAiAttackLocation(new Cell(1, 1));
+   
+        game.Attack(1, new Cell(2, 2));
+
+        Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
+    }
+
+    [Test]
     public void AiWins()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
