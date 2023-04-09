@@ -34,7 +34,7 @@ public class AttackTests
     }
 
     [Test]
-    public void HostMissesWhenAiIsPresent()
+    public void AiMisses()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         game.Guest = new User { IsBot = true };
