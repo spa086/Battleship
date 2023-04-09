@@ -37,7 +37,10 @@ public class Controller
         var userId = request.userId;
         var game = gamePool.GetGame(userId);
         WhatsUpResponseModel? result;
-        if (game is null) (result, game) = (StartPlaying(userId), gamePool.GetGame(userId)!);
+        if (game is null)
+        {
+            (result, game) = (StartPlaying(userId), gamePool.GetGame(userId)!);
+        }
         else if (game.Guest is null) result = WaitingForStartResult();
         else if (game.Guest is not null && (game.Host!.Fleet is null || game.Guest!.Fleet is null))
             result = WhatsUpBeforeBattle(userId, game);
@@ -113,8 +116,8 @@ public class Controller
             : ToFleetStateModel(game.Guest!.Fleet);
         var opponentFleet = forHost ? ToFleetStateModel(game.Guest!.Fleet)
             : ToFleetStateModel(game.Host.Fleet);
-        GameStateModel? stateModel = GetStateModel(userId, game);
-        var result = new WhatsUpResponseModel(game.Id, stateModel!.Value, myFleet, opponentFleet,
+        var stateModel = GetStateModel(userId, game);
+        var result = new WhatsUpResponseModel(game.Id, stateModel, myFleet, opponentFleet,
             myExcludedLocations, opponentExcludedLocations, game.TimerSecondsLeft);
         return result;
     }
@@ -155,7 +158,8 @@ public class Controller
         {
             gameState = secondPlayerJoined ? GameStateModel.CreatingFleet
                 : GameStateModel.WaitingForStart,
-            gameId = game.Id
+            gameId = game.Id,
+            secondsLeft = game.TimerSecondsLeft
         };
     }
 

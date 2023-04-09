@@ -32,6 +32,17 @@ public class WhatsUpPreBattleTests
     [SetUp]
     public void SetUp() => gamePool.ClearGames();
 
+    [Test]
+    public void ReturningMatchingTimerSeconds()
+    {
+        testRandomFleet.SetupAiShips = Array.Empty<Ship>();
+        gamePool.SetupMatchingTimeSeconds = 100;
+        
+        var result = controller.WhatsUp(new WhatsupRequestModel { userId = 1 });
+
+        Assert.That(result.secondsLeft, Is.EqualTo(100));
+    }
+
     [TestCase(GameState.GuestWon)]
     [TestCase(GameState.HostWon)]
     public void GameInVictoryStateButWithoutShips(GameState state)
