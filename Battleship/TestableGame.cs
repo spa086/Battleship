@@ -4,7 +4,7 @@ namespace BattleshipTests;
 
 public class TestableGame : Game
 {
-    public TestableGame(int userId) : base(userId, new TestAi())
+    public TestableGame(int userId, int matchingSeconds = 30) : base(userId, new TestAi(), matchingSeconds)
     {
 
     }

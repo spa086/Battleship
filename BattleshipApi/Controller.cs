@@ -37,10 +37,7 @@ public class Controller
         var userId = request.userId;
         var game = gamePool.GetGame(userId);
         WhatsUpResponseModel? result;
-        if (game is null)
-        {
-            (result, game) = (StartPlaying(userId), gamePool.GetGame(userId)!);
-        }
+        if (game is null) (result, game) = (StartPlaying(userId), gamePool.GetGame(userId)!);
         else if (game.Guest is null) result = WaitingForStartResult();
         else if (game.Guest is not null && (game.Host!.Fleet is null || game.Guest!.Fleet is null))
             result = WhatsUpBeforeBattle(userId, game);
@@ -49,6 +46,7 @@ public class Controller
         //todo tdd this exception
         else throw new Exception("Unknown situation.");
         result.userName = userId == game?.Host?.Id ? game.Guest?.Name : game?.Host.Name;
+        result.secondsLeft = game?.TimerSecondsLeft;
         return result;
     }
 
@@ -94,7 +92,7 @@ public class Controller
 
     private static WhatsUpResponseModel WhatsUpBeforeBattle(int userId, Game game) => 
         new(game.Id, GetStateModel(userId, game), ToFleetStateModel(game.Host!.Fleet),
-            ToFleetStateModel(game.Guest!.Fleet), null, null, game.TimerSecondsLeft);
+            ToFleetStateModel(game.Guest!.Fleet), null, null);
 
     private static LocationModel[] GetMyExcludedLocations(Game game, bool forFirstUser) =>
         forFirstUser ? ToExcludedLocationModels(game.Host!.ExcludedLocations) 
@@ -118,7 +116,7 @@ public class Controller
             : ToFleetStateModel(game.Host.Fleet);
         var stateModel = GetStateModel(userId, game);
         var result = new WhatsUpResponseModel(game.Id, stateModel, myFleet, opponentFleet,
-            myExcludedLocations, opponentExcludedLocations, game.TimerSecondsLeft);
+            myExcludedLocations, opponentExcludedLocations);
         return result;
     }
 
@@ -158,8 +156,7 @@ public class Controller
         {
             gameState = secondPlayerJoined ? GameStateModel.CreatingFleet
                 : GameStateModel.WaitingForStart,
-            gameId = game.Id,
-            secondsLeft = game.TimerSecondsLeft
+            gameId = game.Id
         };
     }
 

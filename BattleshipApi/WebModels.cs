@@ -17,7 +17,7 @@ public class WhatsUpResponseModel
 
     public WhatsUpResponseModel(int gameId, GameStateModel gameState, ShipStateModel[]? myFleet, 
         ShipStateModel[]? opponentFleet, LocationModel[]? myExcludedLocations,
-        LocationModel[]? opponentExcludedLocations, int? secondsLeft)
+        LocationModel[]? opponentExcludedLocations)
     {
         this.gameState = gameState;
         this.myFleet = myFleet;
@@ -25,7 +25,6 @@ public class WhatsUpResponseModel
         this.myExcludedLocations = myExcludedLocations;
         this.opponentExcludedLocations = opponentExcludedLocations;
         this.gameId = gameId;
-        this.secondsLeft = secondsLeft;
     }
 
     public string? userName { get; set; }

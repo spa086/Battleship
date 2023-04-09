@@ -30,9 +30,9 @@ public class TestingEnvironment
     public void SleepMinimalTime() => Thread.Sleep(1100);
 
     public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
-        int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true)
+        int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true, int matchingSeconds = 30)
     {
-        var game = new TestableGame(firstUserId ?? 1).SetState(state);
+        var game = new TestableGame(firstUserId ?? 1, matchingSeconds).SetState(state);
         gamePool.AddGame(game);
         if (game.CreatingFleets || game.BattleOngoing || game.ItsOver)
             MutateGame(game, state, secondUserId, hostHasFleet);

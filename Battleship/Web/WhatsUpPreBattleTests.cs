@@ -33,6 +33,17 @@ public class WhatsUpPreBattleTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
+    public void ReturningMatchingTimerSecondsWhenWaiting()
+    {
+        testingEnvironment.CreateNewTestableGame(
+            GameState.WaitingForGuest, 1, null, matchingSeconds: 100);
+
+        var result = controller.WhatsUp(new WhatsupRequestModel { userId = 1 });
+
+        Assert.That(result.secondsLeft, Is.EqualTo(100));
+    }
+
+    [Test]
     public void ReturningMatchingTimerSeconds()
     {
         testRandomFleet.SetupAiShips = Array.Empty<Ship>();
