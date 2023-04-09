@@ -34,6 +34,20 @@ public class AttackTests
     }
 
     [Test]
+    public void AiTurnRenewsTimer()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.Guest = new User { IsBot = true };
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupAiAttackLocation(new Cell(6, 6));
+        game.SetupBattleTimer(100);
+
+        game.Attack(1, new Cell(5, 5));
+
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
+    }
+
+    [Test]
     public void AiHits()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);

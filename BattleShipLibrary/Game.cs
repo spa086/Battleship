@@ -137,7 +137,7 @@ public class Game
                     Host.Fleet!.SingleOrDefault(x => x.Decks.ContainsKey(aiAttackLocation));
                 if(attackedShip is not null) attackedShip.Decks[aiAttackLocation].Destroyed = true;
             } 
-            else SetBattleTimer();
+            SetBattleTimer();
         }
         return result; //todo tdd correct result
     }
