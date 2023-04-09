@@ -21,7 +21,7 @@ jobs:
     - name: Test SSH authentication with ssh-agent
       run: |
         eval "$(ssh-agent -s)"
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" | fold -w 64 > private_key
         chmod 600 private_key
         echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key -
         ssh -o StrictHostKeyChecking=no -v root@167.172.102.146 "echo 'SSH authentication with ssh-agent successful'"
