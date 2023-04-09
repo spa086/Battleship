@@ -12,8 +12,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: List repository files
-      run: ls -R
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
@@ -32,8 +30,11 @@ jobs:
 #    - name: Publish .NET app
 #      run: dotnet publish --configuration Release --no-restore --output ./publish
       
-    - name: Build .NET app
-      run: dotnet publish --configuration Release -r ubuntu.22.04-x64 --self-contained true --output ./publish
+#    - name: Build .NET app
+#      run: dotnet publish --configuration Release -r ubuntu.22.04-x64 --self-contained true --output ./publish
+
+    - name: Build app
+      run: dotnet publish --configuration Release -r ubuntu.22.04-x64 --self-contained true --no-restore --output ./publish
       
     - name: Install Docker
       run: |
@@ -42,20 +43,25 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
         eval "$(ssh-agent)"
-        echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add private_key -
-
-    - name: List repository files
-      run: ls -R
+        echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add private_key -        
       
     - name: Build Docker image
       run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
 
-    - name: Install and setup rsync
+#    - name: Install and setup rsync
+#      run: |
+#        sudo apt-get update
+#        sudo apt-get install -y rsync
+#        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+#        chmod 600 private_key
+
+    - name: Setting key
       run: |
-        sudo apt-get update
-        sudo apt-get install -y rsync
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
+
+    - name: Calculating size of image
+      run: du -h game-server.tar.gz
 
     - name: Transfer Docker image to DigitalOcean instance
       run: |
