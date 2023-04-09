@@ -7,10 +7,14 @@ namespace BattleshipTests;
 public class TestAi : IAi
 {
     public Ship[]? SetupAiShips { get; set; }
+    public Cell? SetupAttackLocation { get; set; }
+
+    public Cell ChooseAttackLocation() => 
+        SetupAttackLocation ?? throw new Exception($"Attack location is not set up.");
 
     public Ship[] GenerateShips()
     {
-        return SetupAiShips ?? throw new Exception($"No ships were set up.");
+        return SetupAiShips ?? throw new Exception($"Ships are not set up.");
     }
 }
 

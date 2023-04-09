@@ -5,7 +5,7 @@ namespace BattleshipTests;
 public class TestableGame : Game
 {
 #pragma warning disable CS8625 // Литерал, равный NULL, не может быть преобразован в ссылочный тип, не допускающий значение NULL.
-    public TestableGame(int userId) : base(userId, null)
+    public TestableGame(int userId) : base(userId, new TestAi())
 #pragma warning restore CS8625 // Литерал, равный NULL, не может быть преобразован в ссылочный тип, не допускающий значение NULL.
     {
 
@@ -30,6 +30,8 @@ public class TestableGame : Game
 
     public int? SetupTurnTime { get; set; }
     public int? SetupMatchingTime { get; set; }
+
+    public void SetupAiAttackLocation(Cell location) => (ai as TestAi)!.SetupAttackLocation = location;
 
     public void SetupExcludedLocations(int userId, params Cell[] locations)
     {

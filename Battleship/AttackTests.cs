@@ -34,6 +34,20 @@ public class AttackTests
     }
 
     [Test]
+    public void HostMissesWhenAiIsPresent()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.Guest = new User { IsBot = true };
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupAiAttackLocation(new Cell(6, 6));
+
+        game.Attack(1, new Cell(5, 5));
+
+        var locationExcludedByBot = game.Guest.ExcludedLocations.AssertSingle();
+        Assert.That(locationExcludedByBot, Is.EqualTo(new Cell(6, 6)));
+    }
+
+    [Test]
     public void StoppingTimerWhenLost()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);

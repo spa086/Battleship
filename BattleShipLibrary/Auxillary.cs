@@ -5,15 +5,16 @@ namespace BattleshipLibrary;
 
 public class RandomFleet : IAi
 {
-    public Ship[] GenerateShips()
-    {
-        throw new NotImplementedException();
-    }
+    public Cell ChooseAttackLocation() => throw new NotImplementedException();
+
+    public Ship[] GenerateShips() => throw new NotImplementedException();
 }
 
 public interface IAi
 {
     Ship[] GenerateShips();
+
+    Cell ChooseAttackLocation();
 }
 
 //todo use DI instead

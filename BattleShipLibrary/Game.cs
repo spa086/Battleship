@@ -100,7 +100,7 @@ public class Game
 #pragma warning restore IDE0060 // Удалите неиспользуемый параметр
     {
         AssertThatShotIsInFieldBorders(attackedLocation);
-        //todo tdd that we can't get here with playerNShips == null
+        //todo test that we can't get here with playerNShips == null
         Exclude(attackedLocation);
         //todo check for 3 times
         var player1Turn = State == GameState.HostTurn;
@@ -110,7 +110,11 @@ public class Game
         var result = AttackResult.Missed;
         ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
         ProcessBattleOrWin(player1Turn, attackedShips, ref result);
-        if (this.BattleOngoing) SetBattleTimer();
+        if (BattleOngoing)
+        {
+            if(Guest!.IsBot) Exclude(ai.ChooseAttackLocation());
+            else SetBattleTimer();
+        }
         return result; //todo tdd correct result
     }
 
@@ -137,6 +141,9 @@ public class Game
         SetTimerWithAction(() => 
             State = State == GameState.HostTurn ? GameState.GuestWon : GameState.HostWon, 
             secondsLeft);
+
+    protected TimerWithDueTime? timer;
+    protected readonly IAi ai;
 
     private void SetTimerWithAction(Action action, int secondsLeft)
     {
@@ -186,9 +193,7 @@ public class Game
         currentExcluded.Add(location);
     }
 
-    protected TimerWithDueTime? timer;
     private GameState state;
-    private readonly IAi ai;
 
     //todo to Ship extension!!! 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);
