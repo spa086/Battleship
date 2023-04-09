@@ -13,15 +13,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 7.0.x
+    - name: Setting key
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        chmod 600 private_key
 
     - name: Test transfer with a smaller file
       run: echo "test" > test.txt && sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avvvz --progress test.txt root@167.172.102.146:/tmp
       env:
         SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 7.0.x
 
     - name: Restore dependencies
       run: dotnet restore Battleship.sln
@@ -39,11 +44,6 @@ jobs:
       
     - name: Build Docker image
       run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
-
-    - name: Setting key
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-        chmod 600 private_key
 
     - name: Create archive
       run: docker save game-server:${{ github.sha }} | gzip > game-server.tar.gz
