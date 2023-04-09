@@ -105,8 +105,8 @@ public class Game
         //todo check for 3 times
         var player1Turn = State == GameState.HostTurn;
         var attackedShips = player1Turn 
-            ? Guest!.Fleet!.Where(x => !IsDestroyed(x)).ToArray() 
-            : Host!.Fleet!.Where(x => !IsDestroyed(x)).ToArray();
+            ? Guest!.Fleet!.Where(x => !x.IsDestroyed).ToArray() 
+            : Host!.Fleet!.Where(x => !x.IsDestroyed).ToArray();
         var result = AttackResult.Missed;
         var attackedShip = GetAttackedShip(attackedLocation, attackedShips);
         //todo tdd throw if null?
@@ -115,7 +115,7 @@ public class Game
             attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
             result = AttackResult.Hit;
         }
-        if (attackedShips.All(x => IsDestroyed(x)))
+        if (attackedShips.All(x => x.IsDestroyed))
         {
             State = player1Turn ? GameState.HostWon : GameState.GuestWon;
             result = AttackResult.Win;
@@ -133,9 +133,17 @@ public class Game
             {
                 var aiAttackLocation = ai.ChooseAttackLocation();
                 Exclude(aiAttackLocation);
-                attackedShip = 
-                    Host.Fleet!.SingleOrDefault(x => x.Decks.ContainsKey(aiAttackLocation));
+                attackedShips = Host.Fleet!;
+                attackedShip =
+                    attackedShips.SingleOrDefault(x => x.Decks.ContainsKey(aiAttackLocation));
                 if(attackedShip is not null) attackedShip.Decks[aiAttackLocation].Destroyed = true;
+                if (attackedShips.All(x => x.IsDestroyed))
+                {
+                    State = GameState.GuestWon;
+                    result = AttackResult.Win;
+                    DisposeOfTimer();
+                }
+                else State = GameState.HostTurn;
             } 
             SetBattleTimer();
         }
@@ -191,9 +199,6 @@ public class Game
     }
 
     private GameState state;
-
-    //todo to Ship extension!!! 
-    public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);
 
     private static void AssertThatShotIsInFieldBorders(Cell attackedLocation)
     {

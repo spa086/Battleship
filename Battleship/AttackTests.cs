@@ -34,10 +34,25 @@ public class AttackTests
     }
 
     [Test]
+    public void AiWins()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        SetAi(game);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupAiAttackLocation(new Cell(1, 1));
+
+        game.Attack(1, new Cell(5, 5));
+
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
+        Assert.That(game.Host!.Fleet.AssertSingle().IsDestroyed);
+        Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
+    }
+
+    [Test]
     public void AiTurnRenewsTimer()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.Guest = new User { IsBot = true };
+        SetAi(game);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
         game.SetupAiAttackLocation(new Cell(6, 6));
         game.SetupBattleTimer(100);
@@ -51,7 +66,7 @@ public class AttackTests
     public void AiHits()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.Guest = new User { IsBot = true };
+        SetAi(game);
         var hostDecks = new[] {new Deck(1, 1), new Deck(1, 2)}.ToDictionary(x => x.Location);
         var guestDecks = new[]{ new Deck(3, 3) }.ToDictionary(x => x.Location);
         game.SetupFleets(
@@ -69,7 +84,7 @@ public class AttackTests
     public void AiMisses()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.Guest = new User { IsBot = true };
+        SetAi(game);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
         game.SetupAiAttackLocation(new Cell(6, 6));
 
@@ -77,6 +92,7 @@ public class AttackTests
 
         var locationExcludedByBot = game.Guest.ExcludedLocations.AssertSingle();
         Assert.That(locationExcludedByBot, Is.EqualTo(new Cell(6, 6)));
+        Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
     }
 
     [Test]
@@ -189,7 +205,7 @@ public class AttackTests
         game.Attack(1, new Cell(2, 2));
 
         game.Host!.ExcludedLocations.AssertSingle();
-        Assert.That(Game.IsDestroyed(game.Guest!.Fleet.AssertSingle()));
+        Assert.That(game.Guest!.Fleet.AssertSingle().IsDestroyed);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
     }
 
@@ -202,7 +218,9 @@ public class AttackTests
         game.Attack(0, new Cell(0, 0));
 
         game.Guest!.Fleet.AssertSingle();
-        Assert.That(Game.IsDestroyed(game.Host!.Fleet.AssertSingle()));
+        Assert.That(game.Host!.Fleet.AssertSingle().IsDestroyed);
         Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
     }
+
+    private static void SetAi(TestableGame game) => game.Guest = new User { IsBot = true };
 }
