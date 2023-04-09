@@ -66,10 +66,14 @@ jobs:
     - name: Transfer Docker image to DigitalOcean instance
       run: |
         docker save game-server:${{ github.sha }} | gzip > game-server.tar.gz
-        rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
+        sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
+      env:
+        SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
 
     - name: Deploy to DigitalOcean
       run: |
-        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker load < /tmp/game-server.tar.gz"
-        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker stop game-server || true && docker rm game-server || true"
-        ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146> "docker run -d -p 80:80 --name game-server game-server:${{ github.sha }}"
+        sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker load < /tmp/game-server.tar.gz"
+        sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker stop game-server || true && docker rm game-server || true"
+        sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker run -d -p 80:80 --name game-server game-server:${{ github.sha }}"
+      env:
+        SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
