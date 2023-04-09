@@ -46,14 +46,8 @@ jobs:
     - name: Calculating size of image
       run: du -h game-server.tar.gz
 
-    - name: Check network connectivity
-      run: ping -c 3 8.8.8.8
-
-    - name: Check network connectivity
-      run: ping -c 3 167.172.102.146
-
     - name: Transfer Docker image to DigitalOcean instance
-      run: sshpass -e scp -i private_key -o StrictHostKeyChecking=no -C -p game-server.tar.gz root@167.172.102.146:/tmp
+      run: sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avvvz --progress game-server.tar.gz root@167.172.102.146:/tmp
         
       env:
         SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
