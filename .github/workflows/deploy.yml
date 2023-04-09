@@ -18,8 +18,23 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
 
+    - name: Test SSH authentication with ssh-agent
+      run: |
+        eval "$(ssh-agent -s)"
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        chmod 600 private_key
+        echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key -
+        ssh -o StrictHostKeyChecking=no -v root@167.172.102.146 "echo 'SSH authentication with ssh-agent successful'"
+
+    - name: Start SSH agent and add private key
+      run: |
+        eval "$(ssh-agent -s)"
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        chmod 600 private_key
+        echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key -
+
     - name: Test SSH authentication
-      run: sshpass -e ssh -i private_key -o StrictHostKeyChecking=no -v root@167.172.102.146 "echo 'SSH authentication successful'"
+      run: ssh -i private_key -o StrictHostKeyChecking=no -v root@167.172.102.146 "echo 'SSH authentication successful'"
       env:
         SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
         
