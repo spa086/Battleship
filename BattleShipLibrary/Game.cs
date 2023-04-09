@@ -108,15 +108,32 @@ public class Game
             ? Guest!.Fleet!.Where(x => !IsDestroyed(x)).ToArray() 
             : Host!.Fleet!.Where(x => !IsDestroyed(x)).ToArray();
         var result = AttackResult.Missed;
-        ProcessHit(attackedLocation, GetAttackedShip(attackedLocation, attackedShips), ref result);
-        ProcessBattleOrWin(player1Turn, attackedShips, ref result);
+        var attackedShip = GetAttackedShip(attackedLocation, attackedShips);
+        //todo tdd throw if null?
+        if (attackedShip is not null)
+        {
+            attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
+            result = AttackResult.Hit;
+        }
+        if (attackedShips.All(x => IsDestroyed(x)))
+        {
+            State = player1Turn ? GameState.HostWon : GameState.GuestWon;
+            result = AttackResult.Win;
+            DisposeOfTimer();
+        }
+        else
+        {
+            var hit = result == AttackResult.Hit;
+            if (player1Turn && hit || !player1Turn && !hit) State = GameState.HostTurn;
+            if (!player1Turn && hit || player1Turn && !hit) State = GameState.GuestTurn;
+        }
         if (BattleOngoing)
         {
             if (Guest!.IsBot)
             {
                 var aiAttackLocation = ai.ChooseAttackLocation();
                 Exclude(aiAttackLocation);
-                var attackedShip = 
+                attackedShip = 
                     Host.Fleet!.SingleOrDefault(x => x.Decks.ContainsKey(aiAttackLocation));
                 if(attackedShip is not null) attackedShip.Decks[aiAttackLocation].Destroyed = true;
             } 
@@ -156,33 +173,6 @@ public class Game
     {
         timer?.Dispose();
         timer = new TimerWithDueTime(action, TimeSpan.FromSeconds(secondsLeft));
-    }
-
-    private void ProcessBattleOrWin(bool player1Turn, IEnumerable<Ship> attackedShips,
-        ref AttackResult result)
-    {
-        if (attackedShips.All(x => IsDestroyed(x)))
-        {
-            State = player1Turn ? GameState.HostWon : GameState.GuestWon;
-            result = AttackResult.Win;
-            DisposeOfTimer();
-        }
-        else
-        {
-            var hit = result == AttackResult.Hit;
-            if(player1Turn && hit || !player1Turn && !hit) State = GameState.HostTurn;
-            if(!player1Turn && hit || player1Turn && !hit) State = GameState.GuestTurn;
-        }
-    }
-
-    private static void ProcessHit(Cell attackedLocation, Ship? attackedShip, ref AttackResult result)
-    {
-        //todo tdd throw if null?
-        if (attackedShip is not null)
-        {
-            attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
-            result = AttackResult.Hit;
-        }
     }
 
     private static Ship? GetAttackedShip(Cell attackedLocation, IEnumerable<Ship> attackedShips) =>
