@@ -12,10 +12,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Test SSH connection
-      run: ssh -i private_key -o StrictHostKeyChecking=no -o "BatchMode yes" root@167.172.102.146 "echo 'SSH connection successful'"
-
+      
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
