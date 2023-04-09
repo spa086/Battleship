@@ -23,8 +23,15 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
 
-    - name: Test SSH connection without passphrase
-      run: ssh -i private_key -o StrictHostKeyChecking=no -o "BatchMode yes" root@167.172.102.146 "echo 'SSH connection without passphrase successful'"
+    - name: Start SSH agent and add private key
+      run: |
+        eval "$(ssh-agent -s)"
+        ssh-add private_key
+
+    - name: Test SSH connection
+      run: ssh -i private_key -o StrictHostKeyChecking=no -o "BatchMode yes" root@167.172.102.146 "echo 'SSH connection successful'"
+
+
 
 #    - name: Create expect script for SSH passphrase
 #      run: |
