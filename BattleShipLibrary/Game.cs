@@ -6,12 +6,12 @@ namespace BattleshipLibrary;
 //todo refactor long file
 public class Game
 {
-    public Game(int user1Id, Ship[] aiShips, int matchingTimeSeconds = 30)
+    public Game(int user1Id, IAi ai, int matchingTimeSeconds = 30)
     {
         Host = new User { Id = user1Id };
         Id = new Random().Next();
         SetMatchingTimer(matchingTimeSeconds);
-        this.aiShips = aiShips;
+        this.ai = ai;
     }
 
     public User Host { get; set; }
@@ -118,7 +118,7 @@ public class Game
         SetTimerWithAction(() =>
         {
             State = GameState.OnePlayerCreatesFleet;
-            Guest = new User { IsBot = true, Fleet = aiShips, Name = "General Chaos" };
+            Guest = new User { IsBot = true, Fleet = ai.GenerateShips(), Name = "General Chaos" };
         }, secondsLeft);
 
     protected virtual void SetShipsCreationTimer(int secondsLeft = 30) =>
@@ -188,7 +188,7 @@ public class Game
 
     protected TimerWithDueTime? timer;
     private GameState state;
-    private readonly Ship[] aiShips;
+    private readonly IAi ai;
 
     //todo to Ship extension!!! 
     public static bool IsDestroyed(Ship ship) => ship.Decks.Values.All(x => x.Destroyed);

@@ -10,7 +10,7 @@ public class WebAttackTests
     private readonly Controller controller;
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
-    private readonly TestRandomFleet testRandomFleet;
+    private readonly TestAi testRandomFleet;
 
     public WebAttackTests()
     {
@@ -19,14 +19,14 @@ public class WebAttackTests
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
         services.AddTransient<Controller>();
-        services.AddSingleton<IRandomFleet, TestRandomFleet>();
+        services.AddSingleton<IAi, TestAi>();
 
         var serviceProvider = services.BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
         controller = serviceProvider.GetService<Controller>()!;
-        testRandomFleet = (serviceProvider.GetService<IRandomFleet>() as TestRandomFleet)!;
+        testRandomFleet = (serviceProvider.GetService<IAi>() as TestAi)!;
     }
 
     [SetUp]

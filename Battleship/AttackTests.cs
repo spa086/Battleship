@@ -18,7 +18,7 @@ public class AttackTests
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
-        services.AddSingleton<IRandomFleet, TestRandomFleet>();
+        services.AddSingleton<IAi, TestAi>();
 
         var serviceProvider = services.BuildServiceProvider();
 

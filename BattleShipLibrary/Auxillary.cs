@@ -3,17 +3,17 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BattleshipLibrary;
 
-public class RandomFleet : IRandomFleet
+public class RandomFleet : IAi
 {
-    public Ship[] Generate()
+    public Ship[] GenerateShips()
     {
         throw new NotImplementedException();
     }
 }
 
-public interface IRandomFleet
+public interface IAi
 {
-    Ship[] Generate();
+    Ship[] GenerateShips();
 }
 
 //todo use DI instead
@@ -44,11 +44,11 @@ public enum AttackResult
 //todo inherit TestableGamePool
 public class GamePool
 {
-    private readonly IRandomFleet randomFleet;
+    private readonly IAi ai;
 
-    public GamePool(IRandomFleet randomFleet)
+    public GamePool(IAi ai)
     {
-        this.randomFleet = randomFleet;
+        this.ai = ai;
     }
 
     //for testing
@@ -80,8 +80,7 @@ public class GamePool
         //todo tdd ensure id uniqueness
         if (game is null)
         {
-            var aiShips = randomFleet.Generate();
-            var newGame = new Game(userId, aiShips, SetupMatchingTimeSeconds ?? 30);
+            var newGame = new Game(userId, ai, SetupMatchingTimeSeconds ?? 30);
             Games[newGame.Id] = newGame;
             return false;
         }

@@ -4,11 +4,11 @@ using NUnit.Framework;
 
 namespace BattleshipTests;
 
-public class TestRandomFleet : IRandomFleet
+public class TestAi : IAi
 {
     public Ship[]? SetupAiShips { get; set; }
 
-    public Ship[] Generate()
+    public Ship[] GenerateShips()
     {
         return SetupAiShips ?? throw new Exception($"No ships were set up.");
     }

@@ -19,20 +19,20 @@ public class Tests
     private TestableGame game = new(0);
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
-    private readonly TestRandomFleet testRandomFleet;
+    private readonly TestAi testAi;
 
     public Tests()
     {
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
-        services.AddSingleton<IRandomFleet, TestRandomFleet>();
+        services.AddSingleton<IAi, TestAi>();
 
         var serviceProvider = services.BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
-        testRandomFleet = (serviceProvider.GetService<IRandomFleet>() as TestRandomFleet)!;
+        testAi = (serviceProvider.GetService<IAi>() as TestAi)!;
     }
 
     [SetUp]
@@ -46,7 +46,7 @@ public class Tests
     public void MatchingTimer()
     {
         gamePool.SetupMatchingTimeSeconds = 1;
-        testRandomFleet.SetupAiShips = CreateSimpleShip(1, 1);
+        testAi.SetupAiShips = CreateSimpleShip(1, 1);
 
         gamePool.StartPlaying(1);
 
@@ -153,7 +153,7 @@ public class Tests
     [Test]
     public void StartingAGame()
     {
-        testRandomFleet.SetupAiShips = Array.Empty<Ship>();
+        testAi.SetupAiShips = Array.Empty<Ship>();
 
         Assert.That(gamePool.StartPlaying(1), Is.False);
 

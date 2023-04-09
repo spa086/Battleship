@@ -18,7 +18,7 @@ public class WhatsUpBattleTests
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
         services.AddTransient<Controller>();
-        services.AddSingleton<IRandomFleet, TestRandomFleet>();
+        services.AddSingleton<IAi, TestAi>();
 
         var serviceProvider = services.BuildServiceProvider();
 
