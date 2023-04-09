@@ -31,67 +31,6 @@ jobs:
     - name: Test SSH connection
       run: ssh -i private_key -o StrictHostKeyChecking=no -o "BatchMode yes" root@167.172.102.146 "echo 'SSH connection successful'"
 
-
-
-#    - name: Create expect script for SSH passphrase
-#      run: |
-#        echo 'spawn ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "echo SSH connection successful"' > ssh_passphrase.exp
-#        echo 'expect "Enter passphrase for private_key:"' >> ssh_passphrase.exp
-#        echo 'send "$env(SSHPASS)\r"' >> ssh_passphrase.exp
-#        echo 'expect eof' >> ssh_passphrase.exp
-
-#    - name: Test SSH connection using expect script
-#      env:
-#        SSHPASS: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
-#      run: expect ssh_passphrase.exp
-
-#    - name: Create passphrase script and make it executable
-#      run: |
-#        echo 'echo $SSHPASS' > passphrase_script.sh
-#        chmod +x passphrase_script.sh
-
-#    - name: Test SSH connection using passphrase script
-#      env:
-#        SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
-#      run: |
-#        export SSH_ASKPASS=./passphrase_script.sh
-#        ssh -i private_key -o StrictHostKeyChecking=no -o "BatchMode yes" root@167.172.102.146 "echo 'SSH connection with passphrase script successful'"
-
-#    - name: Test SSH authentication with ssh-agent
-#      run: |
-#        eval "$(ssh-agent -s)"
-#        echo "${{ secrets.SSH_PRIVATE_KEY }}" | fold -w 64 > private_key
-#        chmod 600 private_key
-#        echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add private_key -
-#        ssh -o StrictHostKeyChecking=no -v root@167.172.102.146 "echo 'SSH authentication with ssh-agent successful'"
-
-    - name: Start SSH agent and add private key
-      run: |
-        eval "$(ssh-agent -s)"
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-        chmod 600 private_key
-        echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add private_key -
-
-    - name: Test SSH authentication
-      run: ssh -i private_key -o StrictHostKeyChecking=no -v root@167.172.102.146 "echo 'SSH authentication successful'"
-      env:
-        SSHPASS: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
-        
-    - name: Test SSH authentication
-      run: sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "echo 'SSH authentication successful'"
-      env:
-        SSHPASS: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
-
-    - name: Test transfer with a smaller file using scp
-      run: echo "test" > test.txt && sshpass -e scp -i private_key -o StrictHostKeyChecking=no -C -p test.txt root@167.172.102.146:/tmp
-      env:
-        SSHPASS: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
-
-    - name: Test transfer with a smaller file
-      run: echo "test" > test.txt && sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avvvz --progress test.txt root@167.172.102.146:/tmp
-      env:
-        SSHPASS: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
-
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
@@ -121,14 +60,10 @@ jobs:
       run: du -h game-server.tar.gz
 
     - name: Transfer Docker image to DigitalOcean instance
-      run: sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avvvz --progress game-server.tar.gz root@167.172.102.146:/tmp        
-      env:
-        SSHPASS: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
+      run: sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avvvz --progress game-server.tar.gz root@167.172.102.146:/tmp
 
     - name: Deploy to DigitalOcean
       run: |
         sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker load < /tmp/game-server.tar.gz"
         sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker stop game-server || true && docker rm game-server || true"
         sshpass -e ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "docker run -d -p 80:80 --name game-server game-server:${{ github.sha }}"
-      env:
-        SSHPASS: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
