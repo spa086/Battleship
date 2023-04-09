@@ -35,6 +35,9 @@ jobs:
     - name: Build Docker image
       run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
 
+    - name: Install sshpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
+
     - name: Setting key
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
@@ -47,8 +50,7 @@ jobs:
       run: du -h game-server.tar.gz
 
     - name: Transfer Docker image to DigitalOcean instance
-      run: sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avvvz --progress game-server.tar.gz root@167.172.102.146:/tmp
-        
+      run: sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avvvz --progress game-server.tar.gz root@167.172.102.146:/tmp        
       env:
         SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
 
