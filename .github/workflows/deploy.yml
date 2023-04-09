@@ -13,21 +13,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setting key
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-        chmod 600 private_key
-
-    - name: Save private key
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-        chmod 600 private_key
-
-    - name: Start SSH agent and add private key
-      run: |
-        eval "$(ssh-agent -s)"
-        ssh-add private_key
-
     - name: Test SSH connection
       run: ssh -i private_key -o StrictHostKeyChecking=no -o "BatchMode yes" root@167.172.102.146 "echo 'SSH connection successful'"
 
@@ -58,6 +43,16 @@ jobs:
 
     - name: Calculating size of image
       run: du -h game-server.tar.gz
+      
+    - name: Setting key
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        chmod 600 private_key
+
+    - name: Start SSH agent and add private key
+      run: |
+        eval "$(ssh-agent -s)"
+        ssh-add private_key
 
     - name: Transfer Docker image to DigitalOcean instance
       run: rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avz --progress game-server.tar.gz root@167.172.102.146:/tmp
