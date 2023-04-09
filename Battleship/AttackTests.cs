@@ -90,7 +90,7 @@ public class AttackTests
 
         game.Attack(1, new Cell(5, 5));
 
-        var locationExcludedByBot = game.Guest.ExcludedLocations.AssertSingle();
+        var locationExcludedByBot = game.Guest!.ExcludedLocations.AssertSingle();
         Assert.That(locationExcludedByBot, Is.EqualTo(new Cell(6, 6)));
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
     }
