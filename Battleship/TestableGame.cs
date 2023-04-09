@@ -4,9 +4,7 @@ namespace BattleshipTests;
 
 public class TestableGame : Game
 {
-#pragma warning disable CS8625 // Литерал, равный NULL, не может быть преобразован в ссылочный тип, не допускающий значение NULL.
     public TestableGame(int userId) : base(userId, new TestAi())
-#pragma warning restore CS8625 // Литерал, равный NULL, не может быть преобразован в ссылочный тип, не допускающий значение NULL.
     {
 
     }
@@ -53,10 +51,10 @@ public class TestableGame : Game
         SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  new[] { new Cell(3, 3) }, 2);
     }
 
-    public void SetupFleets(IEnumerable<Ship>? fleet1, IEnumerable<Ship>? fleet2)
+    public void SetupFleets(IEnumerable<Ship>? hostFleet, IEnumerable<Ship>? guestFleet)
     {
-        Host.Fleet = fleet1?.ToArray();
-        Guest!.Fleet = fleet2?.ToArray();
+        Host.Fleet = hostFleet?.ToArray();
+        Guest!.Fleet = guestFleet?.ToArray();
     }
 
     public void DestroyFleet(int userId)

@@ -5,12 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BattleshipTests;
 
-//lines 105 chars
-//methods 20 lines
-//files 200 lines
-//no partial
-//folder 5 files
-
 public class Tests
 {
     //todo tdd throw if any location list is uninitialized

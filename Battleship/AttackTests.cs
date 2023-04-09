@@ -34,6 +34,24 @@ public class AttackTests
     }
 
     [Test]
+    public void AiHits()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.Guest = new User { IsBot = true };
+        var hostDecks = new[] {new Deck(1, 1), new Deck(1, 2)}.ToDictionary(x => x.Location);
+        var guestDecks = new[]{ new Deck(3, 3) }.ToDictionary(x => x.Location);
+        game.SetupFleets(
+            new[] { new Ship { Decks = hostDecks } }, new[] { new Ship { Decks = guestDecks } });
+        game.SetupAiAttackLocation(new Cell(1, 1));
+
+        game.Attack(1, new Cell(5, 5));
+
+        var ship = game.Host.Fleet.AssertSingle();
+        var deck = ship.Decks[new Cell(1, 1)];
+        Assert.That(deck.Destroyed, Is.True);
+    }
+
+    [Test]
     public void AiMisses()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);

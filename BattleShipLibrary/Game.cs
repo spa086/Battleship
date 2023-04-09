@@ -3,7 +3,6 @@ using System.Timers;
 
 namespace BattleshipLibrary;
 
-//todo refactor long file
 public class Game
 {
     public Game(int user1Id, IAi ai, int matchingTimeSeconds = 30)
@@ -94,6 +93,7 @@ public class Game
         }
     }
 
+    //todo refactor long method
     //todo tdd userId field
 #pragma warning disable IDE0060 // Удалите неиспользуемый параметр
     public AttackResult Attack(int userId, Cell attackedLocation)
@@ -112,7 +112,14 @@ public class Game
         ProcessBattleOrWin(player1Turn, attackedShips, ref result);
         if (BattleOngoing)
         {
-            if(Guest!.IsBot) Exclude(ai.ChooseAttackLocation());
+            if (Guest!.IsBot)
+            {
+                var aiAttackLocation = ai.ChooseAttackLocation();
+                Exclude(aiAttackLocation);
+                var attackedShip = 
+                    Host.Fleet!.SingleOrDefault(x => x.Decks.ContainsKey(aiAttackLocation));
+                if(attackedShip is not null) attackedShip.Decks[aiAttackLocation].Destroyed = true;
+            } 
             else SetBattleTimer();
         }
         return result; //todo tdd correct result
