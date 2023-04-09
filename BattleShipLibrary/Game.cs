@@ -88,7 +88,8 @@ public class Game
         var result = PerformAttackByUser(attackedLocation);
         if (BattleOngoing)
         {
-            if (Guest!.IsBot && result != AttackResult.Hit) PerformAiAttack();
+            if (Guest!.IsBot && result != AttackResult.Hit) 
+                while (PerformAiAttack() && BattleOngoing) { }
             SetBattleTimer();
         }
         return result; //todo tdd correct result
@@ -167,7 +168,7 @@ public class Game
         if (!player1Turn && hit || player1Turn && !hit) State = GameState.GuestTurn;
     }
 
-    private void PerformAiAttack()
+    private bool PerformAiAttack()
     {
         var aiAttackLocation = ai.ChooseAttackLocation(Host.Fleet!, Guest!.ExcludedLocations);
         Exclude(aiAttackLocation);
@@ -180,6 +181,7 @@ public class Game
             DisposeOfTimer();
         }
         else State = GameState.HostTurn;
+        return aiAttackedShip is not null;
     }
 
     private void SetTimerWithAction(Action action, int secondsLeft)

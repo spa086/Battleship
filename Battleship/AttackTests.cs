@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BattleshipTests;
 
+//todo refactor long file
 public class AttackTests
 {
     //todo tdd throw if any location list is uninitialized
@@ -34,13 +35,28 @@ public class AttackTests
     }
 
     [Test]
+    public void AiAttacksAgain()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        SetAi(game);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1), new Cell(1,2)}, 1,
+            new[] { new Cell(2, 2) }, 2);
+        game.EnqueueAiAttackLocation(new Cell(1, 1));
+        game.EnqueueAiAttackLocation(new Cell(1, 2));
+
+        game.Attack(1, new Cell(5, 5));
+
+        Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
+    }
+
+    [Test]
     public void AttackAgainWithAi()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
             new[] { new Cell(2, 2), new Cell(2, 3) }, 2);
-        game.SetupAiAttackLocation(new Cell(1, 1));
+        game.EnqueueAiAttackLocation(new Cell(1, 1));
    
         game.Attack(1, new Cell(2, 2));
 
@@ -53,7 +69,7 @@ public class AttackTests
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
-        game.SetupAiAttackLocation(new Cell(1, 1));
+        game.EnqueueAiAttackLocation(new Cell(1, 1));
 
         game.Attack(1, new Cell(5, 5));
 
@@ -68,7 +84,7 @@ public class AttackTests
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
-        game.SetupAiAttackLocation(new Cell(6, 6));
+        game.EnqueueAiAttackLocation(new Cell(6, 6));
         game.SetupBattleTimer(100);
 
         game.Attack(1, new Cell(5, 5));
@@ -85,7 +101,8 @@ public class AttackTests
         var guestDecks = new[]{ new Deck(3, 3) }.ToDictionary(x => x.Location);
         game.SetupFleets(
             new[] { new Ship { Decks = hostDecks } }, new[] { new Ship { Decks = guestDecks } });
-        game.SetupAiAttackLocation(new Cell(1, 1));
+        game.EnqueueAiAttackLocation(new Cell(1, 1));
+        game.EnqueueAiAttackLocation(new Cell(7, 7));
 
         game.Attack(1, new Cell(5, 5));
 
@@ -100,7 +117,7 @@ public class AttackTests
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
-        game.SetupAiAttackLocation(new Cell(6, 6));
+        game.EnqueueAiAttackLocation(new Cell(6, 6));
 
         game.Attack(1, new Cell(5, 5));
 
@@ -130,7 +147,7 @@ public class AttackTests
 
         game.Attack(1, new Cell(1, 1));
 
-        testingEnvironment.SleepMinimalTime();
+        TestingEnvironment.SleepMinimalTime();
         Assert.That(game.ItsOver, Is.True);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
         Assert.That(game.TimerSecondsLeft, Is.LessThanOrEqualTo(0));

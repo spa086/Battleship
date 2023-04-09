@@ -44,7 +44,7 @@ public class Tests
 
         gamePool.StartPlaying(1);
 
-        testingEnvironment.SleepMinimalTime();
+        TestingEnvironment.SleepMinimalTime();
         var game = gamePool.Games.Values.Single();
         var botUser = game.Guest;
         Assert.That(botUser, Is.Not.Null);
@@ -64,7 +64,7 @@ public class Tests
 
         gamePool.StartPlaying(1);
 
-        testingEnvironment.SleepMinimalTime();
+        TestingEnvironment.SleepMinimalTime();
         var game = gamePool.Games.Values.Single();
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(60));
@@ -99,7 +99,7 @@ public class Tests
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
-        testingEnvironment.SleepMinimalTime();
+        TestingEnvironment.SleepMinimalTime();
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(29));
     }
 
@@ -153,7 +153,7 @@ public class Tests
 
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(1));
-        testingEnvironment.SleepMinimalTime();
+        TestingEnvironment.SleepMinimalTime();
         Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
     }
 

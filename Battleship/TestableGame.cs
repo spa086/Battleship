@@ -29,7 +29,8 @@ public class TestableGame : Game
     public int? SetupTurnTime { get; set; }
     public int? SetupMatchingTime { get; set; }
 
-    public void SetupAiAttackLocation(Cell location) => (ai as TestAi)!.SetupAttackLocation = location;
+    public void EnqueueAiAttackLocation(Cell location) => 
+        (ai as TestAi)!.AttackLocationsQueue.Enqueue(location);
 
     public void SetupExcludedLocations(int userId, params Cell[] locations)
     {

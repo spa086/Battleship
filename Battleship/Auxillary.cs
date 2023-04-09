@@ -7,10 +7,11 @@ namespace BattleshipTests;
 public class TestAi : IAi
 {
     public Ship[]? SetupAiShips { get; set; }
-    public Cell? SetupAttackLocation { get; set; }
+    public Queue<Cell> AttackLocationsQueue { get; set; } = new Queue<Cell>();
 
-    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations) => 
-        SetupAttackLocation ?? throw new Exception($"Attack location is not set up.");
+    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, 
+        IEnumerable<Cell> excludedLocations) => 
+        AttackLocationsQueue.Dequeue();
 
     public Ship[] GenerateShips()
     {
@@ -27,7 +28,7 @@ public class TestingEnvironment
         this.gamePool = gamePool;
     }
 
-    public void SleepMinimalTime() => Thread.Sleep(1100);
+    public static void SleepMinimalTime() => Thread.Sleep(1100);
 
     public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
         int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true, int matchingSeconds = 30)
