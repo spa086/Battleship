@@ -18,9 +18,6 @@ jobs:
       with:
         dotnet-version: 7.0.x
 
-    - name: Verify path to project file
-      run: ls /home/runner/work/Battleship/Battleship/BattleShipLibrary/BattleShipLibrary.csproj
-
     - name: Restore dependencies
       run: dotnet restore Battleship.sln
 
@@ -48,6 +45,9 @@ jobs:
 
     - name: Calculating size of image
       run: du -h game-server.tar.gz
+
+    - name: Check network connectivity
+      run: ping -c 3 8.8.8.8
 
     - name: Check network connectivity
       run: ping -c 3 167.172.102.146
