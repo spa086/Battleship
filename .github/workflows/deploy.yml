@@ -18,6 +18,11 @@ jobs:
       with:
         dotnet-version: 7.0.x
 
+    - name: Test transfer with a smaller file
+      run: echo "test" > test.txt && sshpass -e rsync -e "ssh -i private_key -o StrictHostKeyChecking=no" -avvvz --progress test.txt root@167.172.102.146:/tmp
+      env:
+        SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
+
     - name: Restore dependencies
       run: dotnet restore Battleship.sln
 
@@ -34,9 +39,6 @@ jobs:
       
     - name: Build Docker image
       run: docker build -t game-server:${{ github.sha }} -f docker/Dockerfile .
-
-    - name: Install sshpass
-      run: sudo apt-get update && sudo apt-get install -y sshpass
 
     - name: Setting key
       run: |
