@@ -8,10 +8,10 @@ WORKDIR /app
 COPY ./publish /app
 
 # Expose the port the app runs on
-EXPOSE 80
+EXPOSE 5000
 
 # Make the BattleshipApi binary executable
 RUN chmod +x /app/BattleshipApi
 
 # Start the application
-ENTRYPOINT ["/app/BattleshipApi"]
+ENTRYPOINT ["/app/BattleshipApi", "--urls", "http://0.0.0.0:5000"]
