@@ -21,18 +21,17 @@ jobs:
     - name: Install expect
       run: sudo apt-get install -y expect
 
-    - name: Create expect script for SSH passphrase
-      run: |
-        echo 'spawn ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "echo SSH connection successful"' > ssh_passphrase.exp
-        echo 'expect "Enter passphrase for private_key:"' >> ssh_passphrase.exp
-        echo 'send "$env(SSHPASS)\r"' >> ssh_passphrase.exp
-        echo 'expect eof' >> ssh_passphrase.exp
+#    - name: Create expect script for SSH passphrase
+#      run: |
+#        echo 'spawn ssh -i private_key -o StrictHostKeyChecking=no root@167.172.102.146 "echo SSH connection successful"' > ssh_passphrase.exp
+#        echo 'expect "Enter passphrase for private_key:"' >> ssh_passphrase.exp
+#        echo 'send "$env(SSHPASS)\r"' >> ssh_passphrase.exp
+#        echo 'expect eof' >> ssh_passphrase.exp
 
     - name: Test SSH connection using expect script
       env:
-        SSHPASS: ${{ secrets.SSH_PASSPHRASE }}
+        SSHPASS: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
       run: expect ssh_passphrase.exp
-
 
     - name: Create passphrase script and make it executable
       run: |
