@@ -49,7 +49,7 @@ public class WhatsUpPreBattleTests
         testRandomFleet.SetupAiShips = Array.Empty<Ship>();
         gamePool.SetupMatchingTimeSeconds = 100;
         
-        var result = controller.WhatsUp(new WhatsupRequestModel { userId = 1 });
+        var result = controller.NewGame(new NewGameRequestModel { userId = 1 });
 
         Assert.That(result.secondsLeft, Is.EqualTo(100));
     }
@@ -120,23 +120,21 @@ public class WhatsUpPreBattleTests
     public void SecondPlayerJoins()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest,
-            1, 2);
+            1, null);
 
-        var result = CallWhatsupViaController(2);
+        controller.NewGame(new NewGameRequestModel { userId = 2 });
 
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.CreatingFleet));
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
         Assert.That(game.Guest!.Id, Is.EqualTo(2));
     }
 
     [Test]
-    public void FirstPlayerStarts()
+    public void GameStart()
     {
         testRandomFleet.SetupAiShips = Array.Empty<Ship>();
 
-        var result = controller.WhatsUp(new WhatsupRequestModel { userId = 1 });
+        var result = controller.NewGame(new NewGameRequestModel { userId = 1 });
 
-        Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
         var gameId = gamePool.Games.Keys.AssertSingle();
         Assert.That(result.gameId, Is.EqualTo(gameId));
     }

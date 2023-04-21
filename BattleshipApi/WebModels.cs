@@ -5,6 +5,17 @@ namespace BattleshipApi;
 
 #pragma warning disable IDE1006 // Стили именования
 
+public class NewGameRequestModel
+{
+    public int userId { get; set; }
+}
+
+public class NewGameResponseModel
+{
+    public int secondsLeft { get; set; }
+    public int gameId { get; set; }
+}
+
 public class AttackRequestModel
 {
     public int userId { get; set; }
@@ -28,7 +39,7 @@ public class WhatsUpResponseModel
     }
 
     public string? userName { get; set; }
-    public int gameId { get; set; }
+    public int? gameId { get; set; }
     public GameStateModel gameState { get; set; }
     //todo tdd filling
     public ShipStateModel[]? myFleet { get; set; }
@@ -108,5 +119,6 @@ public enum GameStateModel
     OpponentsTurn,
     YouWon,
     OpponentWon,
-    Cancelled
+    Cancelled,
+    NoGame
 }

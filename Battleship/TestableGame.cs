@@ -11,7 +11,7 @@ public class TestableGame : Game
 
     public TimerWithDueTime? Timer => timer;
 
-    public TestableGame SetSecondUserId(int? guestId = null)
+    public TestableGame CreateGuest(int? guestId = null)
     {
         if(guestId is null) Guest = null;
         else Guest ??= new User { Id = guestId.Value };

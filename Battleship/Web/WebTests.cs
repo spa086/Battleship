@@ -11,7 +11,6 @@ public class WebTests
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
     private readonly WebResult webResult;
-    private readonly TestAi testRandomFleet;
 
     public WebTests()
     {
@@ -29,7 +28,6 @@ public class WebTests
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
         controller = serviceProvider.GetService<Controller>()!;
         webResult = serviceProvider.GetService<WebResult>()!;
-        testRandomFleet = (serviceProvider.GetService<IAi>() as TestAi)!;
     }
 
     [SetUp]

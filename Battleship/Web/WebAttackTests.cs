@@ -142,7 +142,7 @@ public class WebAttackTests
         int? secondUserId = null, Action<TestableGame>? modifier = null)
     {
         var game = new TestableGame(firstUserId);
-        if (secondUserId != null) game.SetSecondUserId(secondUserId);
+        if (secondUserId != null) game.CreateGuest(secondUserId);
         game.SetState(state);
         modifier?.Invoke(game);
         gamePool.AddGame(game);

@@ -1,5 +1,4 @@
 ﻿using BattleshipLibrary;
-using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace BattleshipTests;
@@ -31,27 +30,27 @@ public class TestingEnvironment
     public static void SleepMinimalTime() => Thread.Sleep(1100);
 
     public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
-        int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true, int matchingSeconds = 30)
+        int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true, 
+        int matchingSeconds = 30)
     {
         var game = new TestableGame(firstUserId ?? 1, matchingSeconds).SetState(state);
         gamePool.AddGame(game);
-        if (game.CreatingFleets || game.BattleOngoing || game.ItsOver)
-            MutateGame(game, state, secondUserId, hostHasFleet);
-        else if (game.State != GameState.WaitingForGuest) throw new Exception("Unknown situation.");
+        MutateGame(game, state, secondUserId, hostHasFleet);
         return game;
     }
 
     private static void MutateGame(
         TestableGame game, GameState state, int? secondUserId, bool hostHasFleet)
     {
-        game.SetSecondUserId(secondUserId);
-        if (game.BattleOngoing)
+        if (game.State == GameState.WaitingForGuest) game.CreateGuest(secondUserId);
+        else if (game.BattleOngoing)
         {
             game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
             game.SetupBattleTimer(30);
         }
         else if (game.CreatingFleets) SetupGameInCreatingFleets(hostHasFleet, game);
         else if (game.ItsOver) SetupGameOver(state, game);
+        else throw new Exception("Unknown situation.");
     }
 
     private static void SetupGameInCreatingFleets(bool firstPlayerHasFleet, TestableGame game)

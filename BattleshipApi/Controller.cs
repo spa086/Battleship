@@ -1,6 +1,4 @@
 ﻿using BattleshipLibrary;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
-using System.Collections.Generic;
 
 namespace BattleshipApi;
 
@@ -13,22 +11,21 @@ public class Controller
         this.gamePool = gamePool;
     }
 
+    public NewGameResponseModel NewGame(NewGameRequestModel model)
+    {
+        return StartPlaying(model.userId);
+    }
+
     public void AbortGame(int userId)
     {
         Log.ger.Info($"User id=[{userId}] wants to abort game.");
         var game = gamePool.GetGame(userId);
         if (game is not null)
-            if (game.State == GameState.HostWon || game.State == GameState.GuestWon)
-            {
-                game.DisposeOfTimer();
-                gamePool.Games.Remove(game.Id);
-                Log.ger.Info($"Game id=[{game.Id}] is removed.");
-            }
-            else
-            {
-                game.SetTechnicalWinner(game.Guest?.Id == userId);
-                Log.ger.Info($"Game id=[{game.Id}] is over. User id=[{userId}] has surrendered.");
-            }
+        {
+            game.DisposeOfTimer();
+            gamePool.Games.Remove(game.Id);
+            Log.ger.Info($"Game id=[{game.Id}] is removed.");
+        }
         else Log.ger.Info($"Game for abortion not found by user id=[{userId}].");
     }
 
@@ -36,9 +33,12 @@ public class Controller
     {
         var userId = request.userId;
         var game = gamePool.GetGame(userId);
-        WhatsUpResponseModel? result;
-        if (game is null) (result, game) = (StartPlaying(userId), gamePool.GetGame(userId)!);
-        else if (game.Guest is null) result = WaitingForStartResult();
+        if (game is null)
+            return new WhatsUpResponseModel
+            {
+                gameState = GameStateModel.NoGame,
+            }; WhatsUpResponseModel? result;
+        if (game.Guest is null) result = WaitingForStartResult();
         else if (game.Guest is not null && (game.Host!.Fleet is null || game.Guest!.Fleet is null))
             result = WhatsUpBeforeBattle(userId, game);
         else if (game.Host!.Fleet is not null && game.Guest!.Fleet is not null)
@@ -146,7 +146,7 @@ public class Controller
     private static WhatsUpResponseModel WaitingForStartResult() =>
         new() { gameState = GameStateModel.WaitingForStart };
 
-    private WhatsUpResponseModel StartPlaying(int userId)
+    private NewGameResponseModel StartPlaying(int userId)
     {
         var secondPlayerJoined = gamePool.StartPlaying(userId);
         var game = gamePool.GetGame(userId)!;
@@ -154,9 +154,8 @@ public class Controller
         Log.ger.Info($"User with id [{userId}] {eventDescription} a game with id [{game.Id}].");
         return new()
         {
-            gameState = secondPlayerJoined ? GameStateModel.CreatingFleet
-                : GameStateModel.WaitingForStart,
-            gameId = game.Id
+            gameId = game.Id,
+            secondsLeft = game.TimerSecondsLeft!.Value
         };
     }
 
