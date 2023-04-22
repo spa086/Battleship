@@ -2,9 +2,10 @@
 
 public class Ai : IAi
 {
+    //todo test
     public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations)
     {
-        var shotDeckLocations = 
+        var shotDeckLocations =
             enemyShips.SelectMany(x => x.Decks.Values).Where(x => x.Destroyed).Select(x => x.Location);
         var unavailableLocations = shotDeckLocations.Concat(excludedLocations);
         var allLocations = from xCoord in Enumerable.Range(0, 10)
@@ -16,15 +17,14 @@ public class Ai : IAi
         return choice;
     }
 
+    //todo test
     public Ship[] GenerateShips()
     {
         var result = new List<Ship>();
         result.Add(GenerateShip(4, result));
         result.Add(GenerateShip(3, result));
         result.Add(GenerateShip(3, result));
-        result.Add(GenerateShip(2, result));
-        result.Add(GenerateShip(2, result));
-        result.Add(GenerateShip(2, result));
+        for (int i = 0; i < 3; i++) result.Add(GenerateShip(2, result));
         return result.ToArray();
     }
 
@@ -44,7 +44,7 @@ public class Ai : IAi
                 decks.Add(new Deck(initialLocation.x + dx, initialLocation.y + dy));
             }
         } while (decks.Any(deck => DeckHasConflicts(existingShips, deck)));
-        
+
         var ship = new Ship { Decks = decks.ToDictionary(x => x.Location) };
         return ship;
     }
@@ -59,17 +59,17 @@ public class Ai : IAi
         return withSurrounding.Contains(deck.Location);
     }
 
-    private static Cell[] GetSurroundingCells(Cell cell) => 
+    private static Cell[] GetSurroundingCells(Cell cell) =>
         new[]
         {
-            new Cell(cell.x, cell.y+1),
-            new Cell(cell.x+1, cell.y+1),
-            new Cell(cell.x+1, cell.y),
-            new Cell(cell.x+1, cell.y-1),
-            new Cell(cell.x, cell.y-1),
-            new Cell(cell.x-1, cell.y-1),
-            new Cell(cell.x-1, cell.y),
-            new Cell(cell.x-1, cell.y+1)
+            new Cell(cell.x, cell.y + 1),
+            new Cell(cell.x + 1, cell.y + 1),
+            new Cell(cell.x + 1, cell.y),
+            new Cell(cell.x + 1, cell.y - 1),
+            new Cell(cell.x, cell.y - 1),
+            new Cell(cell.x - 1, cell.y - 1),
+            new Cell(cell.x - 1, cell.y),
+            new Cell(cell.x - 1, cell.y + 1)
         };
 
     private static List<Direction> GetAvailableDirections(Cell initialLocation, int decksCount)
@@ -104,5 +104,11 @@ public class Ai : IAi
             _ => throw new NotImplementedException()
         };
 
-    private enum Direction { Up, Right, Left, Down}
+    private enum Direction
+    {
+        Up,
+        Right,
+        Left,
+        Down
+    }
 }

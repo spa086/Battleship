@@ -80,11 +80,9 @@ public class GamePool
             Games[newGame.Id] = newGame;
             return false;
         }
-        else
-        {
-            game.Start(userId);
-            return true;
-        }
+
+        game.Start(userId);
+        return true;
     }
 
     //todo make it private, get in tests some other way,
