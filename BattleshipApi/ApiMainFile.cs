@@ -57,7 +57,7 @@ public static class MainApi
         WebApplication app, string urlWithoutSlash,
         Func<TRequestModel, Controller, TResultModel> function) =>
         app.MapPost($"/{urlWithoutSlash}",
-            async delegate (HttpContext context, Controller controller, WebResult webResult)
+            async delegate (HttpContext context, Controller _, WebResult webResult)
             {
                 var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
                 return webResult.Prepare(function, json);
