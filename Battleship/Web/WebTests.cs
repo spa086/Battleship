@@ -54,7 +54,7 @@ public class WebTests
 
         controller.CreateFleet(request);
 
-        Assert.That(game.Host!.Name, Is.EqualTo("Boris"));
+        Assert.That(game.Host.Name, Is.EqualTo("Boris"));
     }
 
     [Test]
@@ -68,7 +68,8 @@ public class WebTests
     [Test]
     public void PrepareErrorResult()
     {
-        var result = webResult.Prepare<int, int>((m, c) => throw new Exception("Some error."), "5");
+        var result = webResult.Prepare<int, int>((_, _) => 
+            throw new Exception("Some error."), "5");
 
         Assert.That(result, Is.EqualTo("\"Some error.\""));
     }
@@ -76,7 +77,7 @@ public class WebTests
     [Test]
     public void PrepareResult()
     {
-        var result = webResult.Prepare<int, int>((m, c) => 2, "5");
+        var result = webResult.Prepare<int, int>((_, _) => 2, "5");
 
         Assert.That(result, Is.EqualTo("2"));
     }
@@ -128,7 +129,7 @@ public class WebTests
         { ships = new[] { NewSimpleShipForFleetCreationRequest(5, 5) }, userId = 2 });
 
         Assert.That(result, Is.False);
-        var ship = testableGame!.Guest!.Fleet.AssertSingle();
+        var ship = testableGame.Guest!.Fleet.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var pair = ship.Decks.AssertSingle();
         Assert.That(pair.Key, Is.EqualTo(new Cell(5, 5)));
@@ -148,7 +149,7 @@ public class WebTests
         { ships = new[] { NewSimpleShipForFleetCreationRequest(1, 1) }, userId = 1 });
 
         Assert.That(result, Is.True);
-        var ship = testableGame!.Host!.Fleet.AssertSingle();
+        var ship = testableGame.Host.Fleet.AssertSingle();
         Assert.That(ship, Is.Not.Null);
         var deck = ship.Decks.AssertSingle();
         Assert.That(deck.Key, Is.EqualTo(new Cell(1, 1)));
