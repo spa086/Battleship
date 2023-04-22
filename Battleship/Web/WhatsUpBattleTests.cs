@@ -33,7 +33,7 @@ public class WhatsUpBattleTests
     [Test]
     public void UserNameIsReturned()
     {
-        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2, true);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         game.SetupUserName(2, "Admiral");
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
@@ -53,7 +53,7 @@ public class WhatsUpBattleTests
 
     [TestCase(GameState.HostWon, GameStateModel.YouWon)]
     [TestCase(GameState.GuestWon, GameStateModel.OpponentWon)]
-    public void WhatsupWhenWon(GameState gameState, GameStateModel expectedModel)
+    public void WhatsUpWhenWon(GameState gameState, GameStateModel expectedModel)
     {
         testingEnvironment.CreateNewTestableGame(gameState, 1, 2);
 
@@ -91,11 +91,11 @@ public class WhatsUpBattleTests
     }
 
     [Test]
-    public void GuestWhatsupAfterShipsOfBothPlayersAreSaved()
+    public void GuestWhatsUpAfterShipsOfBothPlayersAreSaved()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
-        var result = CallWhatsupViaController(2);
+        var result = CallWhatsUpViaController(2);
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.OpponentsTurn));
         AssertSimpleFleet(result.myFleet, 2, 2);
@@ -104,11 +104,11 @@ public class WhatsUpBattleTests
     }
 
     [Test]
-    public void Player1WhatsupAfterShipsOfBothPlayersAreSaved()
+    public void Player1WhatsUpAfterShipsOfBothPlayersAreSaved()
     {
         testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
-        Assert.That(CallWhatsupViaController(1).gameState,
+        Assert.That(CallWhatsUpViaController(1).gameState,
             Is.EqualTo(GameStateModel.YourTurn));
     }
 
@@ -125,6 +125,6 @@ public class WhatsUpBattleTests
         Assert.That(deck1.y, Is.EqualTo(y));
     }
 
-    private WhatsUpResponseModel CallWhatsupViaController(int userId) =>
+    private WhatsUpResponseModel CallWhatsUpViaController(int userId) =>
         controller.WhatsUp(CreateWhatsUpRequestModel(userId));
 }

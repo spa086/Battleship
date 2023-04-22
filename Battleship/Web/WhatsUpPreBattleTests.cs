@@ -36,7 +36,7 @@ public class WhatsUpPreBattleTests
     public void ReturningMatchingTimerSecondsWhenWaiting()
     {
         testingEnvironment.CreateNewTestableGame(
-            GameState.WaitingForGuest, 1, null, matchingSeconds: 100);
+            GameState.WaitingForGuest, 1, matchingSeconds: 100);
 
         var result = controller.WhatsUp(new WhatsupRequestModel { userId = 1 });
 
@@ -111,7 +111,7 @@ public class WhatsUpPreBattleTests
     {
         testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1);
 
-        var result = CallWhatsupViaController(1);
+        var result = CallWhatsUpViaController(1);
 
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.WaitingForStart));
     }
@@ -120,7 +120,7 @@ public class WhatsUpPreBattleTests
     public void SecondPlayerJoins()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest,
-            1, null);
+            1);
 
         controller.NewGame(new NewGameRequestModel { userId = 2 });
 
@@ -142,6 +142,6 @@ public class WhatsUpPreBattleTests
     private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) =>
         new() { userId = userIdParam };
 
-    private WhatsUpResponseModel CallWhatsupViaController(int userId) =>
+    private WhatsUpResponseModel CallWhatsUpViaController(int userId) =>
         controller.WhatsUp(CreateWhatsUpRequestModel(userId));
 }
