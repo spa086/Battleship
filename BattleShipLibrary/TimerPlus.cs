@@ -5,7 +5,7 @@ public class TimerWithDueTime : IDisposable
 {
     public TimerWithDueTime(Action callback, TimeSpan dueTime)
     {
-        timer = new System.Threading.Timer(_ => { callback(); }, new object(), dueTime, Timeout.InfiniteTimeSpan);
+        timer = new Timer(_ => { callback(); }, new object(), dueTime, Timeout.InfiniteTimeSpan);
         next = DateTime.Now.Add(dueTime);
     }
 
@@ -17,6 +17,6 @@ public class TimerWithDueTime : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private readonly System.Threading.Timer timer;
+    private readonly Timer timer;
     private readonly DateTime next;
 }

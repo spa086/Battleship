@@ -8,7 +8,7 @@ public class TestableGame : Game
     {
     }
 
-    public TimerWithDueTime? Timer => timer;
+    public TimerWithDueTime? Timer => TheTimer;
 
     public TestableGame CreateGuest(int? guestId = null)
     {
@@ -27,13 +27,13 @@ public class TestableGame : Game
         return this;
     }
 
-    public TimerWithDueTime? GetTimer() => timer;
+    public TimerWithDueTime? GetTimer() => TheTimer;
 
     public int? SetupTurnTime { get; set; }
     public int? SetupMatchingTime { get; set; }
 
     public void EnqueueAiAttackLocation(Cell location) =>
-        (ai as TestAi)!.AttackLocationsQueue.Enqueue(location);
+        (Ai as TestAi)!.AttackLocationsQueue.Enqueue(location);
 
     public void SetupExcludedLocations(int userId, params Cell[] locations)
     {

@@ -1,7 +1,4 @@
-﻿using NLog;
-using System.Timers;
-
-namespace BattleshipLibrary;
+﻿namespace BattleshipLibrary;
 
 public class Game
 {
@@ -9,34 +6,35 @@ public class Game
     {
         Host = new User { Id = user1Id };
         Id = new Random().Next();
+        // ReSharper disable once VirtualMemberCallInConstructor
         SetMatchingTimer(matchingTimeSeconds);
-        this.ai = ai;
+        Ai = ai;
         StartTime = DateTime.Now;
     }
-    
-    public DateTime StartTime { get; set; }
 
-    public User Host { get; set; }
+    public DateTime StartTime { get; }
+
+    public User Host { get; }
     public User? Guest { get; set; }
 
     //todo tdd this field
-    public int Id { get; private set; }
+    public int Id { get; }
 
     //todo test
     public GameState State
     {
-        get => state; 
+        get => state;
         protected set
         {
             Log.ger.Info($"Game with id [{Id}] has changed state. Previous state: [{state}]. " +
-                $"New State: [{value}].");
+                         $"New State: [{value}].");
             state = value;
         }
     }
 
     //todo test
     public int? TimerSecondsLeft =>
-        timer is null ? null : (int)Math.Ceiling(timer.DueTime.TotalMilliseconds / 1000f);
+        TheTimer is null ? null : (int)Math.Ceiling(TheTimer.DueTime.TotalMilliseconds / 1000f);
 
     //todo test
     public bool BattleOngoing => State == GameState.HostTurn || State == GameState.GuestTurn;
@@ -45,19 +43,16 @@ public class Game
         State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
 
     public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon ||
-        State == GameState.Cancelled;
+                           State == GameState.Cancelled;
 
     //todo tdd
-    public void Cancel()
-    {
-        State = GameState.Cancelled;
-    }
-    
+    public void Cancel() => State = GameState.Cancelled;
+
     //todo tdd
     public void DisposeOfTimer()
     {
-        timer?.Dispose();
-        timer = null;
+        TheTimer?.Dispose();
+        TheTimer = null;
     }
 
     //todo test
@@ -77,15 +72,15 @@ public class Game
 
     public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
     {
-        var battleStarts = (userId == Host!.Id && Guest!.Fleet is not null) ||
-            (userId == Guest!.Id && Host.Fleet is not null);
+        var battleStarts = (userId == Host.Id && Guest!.Fleet is not null) ||
+                           (userId == Guest!.Id && Host.Fleet is not null);
         var newShips = ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
                 .ToDictionary(x => x.Location)
         }).ToArray();
         UpdateState(userId, newShips);
-        if(battleStarts) SetBattleTimer();
+        if (battleStarts) SetBattleTimer();
     }
 
     //todo tdd userId field
@@ -95,16 +90,9 @@ public class Game
     {
         AssertThatShotIsInFieldBorders(attackedLocation);
         var result = PerformAttackByUser(attackedLocation);
-        if (BattleOngoing)
-        {
-            if (Guest!.IsBot && result != AttackResult.Hit)
-            {
-                State = GameState.GuestTurn;
-                while (PerformAiAttack() && BattleOngoing) { }
-                if (BattleOngoing) State = GameState.HostTurn;
-            }
-            SetBattleTimer();
-        }
+        if (!BattleOngoing) return result; //todo tdd correct result
+        if (Guest!.IsBot && result != AttackResult.Hit) AiTurn();
+        SetBattleTimer();
         return result; //todo tdd correct result
     }
 
@@ -112,7 +100,7 @@ public class Game
         SetTimerWithAction(() =>
         {
             State = GameState.OnePlayerCreatesFleet;
-            Guest = new User { IsBot = true, Fleet = ai.GenerateShips(), Name = "General Chaos" };
+            Guest = new User { IsBot = true, Fleet = Ai.GenerateShips(), Name = "General Chaos" };
             SetShipsCreationTimer(60);
         }, secondsLeft);
 
@@ -130,11 +118,10 @@ public class Game
 
     protected virtual void SetBattleTimer(int secondsLeft = 30) =>
         SetTimerWithAction(() =>
-            State = State == GameState.HostTurn ? GameState.GuestWon : GameState.HostWon,
-            secondsLeft);
+            State = State == GameState.HostTurn ? GameState.GuestWon : GameState.HostWon, secondsLeft);
 
-    protected TimerWithDueTime? timer;
-    protected readonly IAi ai;
+    protected TimerWithDueTime? TheTimer;
+    protected readonly IAi Ai;
 
     private AttackResult PerformAttackByUser(Cell attackedLocation)
     {
@@ -144,7 +131,7 @@ public class Game
         var player1Turn = State == GameState.HostTurn;
         var attackedShips = player1Turn
             ? Guest!.Fleet!.Where(x => !x.IsDestroyed).ToArray()
-            : Host!.Fleet!.Where(x => !x.IsDestroyed).ToArray();
+            : Host.Fleet!.Where(x => !x.IsDestroyed).ToArray();
         var result = AttackResult.Missed;
         if (AttackDeck(attackedLocation, attackedShips))
             result = AttackResult.Hit;
@@ -158,13 +145,13 @@ public class Game
     {
         if (userId == Host.Id)
         {
-            Host!.Fleet = newShips;
+            Host.Fleet = newShips;
             State = Guest!.Fleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
         }
         else
         {
             Guest!.Fleet = newShips;
-            State = Host!.Fleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
+            State = Host.Fleet is not null ? GameState.HostTurn : GameState.OnePlayerCreatesFleet;
         }
     }
 
@@ -183,31 +170,29 @@ public class Game
 
     private bool PerformAiAttack()
     {
-        var aiAttackLocation = ai.ChooseAttackLocation(Host.Fleet!, Guest!.ExcludedLocations);
+        var aiAttackLocation = Ai.ChooseAttackLocation(Host.Fleet!, Guest!.ExcludedLocations);
         Exclude(aiAttackLocation);
         var aiAttackedShips = Host.Fleet!;
         var aiAttackedShip = GetAttackedShip(aiAttackLocation, aiAttackedShips);
         if (aiAttackedShip is not null) aiAttackedShip.Decks[aiAttackLocation].Destroyed = true;
-        if (aiAttackedShips.All(x => x.IsDestroyed))
-        {
-            State = GameState.GuestWon;
-            DisposeOfTimer();
-        }
+        if (aiAttackedShips.Any(x => !x.IsDestroyed)) return aiAttackedShip is not null;
+        State = GameState.GuestWon;
+        DisposeOfTimer();
+
         return aiAttackedShip is not null;
     }
 
     private void SetTimerWithAction(Action action, int secondsLeft)
     {
-        timer?.Dispose();
-        timer = new TimerWithDueTime(action, TimeSpan.FromSeconds(secondsLeft));
+        TheTimer?.Dispose();
+        TheTimer = new TimerWithDueTime(action, TimeSpan.FromSeconds(secondsLeft));
     }
 
     private void Exclude(Cell location)
     {
         //todo check for 3 times
-        var currentExcluded =
-            State == GameState.HostTurn ? Host!.ExcludedLocations : Guest!.ExcludedLocations;
-        if (currentExcluded.Contains(location))
+        var currentExcluded = State == GameState.HostTurn ? Host.ExcludedLocations : Guest!.ExcludedLocations;
+        if (currentExcluded.Contains(location)) 
             throw new Exception($"Location {location} is already excluded.");
         currentExcluded.Add(location);
     }
@@ -218,12 +203,9 @@ public class Game
     {
         var attackedShip = GetAttackedShip(attackedLocation, attackedShips);
         //todo tdd throw if null?
-        if (attackedShip is not null)
-        {
-            attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
-            return true;
-        }
-        return false;
+        if (attackedShip is null) return false;
+        attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
+        return true;
     }
 
     private static Ship? GetAttackedShip(Cell attackedLocation, IEnumerable<Ship> attackedShips) =>
@@ -237,5 +219,15 @@ public class Game
             attackedLocation.y < 0 || attackedLocation.y > 9)
             throw new Exception(
                 "Target cannot be outside the game field. Available coordinates are 0-9.");
+    }
+
+    private void AiTurn()
+    {
+        State = GameState.GuestTurn;
+        while (PerformAiAttack() && BattleOngoing)
+        {
+        }
+
+        if (BattleOngoing) State = GameState.HostTurn;
     }
 }
