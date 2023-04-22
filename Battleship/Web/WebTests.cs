@@ -119,17 +119,6 @@ public class WebTests
     }
 
     [Test]
-    public void CannotCreateEmptyDecks()
-    {
-        testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
-        var request = SingleShipFleetCreationRequest(1, null);
-
-        var exception = Assert.Throws<Exception>(() => controller.CreateFleet(request));
-
-        Assert.That(exception.Message, Is.EqualTo("Empty decks are not allowed."));
-    }
-
-    [Test]
     public void GuestCreatesFleet()
     {
         var testableGame = testingEnvironment.CreateNewTestableGame(

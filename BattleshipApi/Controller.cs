@@ -40,32 +40,31 @@ public class Controller
             };
         WhatsUpResponseModel? result;
         if (game.Guest is null) result = WaitingForStartResult();
-        else if (game.Guest is not null && (game.Host!.Fleet is null || game.Guest!.Fleet is null))
+        else if (game.Guest is not null && (game.Host.Fleet is null || game.Guest!.Fleet is null))
             result = WhatsUpBeforeBattle(userId, game);
-        else if (game.Host!.Fleet is not null && game.Guest!.Fleet is not null)
+        else if (game.Host.Fleet is not null && game.Guest!.Fleet is not null)
             result = WhatsUpInBattle(userId, game);
         //todo tdd this exception
         else throw new Exception("Unknown situation.");
-        result.userName = userId == game?.Host?.Id ? game.Guest?.Name : game?.Host.Name;
-        result.secondsLeft = game?.TimerSecondsLeft;
+        result.userName = userId == game.Host.Id ? game.Guest?.Name : game.Host.Name;
+        result.secondsLeft = game.TimerSecondsLeft;
         return result;
     }
 
     public bool CreateFleet(FleetCreationRequestModel request)
     {
         Log.ger.Info($"User [{request.userId}|{request.userName}] wants to create ships.");
-        if (request.ships.Any(x => x.decks is null))
-            throw new Exception("Empty decks are not allowed.");
-        var firstGroupWithDuplicates = request.ships.SelectMany(x => x.decks)
-            .GroupBy(deck => new Cell(deck.x, deck.y))
-            .FirstOrDefault(x => x.Count() > 1);
+        var firstGroupWithDuplicates =
+            request.ships.SelectMany(x => x.decks)
+                .GroupBy(deck => new Cell(deck.x, deck.y))
+                .FirstOrDefault(x => x.Count() > 1);
         if (firstGroupWithDuplicates is not null)
             throw new Exception($"Two decks are at the same place: {firstGroupWithDuplicates.Key}.");
         //todo tdd what if did not find a game
         var game = gamePool.GetGame(request.userId);
-        if (request.userId == game!.Host!.Id) game.Host.Name = request.userName;
+        if (request.userId == game!.Host.Id) game.Host.Name = request.userName;
         else if (request.userId == game.Guest!.Id) game.Guest!.Name = request.userName;
-        game!.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());
+        game.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());
         Log.ger.Info($"Ships were created for user [{request.userId}|{request.userName}].");
         return game.Host.Id == request.userId;
     }
@@ -77,27 +76,27 @@ public class Controller
         //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
         var game = gamePool.GetGame(request.userId)!;
-        var userName = game.State == GameState.HostTurn ? game.Host!.Name : game.Guest!.Name;
+        var userName = game.State == GameState.HostTurn ? game.Host.Name : game.Guest!.Name;
         AssertYourTurn(request, game);
-        var attackResult = game!.Attack(request.userId, ToCell(request.location));
+        var attackResult = game.Attack(request.userId, ToCell(request.location));
         Log.ger.Info($"User id=[{request.userId}] performed attack at " +
                      $"[{request.location.x},{request.location.y}].");
         return new AttackResponse
         {
             result = ToAttackResultModel(attackResult),
-            excludedLocations1 = game.Host!.ExcludedLocations.Select(ToLocationModel).ToArray(),
+            excludedLocations1 = game.Host.ExcludedLocations.Select(ToLocationModel).ToArray(),
             excludedLocations2 = game.Guest!.ExcludedLocations.Select(ToLocationModel).ToArray(),
             opponentName = userName
         };
     }
 
     private static WhatsUpResponseModel WhatsUpBeforeBattle(int userId, Game game) =>
-        new(game.Id, GetStateModel(userId, game), ToFleetStateModel(game.Host!.Fleet),
+        new(game.Id, GetStateModel(userId, game), ToFleetStateModel(game.Host.Fleet),
             ToFleetStateModel(game.Guest!.Fleet), null, null);
 
     private static LocationModel[] GetMyExcludedLocations(Game game, bool forFirstUser) =>
         forFirstUser
-            ? ToExcludedLocationModels(game.Host!.ExcludedLocations)
+            ? ToExcludedLocationModels(game.Host.ExcludedLocations)
             : ToExcludedLocationModels(game.Guest!.ExcludedLocations);
 
     private static LocationModel[] GetOpponentExcludedLocations(Game game, bool forHost) =>
@@ -167,7 +166,7 @@ public class Controller
     private static void AssertYourTurn(AttackRequestModel request, Game game)
     {
         if (game.State == GameState.HostTurn && game.Guest!.Id == request.userId ||
-            game.State == GameState.GuestTurn && game.Host!.Id == request.userId)
+            game.State == GameState.GuestTurn && game.Host.Id == request.userId)
             throw new Exception("Not your turn.");
     }
 
@@ -195,9 +194,5 @@ public class Controller
             }).ToArray();
 
     private static Ship ToShip(ShipForCreationModel ship) =>
-        new()
-        {
-            Decks = ship.decks.ToDictionary(x => ToCell(x),
-                deckModel => new Deck(deckModel.x, deckModel.y))
-        };
+        new() { Decks = ship.decks.ToDictionary(ToCell, deckModel => new Deck(deckModel.x, deckModel.y)) };
 }
