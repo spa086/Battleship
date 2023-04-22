@@ -23,8 +23,8 @@ public class Controller
         if (game is not null)
         {
             game.DisposeOfTimer();
-            gamePool.Games.Remove(game.Id);
-            Log.ger.Info($"Game id=[{game.Id}] is removed.");
+            if (game.State == GameState.WaitingForGuest) game.Cancel();
+            else game.SetTechnicalWinner(userId == game.Guest!.Id);
         }
         else Log.ger.Info($"Game for abortion not found by user id=[{userId}].");
     }
@@ -37,7 +37,8 @@ public class Controller
             return new WhatsUpResponseModel
             {
                 gameState = GameStateModel.NoGame,
-            }; WhatsUpResponseModel? result;
+            };
+        WhatsUpResponseModel? result;
         if (game.Guest is null) result = WaitingForStartResult();
         else if (game.Guest is not null && (game.Host!.Fleet is null || game.Guest!.Fleet is null))
             result = WhatsUpBeforeBattle(userId, game);
@@ -72,7 +73,7 @@ public class Controller
     public AttackResponse Attack(AttackRequestModel request)
     {
         Log.ger.Info($"User id=[{request.userId}] wants to attack at " +
-            $"[{request.location.x},{request.location.y}].");
+                     $"[{request.location.x},{request.location.y}].");
         //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
         var game = gamePool.GetGame(request.userId)!;
@@ -80,7 +81,7 @@ public class Controller
         AssertYourTurn(request, game);
         var attackResult = game!.Attack(request.userId, ToCell(request.location));
         Log.ger.Info($"User id=[{request.userId}] performed attack at " +
-            $"[{request.location.x},{request.location.y}].");
+                     $"[{request.location.x},{request.location.y}].");
         return new AttackResponse
         {
             result = ToAttackResultModel(attackResult),
@@ -90,17 +91,19 @@ public class Controller
         };
     }
 
-    private static WhatsUpResponseModel WhatsUpBeforeBattle(int userId, Game game) => 
+    private static WhatsUpResponseModel WhatsUpBeforeBattle(int userId, Game game) =>
         new(game.Id, GetStateModel(userId, game), ToFleetStateModel(game.Host!.Fleet),
             ToFleetStateModel(game.Guest!.Fleet), null, null);
 
     private static LocationModel[] GetMyExcludedLocations(Game game, bool forFirstUser) =>
-        forFirstUser ? ToExcludedLocationModels(game.Host!.ExcludedLocations) 
+        forFirstUser
+            ? ToExcludedLocationModels(game.Host!.ExcludedLocations)
             : ToExcludedLocationModels(game.Guest!.ExcludedLocations);
 
     private static LocationModel[] GetOpponentExcludedLocations(Game game, bool forHost) =>
-        forHost ? ToExcludedLocationModels(game.Guest!.ExcludedLocations) : 
-            ToExcludedLocationModels(game.Host.ExcludedLocations);
+        forHost
+            ? ToExcludedLocationModels(game.Guest!.ExcludedLocations)
+            : ToExcludedLocationModels(game.Host.ExcludedLocations);
 
     private static LocationModel[] ToExcludedLocationModels(List<Cell> locations) =>
         locations.Select(ToLocationModel).ToArray();
@@ -110,9 +113,11 @@ public class Controller
         var forHost = userId == game.Host.Id;
         var myExcludedLocations = GetMyExcludedLocations(game, forHost);
         var opponentExcludedLocations = GetOpponentExcludedLocations(game, forHost);
-        var myFleet = forHost ? ToFleetStateModel(game.Host.Fleet)
+        var myFleet = forHost
+            ? ToFleetStateModel(game.Host.Fleet)
             : ToFleetStateModel(game.Guest!.Fleet);
-        var opponentFleet = forHost ? ToFleetStateModel(game.Guest!.Fleet)
+        var opponentFleet = forHost
+            ? ToFleetStateModel(game.Guest!.Fleet)
             : ToFleetStateModel(game.Host.Fleet);
         var stateModel = GetStateModel(userId, game);
         var result = new WhatsUpResponseModel(game.Id, stateModel, myFleet, opponentFleet,
@@ -139,8 +144,8 @@ public class Controller
             return GameStateModel.OpponentWon;
         if (game.State == GameState.Cancelled) return GameStateModel.Cancelled;
         throw new Exception($"Unknown situation. State = [{game.State}], " +
-            $"host id = [{game.Host.Id}], guest id = [{game.Guest!.Id}], " +
-            $"requester user id = [{userId}].");
+                            $"host id = [{game.Host.Id}], guest id = [{game.Guest!.Id}], " +
+                            $"requester user id = [{userId}].");
     }
 
     private static WhatsUpResponseModel WaitingForStartResult() =>
@@ -162,7 +167,7 @@ public class Controller
     private static void AssertYourTurn(AttackRequestModel request, Game game)
     {
         if (game.State == GameState.HostTurn && game.Guest!.Id == request.userId ||
-                    game.State == GameState.GuestTurn && game.Host!.Id == request.userId)
+            game.State == GameState.GuestTurn && game.Host!.Id == request.userId)
             throw new Exception("Not your turn.");
     }
 

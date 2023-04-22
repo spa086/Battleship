@@ -93,7 +93,7 @@ public class WhatsUpBattleTests
     [Test]
     public void GuestWhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
         var result = CallWhatsupViaController(2);
 
@@ -106,7 +106,7 @@ public class WhatsUpBattleTests
     [Test]
     public void Player1WhatsupAfterShipsOfBothPlayersAreSaved()
     {
-        testingEnvironment.CreateNewTestableGame(GameState.HostTurn);
+        testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
         Assert.That(CallWhatsupViaController(1).gameState,
             Is.EqualTo(GameStateModel.YourTurn));

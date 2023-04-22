@@ -6,15 +6,18 @@ public class TestableGame : Game
 {
     public TestableGame(int userId, int matchingSeconds = 30) : base(userId, new TestAi(), matchingSeconds)
     {
-
     }
 
     public TimerWithDueTime? Timer => timer;
 
     public TestableGame CreateGuest(int? guestId = null)
     {
-        if(guestId is null) Guest = null;
-        else Guest ??= new User { Id = guestId.Value };
+        if (guestId is not null)
+        {
+            if (Guest is null) Guest = new User();
+            Guest.Id = guestId.Value;
+        }
+
         return this;
     }
 
@@ -29,7 +32,7 @@ public class TestableGame : Game
     public int? SetupTurnTime { get; set; }
     public int? SetupMatchingTime { get; set; }
 
-    public void EnqueueAiAttackLocation(Cell location) => 
+    public void EnqueueAiAttackLocation(Cell location) =>
         (ai as TestAi)!.AttackLocationsQueue.Enqueue(location);
 
     public void SetupExcludedLocations(int userId, params Cell[] locations)
@@ -40,7 +43,7 @@ public class TestableGame : Game
     }
 
     //todo check for 3 times
-    public void SetTurn(bool setPlayer1Turn) => 
+    public void SetTurn(bool setPlayer1Turn) =>
         State = setPlayer1Turn ? GameState.HostTurn : GameState.GuestTurn;
 
     public void StandardSetup()
@@ -49,7 +52,7 @@ public class TestableGame : Game
         Guest = new User { ExcludedLocations = CreateLocationList() };
         State = GameState.HostTurn;
         SetupTurnTime = 30;
-        SetupSimpleFleets(new[] { new Cell(1,1) }, 1,  new[] { new Cell(3, 3) }, 2);
+        SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2);
     }
 
     public void SetupFleets(IEnumerable<Ship>? hostFleet, IEnumerable<Ship>? guestFleet)
@@ -60,9 +63,10 @@ public class TestableGame : Game
 
     public void DestroyFleet(int userId)
     {
-        if(userId == Host.Id)
+        if (userId == Host.Id)
             foreach (var ship in Host.Fleet!)
-                foreach (var deck in ship.Decks.Values) deck.Destroyed = true;
+            foreach (var deck in ship.Decks.Values)
+                deck.Destroyed = true;
     }
 
     public void SetupBattleTimer(int secondsLeft) => SetBattleTimer(secondsLeft);
@@ -74,20 +78,20 @@ public class TestableGame : Game
         if (userId == Host.Id) Host.Name = userName;
         else if (userId == Guest!.Id) Guest.Name = userName;
         else throw new Exception($"User [{userId}] is not found.");
-    }    
+    }
 
-    public void SetupSimpleFleets(Cell[]? hostDeckLocations, int hostId,
-        Cell[]? giestDeckLocations, int? guestId)
+    //todo move id setups to different method/property
+    public void SetupSimpleFleets(Cell[]? hostDeckLocations, int? hostId = null,
+        Cell[]? guestDeckLocations = null, int? guestId = null)
     {
         Host!.Fleet = CreateSimpleFleet(hostDeckLocations);
-        Host.Id = hostId;
-        if (guestId.HasValue && Guest is null) Guest = new User();
-        Guest!.Fleet = CreateSimpleFleet(giestDeckLocations);
+        Host.Id = hostId ?? Host.Id;
+        Guest!.Fleet = CreateSimpleFleet(guestDeckLocations);
         if (guestId is null) Guest = null;
         else Guest.Id = guestId.Value;
     }
 
-    protected override void SetBattleTimer(int secondsLeft = 30) => 
+    protected override void SetBattleTimer(int secondsLeft = 30) =>
         base.SetBattleTimer(SetupTurnTime ?? secondsLeft);
 
     protected override void SetShipsCreationTimer(int secondsLeft = 30) =>
@@ -102,7 +106,7 @@ public class TestableGame : Game
             return null;
         var decks = deckLocations.Select(location => new Deck(location.x, location.y))
             .ToDictionary(x => x.Location);
-        return new[] {new Ship {Decks = decks}};
+        return new[] { new Ship { Decks = decks } };
     }
 
     private static List<Cell> CreateLocationList(params Cell[] locations) => locations.ToList();

@@ -8,8 +8,8 @@ public class TestAi : IAi
     public Ship[]? SetupAiShips { get; set; }
     public Queue<Cell> AttackLocationsQueue { get; set; } = new Queue<Cell>();
 
-    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, 
-        IEnumerable<Cell> excludedLocations) => 
+    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips,
+        IEnumerable<Cell> excludedLocations) =>
         AttackLocationsQueue.Dequeue();
 
     public Ship[] GenerateShips()
@@ -27,25 +27,30 @@ public class TestingEnvironment
         this.gamePool = gamePool;
     }
 
+    public const int LONG_TIME = 36000;
+
     public static void SleepMinimalTime() => Thread.Sleep(1100);
 
     public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
-        int? firstUserId = null, int? secondUserId = null, bool hostHasFleet = true, 
-        int matchingSeconds = 30)
+        int? hostId = null, int? guestId = null, bool hostHasFleet = true,
+        int matchingSeconds = LONG_TIME)
     {
-        var game = new TestableGame(firstUserId ?? 1, matchingSeconds).SetState(state);
+        var game = new TestableGame(hostId ?? 1, matchingSeconds).SetState(state);
         gamePool.AddGame(game);
-        MutateGame(game, state, secondUserId, hostHasFleet);
+        MutateGame(game, state, hostId, guestId, hostHasFleet);
         return game;
     }
 
     private static void MutateGame(
-        TestableGame game, GameState state, int? secondUserId, bool hostHasFleet)
+        TestableGame game, GameState state, int? hostId, int? guestId, bool hostHasFleet)
     {
-        if (game.State == GameState.WaitingForGuest) game.CreateGuest(secondUserId);
+        if (game.State != GameState.WaitingForGuest) game.CreateGuest(guestId);
+        if (game.State == GameState.WaitingForGuest)
+        {
+        }
         else if (game.BattleOngoing)
         {
-            game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
+            game.SetupSimpleFleets(SimpleCellArray(1), hostId, SimpleCellArray(2), guestId);
             game.SetupBattleTimer(30);
         }
         else if (game.CreatingFleets) SetupGameInCreatingFleets(hostHasFleet, game);
@@ -65,7 +70,9 @@ public class TestingEnvironment
         game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
         if (state == GameState.HostWon) game.DestroyFleet(2);
         else if (state == GameState.GuestWon) game.DestroyFleet(1);
-        else if (state == GameState.Cancelled) { }
+        else if (state == GameState.Cancelled)
+        {
+        }
         else throw new Exception($"Unknown state: [{state}].");
     }
 

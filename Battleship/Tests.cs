@@ -1,7 +1,6 @@
-using NUnit.Framework;
 using BattleshipLibrary;
-using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
+using NUnit.Framework;
 
 namespace BattleshipTests;
 
@@ -34,6 +33,18 @@ public class Tests
     {
         gamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void GettingGameWhenThereIsAFinishedGame()
+    {
+        var ongoingGameId =
+            testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 3, 5, matchingSeconds: 36000).Id;
+        testingEnvironment.CreateNewTestableGame(GameState.HostWon, 3, 5, matchingSeconds: 36000);
+
+        var result = gamePool.GetGame(3);
+
+        Assert.That(result, Is.Not.Null);
     }
 
     [Test]
@@ -79,7 +90,7 @@ public class Tests
 
         var exception = Assert.Throws<Exception>(() => gamePool.GetGame(userIdToSearchBy));
         Assert.That(exception.Message, Is.EqualTo($"User id = [{userIdToSearchBy}] participates " +
-            $"in several games. Game id's: [{game1.Id}, {game2.Id}]."));
+                                                  $"in several games. Game id's: [{game1.Id}, {game2.Id}]."));
     }
 
     [TestCase(1)]
@@ -106,11 +117,11 @@ public class Tests
     [Test]
     public void FirstPlayerCreatesShipAfterSecondPlayer()
     {
-        var game = 
+        var game =
             testingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 1, 2, false);
         game.SetupSimpleFleets(null, 1, new[] { new Cell(2, 2) }, 2);
 
-        game.CreateAndSaveShips(1, CreateSimpleShip(1,1));
+        game.CreateAndSaveShips(1, CreateSimpleShip(1, 1));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
     }
@@ -118,7 +129,7 @@ public class Tests
     [Test]
     public void SecondPlayerCreatesShipsWhenFirstHasNoShips()
     {
-        var game = 
+        var game =
             testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2, false);
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
@@ -132,7 +143,7 @@ public class Tests
     {
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, null, 2);
 
-        game.CreateAndSaveShips(2, CreateSimpleShip(2,2));
+        game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
@@ -194,6 +205,6 @@ public class Tests
         Assert.That(deck.Location, Is.EqualTo(new Cell(x, y)));
     }
 
-    private static Ship[] CreateSimpleShip(int x, int y) => 
+    private static Ship[] CreateSimpleShip(int x, int y) =>
         new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(x => x.Location) } };
 }

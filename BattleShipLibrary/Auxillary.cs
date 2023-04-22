@@ -51,12 +51,13 @@ public class GamePool
 
     public Game? GetGame(int userId)
     {
-        var gamesByUserId = Games.Values.Where(x => 
-            x.Host.Id == userId || x.Guest?.Id == userId);
-        if (gamesByUserId.Count() > 1)
+        var gamesByUserId = Games.Values.Where(x => x.Host.Id == userId || x.Guest?.Id == userId);
+        var nonFinishedGames = gamesByUserId.Where(x => !x.ItsOver);
+        if (nonFinishedGames.Count() > 1)
             throw new Exception($"User id = [{userId}] participates in several games. Game id's: " +
                 $"[{string.Join(", ", gamesByUserId.Select(x => x.Id))}].");
-        return gamesByUserId.SingleOrDefault();
+        if(nonFinishedGames.Any()) return nonFinishedGames.Single();
+        return gamesByUserId.OrderByDescending(x => x.StartTime).First();
     }
 
     //for testing

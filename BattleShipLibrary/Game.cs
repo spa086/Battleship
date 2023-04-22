@@ -11,7 +11,10 @@ public class Game
         Id = new Random().Next();
         SetMatchingTimer(matchingTimeSeconds);
         this.ai = ai;
+        StartTime = DateTime.Now;
     }
+    
+    public DateTime StartTime { get; set; }
 
     public User Host { get; set; }
     public User? Guest { get; set; }
@@ -44,6 +47,12 @@ public class Game
     public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon ||
         State == GameState.Cancelled;
 
+    //todo tdd
+    public void Cancel()
+    {
+        State = GameState.Cancelled;
+    }
+    
     //todo tdd
     public void DisposeOfTimer()
     {

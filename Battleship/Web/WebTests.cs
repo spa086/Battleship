@@ -34,21 +34,9 @@ public class WebTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
-    public void AbortionWhenVictoryHasAlreadyHappened()
-    {
-        gamePool.ClearGames();
-        var game = testingEnvironment.CreateNewTestableGame(GameState.HostWon, 1, 2);
-
-        controller.AbortGame(1);
-
-        Assert.That(gamePool.Games, Has.Count.Zero);
-        Assert.That(game.Timer, Is.Null);
-    }
-
-    [Test]
     public void SettingGuestName()
     {
-        var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
         var request = SingleShipFleetCreationRequest(2, new[] { new LocationModel { x = 1, y = 1 } });
         request.userName = "Rachel";
 
@@ -60,7 +48,7 @@ public class WebTests
     [Test]
     public void SettingHostName()
     {
-        var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
         var request = SingleShipFleetCreationRequest(1, new[] { new LocationModel { x = 1, y = 1 } });
         request.userName = "Boris";
 
@@ -94,9 +82,22 @@ public class WebTests
     }
 
     [Test]
+    public void SurrenderingWhenWaitingForGuest()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1, 2);
+
+        controller.AbortGame(1);
+
+        Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
+        Assert.That(game.Timer, Is.Null);
+    }
+
+    [Test]
     public void Surrendering([Values] GameState state)
     {
-        if (state == GameState.HostWon || state == GameState.GuestWon) return;
+        if (state == GameState.HostWon || state == GameState.GuestWon || 
+            state == GameState.Cancelled || state == GameState.WaitingForGuest) 
+            return;
         var game = testingEnvironment.CreateNewTestableGame(state, 1, 2);
 
         controller.AbortGame(1);
@@ -108,7 +109,7 @@ public class WebTests
     [Test]
     public void TwoDecksOfSameShipAreInTheSameLocation()
     {
-        testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1);
+        testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
 
         var exception = Assert.Throws<Exception>(() =>
             controller.CreateFleet(SingleShipFleetCreationRequest(1,
@@ -120,7 +121,7 @@ public class WebTests
     [Test]
     public void CannotCreateEmptyDecks()
     {
-        testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1);
+        testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
         var request = SingleShipFleetCreationRequest(1, null);
 
         var exception = Assert.Throws<Exception>(() => controller.CreateFleet(request));
@@ -151,7 +152,8 @@ public class WebTests
     [Test]
     public void HostCreatesFleet()
     {
-        var testableGame = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets);
+        var testableGame = 
+            testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
 
         var result = controller.CreateFleet(new FleetCreationRequestModel
         { ships = new[] { NewSimpleShipForFleetCreationRequest(1, 1) }, userId = 1 });

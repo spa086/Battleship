@@ -9,7 +9,7 @@ public class AttackTests
 {
     //todo tdd throw if any location list is uninitialized
     //todo tdd throw if ships are adjacent
-    private TestableGame game = new(1);
+    private TestableGame game;
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
 
@@ -31,7 +31,7 @@ public class AttackTests
     public void SetUp()
     {
         gamePool.ClearGames();
-        game.StandardSetup();
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
     }
 
     [Test]
@@ -39,7 +39,7 @@ public class AttackTests
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1), new Cell(1,2)}, 1,
+        game.SetupSimpleFleets(new[] { new Cell(1, 1), new Cell(1, 2) }, 1,
             new[] { new Cell(2, 2) }, 2);
         game.EnqueueAiAttackLocation(new Cell(1, 1));
         game.EnqueueAiAttackLocation(new Cell(1, 2));
@@ -54,10 +54,10 @@ public class AttackTests
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, 
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
             new[] { new Cell(2, 2), new Cell(2, 3) }, 2);
         game.EnqueueAiAttackLocation(new Cell(1, 1));
-   
+
         game.Attack(1, new Cell(2, 2));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
@@ -97,8 +97,8 @@ public class AttackTests
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
-        var hostDecks = new[] {new Deck(1, 1), new Deck(1, 2)}.ToDictionary(x => x.Location);
-        var guestDecks = new[]{ new Deck(3, 3) }.ToDictionary(x => x.Location);
+        var hostDecks = new[] { new Deck(1, 1), new Deck(1, 2) }.ToDictionary(x => x.Location);
+        var guestDecks = new[] { new Deck(3, 3) }.ToDictionary(x => x.Location);
         game.SetupFleets(
             new[] { new Ship { Decks = hostDecks } }, new[] { new Ship { Decks = guestDecks } });
         game.EnqueueAiAttackLocation(new Cell(1, 1));
@@ -158,7 +158,7 @@ public class AttackTests
     {
         var exception = Assert.Throws<Exception>(() => game.Attack(1, new Cell(11, 0)));
 
-        Assert.That(exception.Message, 
+        Assert.That(exception.Message,
             Is.EqualTo("Target cannot be outside the game field. Available coordinates are 0-9."));
     }
 
@@ -176,7 +176,7 @@ public class AttackTests
     [Test]
     public void DamagingAMultideckShip()
     {
-        game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn);
+        game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 1, 2);
         game.SetupSimpleFleets(
             new[] { new Cell(0, 1), new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 2);
 
@@ -192,7 +192,7 @@ public class AttackTests
     {
         game.SetupExcludedLocations(1, new Cell(0, 0));
 
-        var exception = Assert.Throws<Exception>(() => game.Attack(0, new Cell(0,0)));
+        var exception = Assert.Throws<Exception>(() => game.Attack(0, new Cell(0, 0)));
         Assert.That(exception.Message, Is.EqualTo("Location [0,0] is already excluded."));
     }
 
@@ -206,7 +206,7 @@ public class AttackTests
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
         //todo tdd player ship desctruction
         //todo check 3 times
-        game.Host!.Fleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle(); 
+        game.Host!.Fleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
     }
 
     [Test]
@@ -243,7 +243,7 @@ public class AttackTests
     [Test]
     public void Player2AttacksAndWins()
     {
-        game.SetupSimpleFleets( new[] { new Cell(0, 0)}, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 2);
         game.SetTurn(false);
 
         game.Attack(0, new Cell(0, 0));
