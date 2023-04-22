@@ -41,7 +41,7 @@ public class Ai : IAi
             {
                 var dx = GetDx(choice, i);
                 var dy = GetDy(choice, i);
-                decks.Add(new Deck(initialLocation.x + dx, initialLocation.y + dy));
+                decks.Add(new Deck(initialLocation.X + dx, initialLocation.Y + dy));
             }
         } while (decks.Any(deck => DeckHasConflicts(existingShips, deck)));
 
@@ -62,14 +62,14 @@ public class Ai : IAi
     private static Cell[] GetSurroundingCells(Cell cell) =>
         new[]
         {
-            new Cell(cell.x, cell.y + 1),
-            new Cell(cell.x + 1, cell.y + 1),
-            new Cell(cell.x + 1, cell.y),
-            new Cell(cell.x + 1, cell.y - 1),
-            new Cell(cell.x, cell.y - 1),
-            new Cell(cell.x - 1, cell.y - 1),
-            new Cell(cell.x - 1, cell.y),
-            new Cell(cell.x - 1, cell.y + 1)
+            new Cell(cell.X, cell.Y + 1),
+            new Cell(cell.X + 1, cell.Y + 1),
+            new Cell(cell.X + 1, cell.Y),
+            new Cell(cell.X + 1, cell.Y - 1),
+            new Cell(cell.X, cell.Y - 1),
+            new Cell(cell.X - 1, cell.Y - 1),
+            new Cell(cell.X - 1, cell.Y),
+            new Cell(cell.X - 1, cell.Y + 1)
         };
 
     private static List<Direction> GetAvailableDirections(Cell initialLocation, int decksCount)
@@ -77,10 +77,10 @@ public class Ai : IAi
         var result = new List<Direction>();
         var upperBound = 9 - decksCount + 1;
         var lowerBound = decksCount - 1;
-        if (initialLocation.y <= upperBound) result.Add(Direction.Up);
-        if (initialLocation.x <= upperBound) result.Add(Direction.Right);
-        if (initialLocation.y >= lowerBound) result.Add(Direction.Down);
-        if (initialLocation.x >= lowerBound) result.Add(Direction.Left);
+        if (initialLocation.Y <= upperBound) result.Add(Direction.Up);
+        if (initialLocation.X <= upperBound) result.Add(Direction.Right);
+        if (initialLocation.Y >= lowerBound) result.Add(Direction.Down);
+        if (initialLocation.X >= lowerBound) result.Add(Direction.Left);
         return result;
     }
 

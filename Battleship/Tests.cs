@@ -36,6 +36,14 @@ public class Tests
     }
 
     [Test]
+    public void GettingGameWhenThereIsNoGame()
+    {
+        var result = gamePool.GetGame(4799);
+
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
     public void GettingGameWhenThereIsAFinishedGame()
     {
         var ongoingGameId =
@@ -192,7 +200,7 @@ public class Tests
         //todo use separate collection
         var ship = game.Host!.Fleet!.AssertSingle();
         Assert.That(decks, Has.Count.EqualTo(2));
-        var orderedDecks = decks.Values.OrderBy(x => x.Location.y);
+        var orderedDecks = decks.Values.OrderBy(x => x.Location.Y);
         AssertNonDestroyedDeck(orderedDecks.First(), 1, 1);
         AssertNonDestroyedDeck(orderedDecks.Last(), 1, 2);
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));

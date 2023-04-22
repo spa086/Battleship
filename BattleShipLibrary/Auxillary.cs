@@ -1,6 +1,5 @@
-﻿using NLog;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using NLog;
 
 namespace BattleshipLibrary;
 
@@ -14,6 +13,7 @@ public interface IAi
 //todo use DI instead
 public static class Log
 {
+    // ReSharper disable once InconsistentNaming
     public static readonly ILogger ger = LogManager.GetCurrentClassLogger();
 }
 
@@ -51,13 +51,13 @@ public class GamePool
 
     public Game? GetGame(int userId)
     {
-        var gamesByUserId = Games.Values.Where(x => x.Host.Id == userId || x.Guest?.Id == userId);
-        var nonFinishedGames = gamesByUserId.Where(x => !x.ItsOver);
-        if (nonFinishedGames.Count() > 1)
+        var gamesByUserId = 
+            Games.Values.Where(x => x.Host.Id == userId || x.Guest?.Id == userId).ToArray();
+        var nonFinishedGames = gamesByUserId.Where(x => !x.ItsOver).ToArray();
+        if (nonFinishedGames.Length > 1)
             throw new Exception($"User id = [{userId}] participates in several games. Game id's: " +
-                $"[{string.Join(", ", gamesByUserId.Select(x => x.Id))}].");
-        if(nonFinishedGames.Any()) return nonFinishedGames.Single();
-        return gamesByUserId.OrderByDescending(x => x.StartTime).First();
+                                $"[{string.Join(", ", gamesByUserId.Select(x => x.Id))}].");
+        return nonFinishedGames.Any() ? nonFinishedGames.Single() : gamesByUserId.MaxBy(x => x.StartTime);
     }
 
     //for testing
@@ -94,22 +94,22 @@ public readonly struct Cell
 {
     public Cell(int x, int y)
     {
-        this.x = x;
-        this.y = y;
+        X = x;
+        Y = y;
     }
 
-    public readonly int x;
-    public readonly int y;
+    public readonly int X;
+    public readonly int Y;
 
-    public override string ToString() => $"[{x},{y}]";
+    public override string ToString() => $"[{X},{Y}]";
 
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
         var otherLocation = (Cell)obj!;
-        return otherLocation.x == x && otherLocation.y == y;
+        return otherLocation.X == X && otherLocation.Y == Y;
     }
 
-    public override int GetHashCode() => x * 100 + y;
+    public override int GetHashCode() => X * 100 + Y;
 
     public static bool operator ==(Cell cell1, Cell cell2) => cell1.Equals(cell2);
 
@@ -135,7 +135,7 @@ public class Ship
     public bool IsDestroyed => Decks.Values.All(x => x.Destroyed);
 
     //todo make it a hashset
-    public Dictionary<Cell, Deck> Decks { get; set; } = new Dictionary<Cell, Deck>();
+    public Dictionary<Cell, Deck> Decks { get; init; } = new Dictionary<Cell, Deck>();
 
     public override string ToString() => "(" + string.Join(";", Decks.Keys) + ")";
 }

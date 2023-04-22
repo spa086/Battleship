@@ -174,7 +174,7 @@ public class Controller
     private static Cell ToCell(LocationModel model) => new(model.x, model.y);
 
     private static LocationModel ToLocationModel(Cell location) =>
-        new() { x = location.x, y = location.y };
+        new() { x = location.X, y = location.Y };
 
     private static AttackResultTransportModel ToAttackResultModel(AttackResult attackResult) =>
         attackResult switch
@@ -191,7 +191,7 @@ public class Controller
             {
                 decks = ship.Decks.Select(deck =>
                     new DeckStateModel
-                        { destroyed = deck.Value.Destroyed, x = deck.Key.x, y = deck.Key.y }).ToArray()
+                        { destroyed = deck.Value.Destroyed, x = deck.Key.X, y = deck.Key.Y }).ToArray()
             }).ToArray();
 
     private static Ship ToShip(ShipForCreationModel ship) =>

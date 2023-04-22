@@ -76,7 +76,7 @@ public class Game
                            (userId == Guest!.Id && Host.Fleet is not null);
         var newShips = ships.Select(ship => new Ship
         {
-            Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.x, deckLocation.y))
+            Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.X, deckLocation.Y))
                 .ToDictionary(x => x.Location)
         }).ToArray();
         UpdateState(userId, newShips);
@@ -215,8 +215,8 @@ public class Game
 
     private static void AssertThatShotIsInFieldBorders(Cell attackedLocation)
     {
-        if (attackedLocation.x < 0 || attackedLocation.x > 9 ||
-            attackedLocation.y < 0 || attackedLocation.y > 9)
+        if (attackedLocation.X < 0 || attackedLocation.X > 9 ||
+            attackedLocation.Y < 0 || attackedLocation.Y > 9)
             throw new Exception(
                 "Target cannot be outside the game field. Available coordinates are 0-9.");
     }

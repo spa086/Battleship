@@ -104,7 +104,7 @@ public class TestableGame : Game
     {
         if (deckLocations is null)
             return null;
-        var decks = deckLocations.Select(location => new Deck(location.x, location.y))
+        var decks = deckLocations.Select(location => new Deck(location.X, location.Y))
             .ToDictionary(x => x.Location);
         return new[] { new Ship { Decks = decks } };
     }
