@@ -6,16 +6,12 @@ namespace BattleshipTests;
 public class TestAi : IAi
 {
     public Ship[]? SetupAiShips { get; set; }
-    public Queue<Cell> AttackLocationsQueue { get; set; } = new Queue<Cell>();
+    public Queue<Cell> AttackLocationsQueue { get; set; } = new();
 
-    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips,
-        IEnumerable<Cell> excludedLocations) =>
+    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations) =>
         AttackLocationsQueue.Dequeue();
 
-    public Ship[] GenerateShips()
-    {
-        return SetupAiShips ?? throw new Exception($"Ships are not set up.");
-    }
+    public Ship[] GenerateShips() => SetupAiShips ?? throw new Exception($"Ships are not set up.");
 }
 
 public class TestingEnvironment
@@ -27,13 +23,10 @@ public class TestingEnvironment
         this.gamePool = gamePool;
     }
 
-    public const int LONG_TIME = 36000;
-
     public static void SleepMinimalTime() => Thread.Sleep(1100);
 
-    public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest,
-        int? hostId = null, int? guestId = null, bool hostHasFleet = true,
-        int matchingSeconds = LONG_TIME)
+    public TestableGame CreateNewTestableGame(GameState state = GameState.WaitingForGuest, int? hostId = null,
+        int? guestId = null, bool hostHasFleet = true, int matchingSeconds = LongTime)
     {
         var game = new TestableGame(hostId ?? 1, matchingSeconds).SetState(state);
         gamePool.AddGame(game);
@@ -50,7 +43,8 @@ public class TestingEnvironment
         }
         else if (game.BattleOngoing)
         {
-            game.SetupSimpleFleets(SimpleCellArray(1), hostId, SimpleCellArray(2), guestId);
+            game.SetupSimpleFleets(SimpleCellArray(1), hostId,
+                SimpleCellArray(2), guestId);
             game.SetupBattleTimer(30);
         }
         else if (game.CreatingFleets) SetupGameInCreatingFleets(hostHasFleet, game);
@@ -67,7 +61,8 @@ public class TestingEnvironment
 
     private static void SetupGameOver(GameState state, TestableGame game)
     {
-        game.SetupSimpleFleets(SimpleCellArray(1), 1, SimpleCellArray(2), 2);
+        game.SetupSimpleFleets(SimpleCellArray(1), 1,
+            SimpleCellArray(2), 2);
         if (state == GameState.HostWon) game.DestroyFleet(2);
         else if (state == GameState.GuestWon) game.DestroyFleet(1);
         else if (state == GameState.Cancelled)
@@ -77,6 +72,8 @@ public class TestingEnvironment
     }
 
     private static Cell[] SimpleCellArray(int content) => new[] { new Cell(content, content) };
+
+    private const int LongTime = 36000;
 }
 
 public static class Extensions
@@ -85,7 +82,8 @@ public static class Extensions
     public static T AssertSingle<T>(this IEnumerable<T>? collection)
     {
         if (collection is null) throw new Exception("AssertSingle requires non-null target.");
-        Assert.That(collection.Count(), Is.EqualTo(1));
-        return collection.Single();
+        var array = collection.ToArray();
+        Assert.That(array.Length, Is.EqualTo(1));
+        return array.Single();
     }
 }
