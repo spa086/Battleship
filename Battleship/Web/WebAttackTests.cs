@@ -10,7 +10,6 @@ public class WebAttackTests
     private readonly Controller controller;
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
-    private readonly TestAi testRandomFleet;
 
     public WebAttackTests()
     {
@@ -26,7 +25,6 @@ public class WebAttackTests
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
         controller = serviceProvider.GetService<Controller>()!;
-        testRandomFleet = (serviceProvider.GetService<IAi>() as TestAi)!;
     }
 
     [SetUp]
@@ -49,7 +47,7 @@ public class WebAttackTests
         testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
         var exception = Assert.Throws<Exception>(() => controller.Attack(
-            new AttackRequestModel { location = new LocationModel { x = 5, y = 6 }, userId = 2 }));
+            new AttackRequestModel { location = new LocationModel { x = 5, y = 6 }, userId = 2 }))!;
 
         Assert.That(exception.Message, Is.EqualTo("Not your turn."));
     }
@@ -77,11 +75,12 @@ public class WebAttackTests
     [Test]
     public void AttackMissed()
     {
-        var game = SetupGameInPoolWithState(GameState.HostTurn, 1, 2,
-            game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(3, 3) }, 2));
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
+            new[] { new Cell(3, 3) }, 2);
 
         var result = controller.Attack(new AttackRequestModel
-        { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
+            { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Missed));
         Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
@@ -90,11 +89,10 @@ public class WebAttackTests
     [Test]
     public void AttackHitsAShip()
     {
-        var game = SetupGameInPoolWithState(GameState.HostTurn, 1, 2,
-            game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(2, 2), new Cell(2, 3) }, 2));
-        var request = new AttackRequestModel
-        { location = new LocationModel { x = 2, y = 2 }, userId = 1 };
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
+            new[] { new Cell(2, 2), new Cell(2, 3) }, 2);
+        var request = new AttackRequestModel { location = new LocationModel { x = 2, y = 2 }, userId = 1 };
 
         var result = controller.Attack(request);
 
@@ -107,17 +105,17 @@ public class WebAttackTests
     }
 
     [Test]
-    public void Playe21AttacksAndWins()
+    public void Player21AttacksAndWins()
     {
-        var game = SetupGameInPoolWithState(GameState.GuestTurn, 1, 2,
-            game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(2, 2) }, 2));
+        var game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 1, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
+            new[] { new Cell(2, 2) }, 2);
 
         var result = controller.Attack(new AttackRequestModel
-        { location = new LocationModel { x = 1, y = 1 }, userId = 2 });
+            { location = new LocationModel { x = 1, y = 1 }, userId = 2 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
-        AssertSimpleDeckDestroyed(game.Host!.Fleet!, true);
+        AssertSimpleDeckDestroyed(game.Host.Fleet!, true);
         AssertSimpleDeckDestroyed(game.Guest!.Fleet!, false);
         Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
     }
@@ -125,28 +123,17 @@ public class WebAttackTests
     [Test]
     public void Player1AttacksAndWins()
     {
-        var game = SetupGameInPoolWithState(GameState.HostTurn, 1, 2,
-            game => game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(2, 2) }, 2));
+        var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
+            new[] { new Cell(2, 2) }, 2);
 
         var result = controller.Attack(new AttackRequestModel
-        { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
+            { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
 
         Assert.That(result.result, Is.EqualTo(AttackResultTransportModel.Win));
-        AssertSimpleDeckDestroyed(game.Host!.Fleet!, false);
+        AssertSimpleDeckDestroyed(game.Host.Fleet!, false);
         AssertSimpleDeckDestroyed(game.Guest!.Fleet!, true);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
-    }
-
-    private TestableGame SetupGameInPoolWithState(GameState state, int firstUserId,
-        int? secondUserId = null, Action<TestableGame>? modifier = null)
-    {
-        var game = new TestableGame(firstUserId);
-        if (secondUserId != null) game.CreateGuest(secondUserId);
-        game.SetState(state);
-        modifier?.Invoke(game);
-        gamePool.AddGame(game);
-        return game;
     }
 
     private static void AssertSimpleDeckDestroyed(Ship[] ships, bool expectingDestroyed) =>
