@@ -87,7 +87,7 @@ public class GamePool
 
     //todo make it private, get in tests some other way,
     //maybe some for-testing method in GamePool or TestGamePool here
-    public Dictionary<int, Game> Games { get; private set; } = new Dictionary<int, Game>();
+    public Dictionary<int, Game> Games { get; } = new();
 }
 
 public readonly struct Cell
@@ -127,7 +127,7 @@ public class Deck
 
     public bool Destroyed { get; set; }
 
-    public Cell Location { get; set; }
+    public Cell Location { get; }
 }
 
 public class Ship
@@ -135,7 +135,7 @@ public class Ship
     public bool IsDestroyed => Decks.Values.All(x => x.Destroyed);
 
     //todo make it a hashset
-    public Dictionary<Cell, Deck> Decks { get; init; } = new Dictionary<Cell, Deck>();
+    public Dictionary<Cell, Deck> Decks { get; init; } = new();
 
     public override string ToString() => "(" + string.Join(";", Decks.Keys) + ")";
 }
