@@ -61,8 +61,9 @@ public class TestingEnvironment
 
     private static void SetupGameOver(GameState state, TestableGame game)
     {
-        game.SetupSimpleFleets(SimpleCellArray(1), 1,
-            SimpleCellArray(2), 2);
+        var guestJoined = game.Guest is not null;
+        game.SetupSimpleFleets(SimpleCellArray(1), 1, 
+            guestJoined ? SimpleCellArray(2) : null, guestJoined ? 2 : null);
         if (state == GameState.HostWon) game.DestroyFleet(2);
         else if (state == GameState.GuestWon) game.DestroyFleet(1);
         else if (state == GameState.Cancelled)

@@ -68,7 +68,7 @@ public class WebTests
     [Test]
     public void PrepareErrorResult()
     {
-        var result = webResult.Prepare<int, int>((_, _) => 
+        var result = webResult.Prepare<int, int>((_, _) =>
             throw new Exception("Some error."), "5");
 
         Assert.That(result, Is.EqualTo("\"Some error.\""));
@@ -83,6 +83,15 @@ public class WebTests
     }
 
     [Test]
+    public void SurrenderingWhenGameIsCancelledBeforeMatching()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 3);
+        game.Guest = null;
+        
+        Assert.DoesNotThrow(() => controller.AbortGame(3));
+    }
+
+[Test]
     public void SurrenderingWhenWaitingForGuest()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1, 2);
@@ -96,8 +105,7 @@ public class WebTests
     [Test]
     public void Surrendering([Values] GameState state)
     {
-        if (state == GameState.HostWon || state == GameState.GuestWon || 
-            state == GameState.Cancelled || state == GameState.WaitingForGuest) 
+        if (state is GameState.HostWon or GameState.GuestWon or GameState.Cancelled or GameState.WaitingForGuest) 
             return;
         var game = testingEnvironment.CreateNewTestableGame(state, 1, 2);
 

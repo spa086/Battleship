@@ -17,7 +17,7 @@ public class Controller
     {
         Log.ger.Info($"User id=[{userId}] wants to abort game.");
         var game = gamePool.GetGame(userId);
-        if (game is not null)
+        if (game is not null && !game.ItsOver)
         {
             game.DisposeOfTimer();
             if (game.State == GameState.WaitingForGuest) game.Cancel();
