@@ -28,7 +28,7 @@ public class WhatsUpPreBattleTests
     [Test]
     public void WhatsUpOnCancelledGame()
     {
-        var game = testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 33, 34);
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 33);
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(33));
         
