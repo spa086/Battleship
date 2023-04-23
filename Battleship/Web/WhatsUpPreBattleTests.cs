@@ -38,7 +38,7 @@ public class WhatsUpPreBattleTests
         testingEnvironment.CreateNewTestableGame(
             GameState.WaitingForGuest, 1, matchingSeconds: 100);
 
-        var result = controller.WhatsUp(new WhatsupRequestModel { userId = 1 });
+        var result = controller.WhatsUp(new WhatsUpRequestModel { userId = 1 });
 
         Assert.That(result.secondsLeft, Is.EqualTo(100));
     }
@@ -139,7 +139,7 @@ public class WhatsUpPreBattleTests
         Assert.That(result.gameId, Is.EqualTo(gameId));
     }
 
-    private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) =>
+    private static WhatsUpRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) =>
         new() { userId = userIdParam };
 
     private WhatsUpResponseModel CallWhatsUpViaController(int userId) =>

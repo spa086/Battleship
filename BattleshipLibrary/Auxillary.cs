@@ -10,7 +10,6 @@ public interface IAi
     Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations);
 }
 
-//todo use DI instead
 public static class Log
 {
     // ReSharper disable once InconsistentNaming
@@ -123,7 +122,6 @@ public readonly struct Cell
 
 public class Deck
 {
-    //todo tdd this
     public Deck(int x, int y, bool destroyed = false)
     {
         Destroyed = destroyed;

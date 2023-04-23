@@ -26,15 +26,11 @@ public class Controller
         else Log.ger.Info($"Game for abortion not found by user id=[{userId}].");
     }
 
-    public WhatsUpResponseModel WhatsUp(WhatsupRequestModel request)
+    public WhatsUpResponseModel WhatsUp(WhatsUpRequestModel request)
     {
         var userId = request.userId;
         var game = gamePool.GetGame(userId);
-        if (game is null)
-            return new WhatsUpResponseModel
-            {
-                gameState = GameStateModel.NoGame,
-            };
+        if (game is null) return new WhatsUpResponseModel { gameState = GameStateModel.NoGame };
         WhatsUpResponseModel? result;
         if (game.Guest is null) result = WaitingForStartResult();
         else if (game.Guest is not null && (game.Host.Fleet is null || game.Guest!.Fleet is null))

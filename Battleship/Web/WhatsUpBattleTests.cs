@@ -112,7 +112,7 @@ public class WhatsUpBattleTests
             Is.EqualTo(GameStateModel.YourTurn));
     }
 
-    private static WhatsupRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) =>
+    private static WhatsUpRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) =>
         new() { userId = userIdParam };
 
     private static void AssertSimpleFleet(ShipStateModel[]? fleet, int x, int y)

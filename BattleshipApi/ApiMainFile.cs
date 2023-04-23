@@ -23,7 +23,7 @@ public static class MainApi
     {
         MapPostFunction<NewGameRequestModel, NewGameResponseModel>(app, "newGame",
             (model, controller) => controller.NewGame(model));
-        MapPostFunction<WhatsupRequestModel, WhatsUpResponseModel>(app, "whatsUp",
+        MapPostFunction<WhatsUpRequestModel, WhatsUpResponseModel>(app, "whatsUp",
             (model, controller) => controller.WhatsUp(model));
         MapPostFunction<AttackRequestModel, AttackResponse>(app, "attack",
             (model, controller) => controller.Attack(model));

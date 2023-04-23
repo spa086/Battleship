@@ -1,5 +1,6 @@
-﻿using BattleshipLibrary;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+// ReSharper disable PropertyCanBeMadeInitOnly.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace BattleshipApi;
 
@@ -19,7 +20,7 @@ public class NewGameResponseModel
 public class AttackRequestModel
 {
     public int userId { get; set; }
-    public LocationModel location { get; set; } = new LocationModel();
+    public LocationModel location { get; set; } = new();
 }
 
 public class WhatsUpResponseModel
@@ -41,16 +42,14 @@ public class WhatsUpResponseModel
     public string? userName { get; set; }
     public int? gameId { get; set; }
     public GameStateModel gameState { get; set; }
-    //todo tdd filling
     public ShipStateModel[]? myFleet { get; set; }
-    //todo tdd filling
     public ShipStateModel[]? opponentFleet { get; set; }
     public LocationModel[]? myExcludedLocations { get; set; }
     public LocationModel[]? opponentExcludedLocations { get; set; }
     public int? secondsLeft { get; set; }
 }
 
-public class WhatsupRequestModel
+public class WhatsUpRequestModel
 {
     public int userId { get; set; }
 }
@@ -61,8 +60,7 @@ public class FleetCreationRequestModel
 
     public string? userName { get; set; }
 
-    public ShipForCreationModel[] ships { get; set; }
-        = Array.Empty<ShipForCreationModel>();
+    public ShipForCreationModel[] ships { get; set; } = Array.Empty<ShipForCreationModel>();
 }
 
 public class LocationModel
