@@ -36,6 +36,16 @@ public class Tests
     }
 
     [Test]
+    public void StartPlayingWhenThereIsAlreadyAGame()
+    {
+        var existingGame = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 4, 7);
+
+        var exception = Assert.Throws<Exception>(() => gamePool.StartPlaying(7))!;
+        Assert.That(exception.Message, 
+            Is.EqualTo($"Can't start playing: you already participate in ongoing game id=[{existingGame.Id}]."));
+    }
+
+    [Test]
     public void GettingGameWhenThereIsNoGame()
     {
         var result = gamePool.GetGame(4799);
@@ -163,11 +173,11 @@ public class Tests
     [Test]
     public void SecondPlayerJoins()
     {
-        game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1);
+        game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 19);
         game.SetupTurnTime = 1;
         gamePool.AddGame(game);
 
-        Assert.That(gamePool.StartPlaying(1), Is.True);
+        Assert.That(gamePool.StartPlaying(5), Is.True);
 
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(1));

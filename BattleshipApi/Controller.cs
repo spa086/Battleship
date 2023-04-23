@@ -11,10 +11,7 @@ public class Controller
         this.gamePool = gamePool;
     }
 
-    public NewGameResponseModel NewGame(NewGameRequestModel model)
-    {
-        return StartPlaying(model.userId);
-    }
+    public NewGameResponseModel NewGame(NewGameRequestModel model) => StartPlaying(model.userId);
 
     public void AbortGame(int userId)
     {

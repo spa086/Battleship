@@ -72,16 +72,21 @@ public class GamePool
 
     public bool StartPlaying(int userId)
     {
-        var game = Games.Values.FirstOrDefault(x => x.Guest is null);
+        var games = Games.Values;
+        var gamesWithUser = games.Where(x => x.Host.Id == userId || x.Guest?.Id == userId).ToArray();
+        if (gamesWithUser.Any())
+            throw new Exception($"Can't start playing: you already participate in " +
+                                $"ongoing game id=[{gamesWithUser.First().Id}].");
+        var gameToJoin = games.FirstOrDefault(x => x.Guest is null);
         //todo tdd ensure id uniqueness
-        if (game is null)
+        if (gameToJoin is null)
         {
             var newGame = new Game(userId, ai, SetupMatchingTimeSeconds ?? 30);
             Games[newGame.Id] = newGame;
             return false;
         }
 
-        game.Start(userId);
+        gameToJoin.Start(userId);
         return true;
     }
 
