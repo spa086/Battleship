@@ -1,8 +1,8 @@
-using NUnit.Framework;
 using BattleshipLibrary;
 using Microsoft.Extensions.DependencyInjection;
+using NUnit.Framework;
 
-namespace BattleshipTests;
+namespace BattleshipTests.Internal;
 
 //todo refactor long file
 public class AttackTests

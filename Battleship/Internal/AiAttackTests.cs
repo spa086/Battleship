@@ -2,7 +2,7 @@ using BattleshipLibrary;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
-namespace BattleshipTests;
+namespace BattleshipTests.Internal;
 
 public class AiAttackTests
 {

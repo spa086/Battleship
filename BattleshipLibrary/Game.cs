@@ -205,9 +205,7 @@ public class Game
     }
 
     private static Ship? GetAttackedShip(Cell attackedLocation, IEnumerable<Ship> attackedShips) =>
-        //todo tdd this condition
-        attackedShips.SingleOrDefault(ship =>
-            ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
+        attackedShips.SingleOrDefault(ship => ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
 
     private static void AssertThatShotIsInFieldBorders(Cell attackedLocation)
     {
