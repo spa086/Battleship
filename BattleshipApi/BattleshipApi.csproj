@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TempName\TempName.csproj" />
+    <ProjectReference Include="..\BattleshipLibrary\BattleshipLibrary.csproj" />
   </ItemGroup>
 
 </Project>
