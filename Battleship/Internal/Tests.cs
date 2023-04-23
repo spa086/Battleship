@@ -68,12 +68,16 @@ public class Tests
         Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
     }
 
-    [Test]
-    public void StartPlayingWhenThereIsAlreadyGame()
+    [TestCase(GameState.HostTurn)]
+    [TestCase(GameState.GuestTurn)]
+    [TestCase(GameState.WaitingForGuest)]
+    [TestCase(GameState.BothPlayersCreateFleets)]
+    [TestCase(GameState.OnePlayerCreatesFleet)]
+    public void StartPlayingWhenThereIsAlreadyGame(GameState state)
     {
-        var existingGame = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 4, 7);
+        var existingGame = testingEnvironment.CreateNewTestableGame(state, 4, 7);
 
-        var exception = Assert.Throws<Exception>(() => gamePool.StartPlaying(7))!;
+        var exception = Assert.Throws<Exception>(() => gamePool.StartPlaying(4))!;
         Assert.That(exception.Message, 
             Is.EqualTo($"Can't start playing: you already participate in ongoing game id=[{existingGame.Id}]."));
     }

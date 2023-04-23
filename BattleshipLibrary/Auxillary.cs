@@ -50,7 +50,7 @@ public class GamePool
 
     public Game? GetGame(int userId)
     {
-        var gamesByUserId = 
+        var gamesByUserId =
             Games.Values.Where(x => x.Host.Id == userId || x.Guest?.Id == userId).ToArray();
         var nonFinishedGames = gamesByUserId.Where(x => !x.ItsOver).ToArray();
         if (nonFinishedGames.Length > 1)
@@ -73,7 +73,7 @@ public class GamePool
     {
         var games = Games.Values;
         var ongoingGamesWithUser = games
-            .Where(x => x.Host.Id == userId || x.Guest?.Id == userId).Where(x => x.BattleOngoing).ToArray();
+            .Where(x => x.Host.Id == userId || x.Guest?.Id == userId).Where(x => !x.ItsOver).ToArray();
         if (ongoingGamesWithUser.Any())
             throw new Exception($"Can't start playing: you already participate in " +
                                 $"ongoing game id=[{ongoingGamesWithUser.First().Id}].");
