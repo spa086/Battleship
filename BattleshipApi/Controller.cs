@@ -47,14 +47,15 @@ public class Controller
     public bool CreateFleet(FleetCreationRequestModel request)
     {
         Log.ger.Info($"User [{request.userId}|{request.userName}] wants to create ships.");
+        var game = gamePool.GetGame(request.userId);
+        if (game is null) 
+            throw new Exception($"User [{request.userId}] does not participate in any ongoing games.");
         var firstGroupWithDuplicates =
             request.ships.SelectMany(x => x.decks)
                 .GroupBy(deck => new Cell(deck.x, deck.y))
                 .FirstOrDefault(x => x.Count() > 1);
         if (firstGroupWithDuplicates is not null)
             throw new Exception($"Two decks are at the same place: {firstGroupWithDuplicates.Key}.");
-        //todo tdd what if did not find a game
-        var game = gamePool.GetGame(request.userId);
         if (request.userId == game!.Host.Id) game.Host.Name = request.userName;
         else if (request.userId == game.Guest!.Id) game.Guest!.Name = request.userName;
         game.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());

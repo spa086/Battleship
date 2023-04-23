@@ -91,7 +91,7 @@ public class Ai : IAi
             Direction.Right => 0,
             Direction.Down => -i,
             Direction.Left => 0,
-            _ => throw new NotImplementedException()
+            _ => throw new Exception($"Unknown direction: [{choice}].")
         };
 
     private static int GetDx(Direction choice, int i) =>
@@ -101,7 +101,7 @@ public class Ai : IAi
             Direction.Right => i,
             Direction.Down => 0,
             Direction.Left => -i,
-            _ => throw new NotImplementedException()
+            _ => throw new Exception($"Unknown direction: [{choice}].")
         };
 
     private enum Direction

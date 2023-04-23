@@ -32,11 +32,9 @@ public class Game
         }
     }
 
-    //todo test
     public int? TimerSecondsLeft =>
         TheTimer is null ? null : (int)Math.Ceiling(TheTimer.DueTime.TotalMilliseconds / 1000f);
 
-    //todo test
     public bool BattleOngoing => State == GameState.HostTurn || State == GameState.GuestTurn;
 
     public bool CreatingFleets =>

@@ -34,6 +34,16 @@ public class WebTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
+    public void CreatingShipsWhenNoGameStarted()
+    {
+        var request = SingleShipFleetCreationRequest(8755, new[] { new LocationModel { x = 1, y = 1 } });
+        
+        var exception = Assert.Throws<Exception>(() => controller.CreateFleet(request))!;
+        
+        Assert.That(exception.Message, Is.EqualTo($"User [8755] does not participate in any ongoing games."));
+    }
+    
+    [Test]
     public void SettingGuestName()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
