@@ -26,6 +26,16 @@ public class WhatsUpPreBattleTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
+    public void WhatsUpOnCancelledGame()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 33, 34);
+
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(33));
+        
+        Assert.That(result.gameState, Is.EqualTo(GameStateModel.Cancelled));
+    }
+
+    [Test]
     public void ReturningMatchingTimerSecondsWhenWaiting()
     {
         testingEnvironment.CreateNewTestableGame(

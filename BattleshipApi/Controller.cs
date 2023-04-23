@@ -32,7 +32,9 @@ public class Controller
         var game = gamePool.GetGame(userId);
         if (game is null) return new WhatsUpResponseModel { gameState = GameStateModel.NoGame };
         WhatsUpResponseModel? result;
-        if (game.Guest is null) result = WaitingForStartResult();
+        if (game.State == GameState.Cancelled && game.Guest is null || game.State == GameState.WaitingForGuest)
+            result = BasicResponseModel(
+                game.State == GameState.Cancelled ? GameStateModel.Cancelled : GameStateModel.WaitingForStart);
         else if (game.Guest is not null && (game.Host.Fleet is null || game.Guest!.Fleet is null))
             result = WhatsUpBeforeBattle(userId, game);
         else if (game.Host.Fleet is not null && game.Guest!.Fleet is not null)
@@ -48,7 +50,7 @@ public class Controller
     {
         Log.ger.Info($"User [{request.userId}|{request.userName}] wants to create ships.");
         var game = gamePool.GetGame(request.userId);
-        if (game is null) 
+        if (game is null)
             throw new Exception($"User [{request.userId}] does not participate in any ongoing games.");
         var firstGroupWithDuplicates =
             request.ships.SelectMany(x => x.decks)
@@ -141,8 +143,8 @@ public class Controller
                             $"requester user id = [{userId}].");
     }
 
-    private static WhatsUpResponseModel WaitingForStartResult() =>
-        new() { gameState = GameStateModel.WaitingForStart };
+    private static WhatsUpResponseModel BasicResponseModel(GameStateModel state) =>
+        new() { gameState = state };
 
     private NewGameResponseModel StartPlaying(int userId)
     {
