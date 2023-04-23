@@ -16,12 +16,8 @@ public class Tests
 
     public Tests()
     {
-        var services = new ServiceCollection();
-        services.AddSingleton<GamePool>();
-        services.AddTransient<TestingEnvironment>();
-        services.AddSingleton<IAi, TestAi>();
-
-        var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = 
+            TestServiceCollection.Minimal().BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;

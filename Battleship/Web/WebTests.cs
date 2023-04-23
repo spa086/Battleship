@@ -14,21 +14,15 @@ public class WebTests
 
     public WebTests()
     {
-        //todo 3 times
-        var services = new ServiceCollection();
-        services.AddSingleton<GamePool>();
-        services.AddTransient<TestingEnvironment>();
-        services.AddTransient<Controller>();
-        services.AddTransient<WebResult>();
-        services.AddSingleton<IAi, TestAi>();
-
-        var serviceProvider = services.BuildServiceProvider();
-
+        var serviceProvider = TestServiceCollection.Web().BuildServiceProvider();
+        
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
         controller = serviceProvider.GetService<Controller>()!;
         webResult = serviceProvider.GetService<WebResult>()!;
     }
+
+    
 
     [SetUp]
     public void SetUp() => gamePool.ClearGames();

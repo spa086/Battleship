@@ -14,14 +14,7 @@ public class WhatsUpPreBattleTests
 
     public WhatsUpPreBattleTests()
     {
-        //todo 3 times
-        var services = new ServiceCollection();
-        services.AddSingleton<GamePool>();
-        services.AddTransient<TestingEnvironment>();
-        services.AddTransient<Controller>();
-        services.AddSingleton<IAi, TestAi>();
-
-        var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = TestServiceCollection.Web().BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;

@@ -1,7 +1,19 @@
-﻿using BattleshipLibrary;
+﻿using BattleshipApi;
+using BattleshipLibrary;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 namespace BattleshipTests;
+
+public static class TestServiceCollection
+{
+    public static IServiceCollection Web() => 
+        Minimal().AddTransient<Controller>().AddTransient<WebResult>();
+
+    public static IServiceCollection Minimal() => 
+        new ServiceCollection().AddSingleton<GamePool>()
+            .AddTransient<TestingEnvironment>().AddSingleton<IAi, TestAi>();
+}
 
 public class TestAi : IAi
 {

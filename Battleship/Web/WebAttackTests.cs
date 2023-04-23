@@ -13,7 +13,6 @@ public class WebAttackTests
 
     public WebAttackTests()
     {
-        //todo 3 times
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();

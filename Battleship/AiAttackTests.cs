@@ -12,12 +12,7 @@ public class AiAttackTests
     
     public AiAttackTests()
     {
-        //todo 3 times
-        var services = new ServiceCollection();
-        services.AddSingleton<GamePool>();
-        services.AddTransient<TestingEnvironment>();
-        services.AddSingleton<IAi, TestAi>();
-
+        var services = TestServiceCollection.Minimal();
         var serviceProvider = services.BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
