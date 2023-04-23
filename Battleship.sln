@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipTests", "Battlesh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipApi", "BattleshipApi\BattleshipApi.csproj", "{942BB409-14FD-44E6-97BC-5825BB03CF3D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipLibrary", "BattleshipLibrary\BattleshipLibrary.csproj", "{DACE502C-4E9F-42A3-A595-B687EE0ABD61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TempName", "TempName\TempName.csproj", "{DACE502C-4E9F-42A3-A595-B687EE0ABD61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

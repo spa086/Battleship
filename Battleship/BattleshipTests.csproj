@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BattleshipApi\BattleshipApi.csproj" />
-    <ProjectReference Include="..\BattleshipLibrary\BattleshipLibrary.csproj" />
+    <ProjectReference Include="..\TempName\TempName.csproj" />
   </ItemGroup>
 
 </Project>
