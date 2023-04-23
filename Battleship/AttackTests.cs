@@ -8,7 +8,6 @@ namespace BattleshipTests;
 public class AttackTests
 {
     //todo tdd throw if any location list is uninitialized
-    //todo tdd throw if ships are adjacent
     private TestableGame? game;
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;

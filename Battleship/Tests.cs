@@ -8,7 +8,6 @@ public class Tests
 {
     //todo tdd throw if any location list is uninitialized
     //todo tdd throw if ships are adjacent
-    //todo tdd game cycle
     private TestableGame game = new(0);
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
@@ -29,6 +28,17 @@ public class Tests
     {
         gamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void TechnicalVictory()
+    {
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 35, 70);
+        
+        game.SetTechnicalWinner(true);
+        
+        Assert.That(game.Timer, Is.Null);
+        Assert.That(game.State, Is.EqualTo(GameState.HostWon));
     }
 
     [Test]

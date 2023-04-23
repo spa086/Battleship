@@ -52,7 +52,6 @@ public class Game
         TheTimer = null;
     }
 
-    //todo test
     public void SetTechnicalWinner(bool hostWon)
     {
         DisposeOfTimer();
