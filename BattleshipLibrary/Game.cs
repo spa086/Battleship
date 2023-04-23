@@ -45,7 +45,6 @@ public class Game
     public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon ||
                            State == GameState.Cancelled;
 
-    //todo tdd
     public void Cancel() => State = GameState.Cancelled;
 
     //todo tdd
@@ -95,14 +94,6 @@ public class Game
         SetBattleTimer();
         return result; //todo tdd correct result
     }
-
-    protected virtual void SetMatchingTimer(int secondsLeft = 30) =>
-        SetTimerWithAction(() =>
-        {
-            State = GameState.OnePlayerCreatesFleet;
-            Guest = new User { IsBot = true, Fleet = Ai.GenerateShips(), Name = "General Chaos" };
-            SetShipsCreationTimer(60);
-        }, secondsLeft);
 
     protected virtual void SetShipsCreationTimer(int secondsLeft = 30) =>
         SetTimerWithAction(() =>
@@ -196,6 +187,14 @@ public class Game
             throw new Exception($"Location {location} is already excluded.");
         currentExcluded.Add(location);
     }
+    
+    private void SetMatchingTimer(int secondsLeft = 30) =>
+        SetTimerWithAction(() =>
+        {
+            State = GameState.OnePlayerCreatesFleet;
+            Guest = new User { IsBot = true, Fleet = Ai.GenerateShips(), Name = "General Chaos" };
+            SetShipsCreationTimer(60);
+        }, secondsLeft);
 
     private GameState state;
 

@@ -36,6 +36,14 @@ public class Tests
     }
 
     [Test]
+    public void Cancel()
+    {
+        game.Cancel();
+        
+        Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
+    }
+
+    [Test]
     public void StartPlayingWhenThereIsAlreadyAGame()
     {
         var existingGame = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 4, 7);
