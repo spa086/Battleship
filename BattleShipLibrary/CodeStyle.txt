@@ -1,0 +1,4 @@
+﻿//methods 20 lines
+//files 250 lines
+//no partial
+//folder 6 files

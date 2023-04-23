@@ -1,15 +1,8 @@
-using NUnit.Framework;
 using BattleshipLibrary;
-using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
+using NUnit.Framework;
 
 namespace BattleshipTests;
-
-//lines 105 chars
-//methods 20 lines
-//files 200 lines
-//no partial
-//folder 5 files
 
 public class Tests
 {
@@ -19,24 +12,80 @@ public class Tests
     private TestableGame game = new(0);
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
+    private readonly TestAi testAi;
 
     public Tests()
     {
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
+        services.AddSingleton<IAi, TestAi>();
 
         var serviceProvider = services.BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
-    } 
+        testAi = (serviceProvider.GetService<IAi>() as TestAi)!;
+    }
 
     [SetUp]
     public void SetUp()
     {
         gamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void GettingGameWhenThereIsNoGame()
+    {
+        var result = gamePool.GetGame(4799);
+
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void GettingGameWhenThereIsAFinishedGame()
+    {
+        testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 3, 5);
+        testingEnvironment.CreateNewTestableGame(GameState.HostWon, 3, 5);
+
+        var result = gamePool.GetGame(3);
+
+        Assert.That(result, Is.Not.Null);
+    }
+
+    [Test]
+    public void MatchingTimerCreatesBot()
+    {
+        gamePool.SetupMatchingTimeSeconds = 1;
+        testAi.SetupAiShips = CreateSimpleShip(1, 1);
+
+        gamePool.StartPlaying(1);
+
+        TestingEnvironment.SleepMinimalTime();
+        var theGame = gamePool.Games.Values.Single();
+        var botUser = theGame.Guest!;
+        Assert.That(botUser, Is.Not.Null);
+        Assert.That(botUser.IsBot);
+        Assert.That(botUser.Name, Is.EqualTo("General Chaos"));
+        var ship = botUser.Fleet.AssertSingle();
+        var deck = ship.Decks.Values.AssertSingle();
+        Assert.That(deck.Destroyed, Is.False);
+        Assert.That(deck.Location, Is.EqualTo(new Cell(1, 1)));
+    }
+
+    [Test]
+    public void MatchingTimer()
+    {
+        gamePool.SetupMatchingTimeSeconds = 1;
+        testAi.SetupAiShips = CreateSimpleShip(1, 1);
+
+        gamePool.StartPlaying(1);
+
+        TestingEnvironment.SleepMinimalTime();
+        var theGame = gamePool.Games.Values.Single();
+        Assert.That(theGame.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
+        Assert.That(theGame.TimerSecondsLeft, Is.EqualTo(60));
     }
 
     [TestCase(1)]
@@ -46,9 +95,9 @@ public class Tests
         var game1 = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         var game2 = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
-        var exception = Assert.Throws<Exception>(() => gamePool.GetGame(userIdToSearchBy));
+        var exception = Assert.Throws<Exception>(() => gamePool.GetGame(userIdToSearchBy))!;
         Assert.That(exception.Message, Is.EqualTo($"User id = [{userIdToSearchBy}] participates " +
-            $"in several games. Game id's: [{game1.Id}, {game2.Id}]."));
+                                                  $"in several games. Game id's: [{game1.Id}, {game2.Id}]."));
     }
 
     [TestCase(1)]
@@ -62,51 +111,24 @@ public class Tests
     }
 
     [Test]
-    public void StoppingTimerWhenLost()
-    {
-        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
-        game.SetupBattleTimer(100);
-
-        game.Attack(1, new Cell(2, 2));
-
-        Assert.That(game.TimerSecondsLeft, Is.Null);
-        Assert.That(game.GetTimer(), Is.Null);
-    }
-
-    [Test]
-    public void LosingWhenTimeIsOut()
-    {
-        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupTurnTime = 1;
-
-        game.Attack(1, new Cell(1, 1));
-        Thread.Sleep(1100);
-
-        Assert.That(game.ItsOver, Is.True);
-        Assert.That(game.State, Is.EqualTo(GameState.HostWon));
-        Assert.That(game.TimerSecondsLeft, Is.LessThanOrEqualTo(0));
-    }
-
-    [Test]
     public void BattleTimer()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
-        Thread.Sleep(1000);
+        TestingEnvironment.SleepMinimalTime();
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(29));
     }
 
     [Test]
     public void FirstPlayerCreatesShipAfterSecondPlayer()
     {
-        var game = 
-            testingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 1, 2, false);
+        game = testingEnvironment.CreateNewTestableGame(
+            GameState.OnePlayerCreatesFleet, 1, 2, false);
         game.SetupSimpleFleets(null, 1, new[] { new Cell(2, 2) }, 2);
 
-        game.CreateAndSaveShips(1, CreateSimpleShip(1,1));
+        game.CreateAndSaveShips(1, CreateSimpleShip(1, 1));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
     }
@@ -114,8 +136,8 @@ public class Tests
     [Test]
     public void SecondPlayerCreatesShipsWhenFirstHasNoShips()
     {
-        var game = 
-            testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2, false);
+        game = testingEnvironment.CreateNewTestableGame(
+            GameState.BothPlayersCreateFleets, 1, 2, false);
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
@@ -128,7 +150,7 @@ public class Tests
     {
         game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, null, 2);
 
-        game.CreateAndSaveShips(2, CreateSimpleShip(2,2));
+        game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
@@ -141,7 +163,7 @@ public class Tests
     [Test]
     public void SecondPlayerJoins()
     {
-        var game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1, null);
+        game = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1);
         game.SetupTurnTime = 1;
         gamePool.AddGame(game);
 
@@ -149,18 +171,20 @@ public class Tests
 
         Assert.That(game.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(1));
-        Thread.Sleep(1100); //todo can we do without sleeping?
+        TestingEnvironment.SleepMinimalTime();
         Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
     }
 
     [Test]
     public void StartingAGame()
     {
+        testAi.SetupAiShips = Array.Empty<Ship>();
+
         Assert.That(gamePool.StartPlaying(1), Is.False);
 
-        var game = gamePool.Games.Values.AssertSingle();
-        Assert.That(game, Is.Not.Null);
-        Assert.That(game.State, Is.EqualTo(GameState.WaitingForGuest));
+        var theGame = gamePool.Games.Values.AssertSingle();
+        Assert.That(theGame, Is.Not.Null);
+        Assert.That(theGame.State, Is.EqualTo(GameState.WaitingForGuest));
     }
 
     [Test]
@@ -173,9 +197,9 @@ public class Tests
         game.CreateAndSaveShips(1, new[] { new Ship { Decks = decks } });
 
         //todo use separate collection
-        var ship = game.Host!.Fleet!.AssertSingle();
+        game.Host.Fleet!.AssertSingle();
         Assert.That(decks, Has.Count.EqualTo(2));
-        var orderedDecks = decks.Values.OrderBy(x => x.Location.y);
+        var orderedDecks = decks.Values.OrderBy(x => x.Location.Y).ToArray();
         AssertNonDestroyedDeck(orderedDecks.First(), 1, 1);
         AssertNonDestroyedDeck(orderedDecks.Last(), 1, 2);
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
@@ -188,6 +212,6 @@ public class Tests
         Assert.That(deck.Location, Is.EqualTo(new Cell(x, y)));
     }
 
-    private static Ship[] CreateSimpleShip(int x, int y) => 
-        new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(x => x.Location) } };
+    private static Ship[] CreateSimpleShip(int x, int y) =>
+        new[] { new Ship { Decks = new[] { new Deck(x, y) }.ToDictionary(deck => deck.Location) } };
 }

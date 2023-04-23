@@ -5,6 +5,17 @@ namespace BattleshipApi;
 
 #pragma warning disable IDE1006 // Стили именования
 
+public class NewGameRequestModel
+{
+    public int userId { get; set; }
+}
+
+public class NewGameResponseModel
+{
+    public int secondsLeft { get; set; }
+    public int gameId { get; set; }
+}
+
 public class AttackRequestModel
 {
     public int userId { get; set; }
@@ -17,7 +28,7 @@ public class WhatsUpResponseModel
 
     public WhatsUpResponseModel(int gameId, GameStateModel gameState, ShipStateModel[]? myFleet, 
         ShipStateModel[]? opponentFleet, LocationModel[]? myExcludedLocations,
-        LocationModel[]? opponentExcludedLocations, int? secondsLeft)
+        LocationModel[]? opponentExcludedLocations)
     {
         this.gameState = gameState;
         this.myFleet = myFleet;
@@ -25,11 +36,10 @@ public class WhatsUpResponseModel
         this.myExcludedLocations = myExcludedLocations;
         this.opponentExcludedLocations = opponentExcludedLocations;
         this.gameId = gameId;
-        this.secondsLeft = secondsLeft;
     }
 
     public string? userName { get; set; }
-    public int gameId { get; set; }
+    public int? gameId { get; set; }
     public GameStateModel gameState { get; set; }
     //todo tdd filling
     public ShipStateModel[]? myFleet { get; set; }
@@ -109,5 +119,6 @@ public enum GameStateModel
     OpponentsTurn,
     YouWon,
     OpponentWon,
-    Cancelled
+    Cancelled,
+    NoGame
 }

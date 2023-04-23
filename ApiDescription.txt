@@ -1,3 +1,13 @@
+"/newGame"
+Request object:
+{
+	userId - int.
+}
+Returns object:
+{
+	gameId - int.
+}.
+
 "/whatsUp" 
 Request object:
 {
@@ -5,7 +15,7 @@ Request object:
 }
 Returns object:
 {
-	gameState - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn", "YouWon", "OpponentWon", "Cancelled" }
+	gameState - string enum { "WaitingForStart", "CreatingFleet", "YourTurn", "OpponentsTurn", "YouWon", "OpponentWon", "Cancelled", "NoGame" }
 	myFleet (optional) - array of objects:
 	{
 		userId - integer.
@@ -36,8 +46,8 @@ Returns object:
 		x - integer,
 		y - integer.
 	},
-	gameId - integer,
-	secondsLeft - integer,
+	gameId (optional) - integer,
+	secondsLeft (optional) - integer,
 	userName (optional) - string.
 }
 

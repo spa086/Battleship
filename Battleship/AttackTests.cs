@@ -4,25 +4,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BattleshipTests;
 
-//lines 105 chars
-//methods 20 lines
-//files 200 lines
-//no partial
-//folder 5 files
-
+//todo refactor long file
 public class AttackTests
 {
     //todo tdd throw if any location list is uninitialized
     //todo tdd throw if ships are adjacent
-    private TestableGame game = new(1);
+    private TestableGame? game;
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
 
     public AttackTests()
     {
+        //todo 3 times
         var services = new ServiceCollection();
         services.AddSingleton<GamePool>();
         services.AddTransient<TestingEnvironment>();
+        services.AddSingleton<IAi, TestAi>();
 
         var serviceProvider = services.BuildServiceProvider();
 
@@ -34,15 +31,42 @@ public class AttackTests
     public void SetUp()
     {
         gamePool.ClearGames();
-        game.StandardSetup();
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+    }
+
+    [Test]
+    public void StoppingTimerWhenLost()
+    {
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupBattleTimer(100);
+
+        game.Attack(1, new Cell(2, 2));
+
+        Assert.That(game.TimerSecondsLeft, Is.Null);
+        Assert.That(game.GetTimer(), Is.Null);
+    }
+
+    [Test]
+    public void LosingWhenTimeIsOut()
+    {
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+        game.SetupTurnTime = 1;
+
+        game.Attack(1, new Cell(1, 1));
+
+        TestingEnvironment.SleepMinimalTime();
+        Assert.That(game.ItsOver, Is.True);
+        Assert.That(game.State, Is.EqualTo(GameState.HostWon));
+        Assert.That(game.TimerSecondsLeft, Is.LessThanOrEqualTo(0));
     }
 
     [Test]
     public void ShotOutsideTheField()
     {
-        var exception = Assert.Throws<Exception>(() => game.Attack(1, new Cell(11, 0)));
+        var exception = Assert.Throws<Exception>(() => game!.Attack(1, new Cell(11, 0)))!;
 
-        Assert.That(exception.Message, 
+        Assert.That(exception.Message,
             Is.EqualTo("Target cannot be outside the game field. Available coordinates are 0-9."));
     }
 
@@ -60,13 +84,13 @@ public class AttackTests
     [Test]
     public void DamagingAMultideckShip()
     {
-        game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn);
-        game.SetupSimpleFleets(
-            new[] { new Cell(0, 1), new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 2);
+        game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 1, 2);
+        game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) }, 1, 
+            new[] { new Cell(2, 2) }, 2);
 
         game.Attack(1, new Cell(0, 1));
 
-        Assert.That(game.Host!.Fleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
+        Assert.That(game.Host.Fleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
         Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
     }
 
@@ -74,32 +98,33 @@ public class AttackTests
     [Test]
     public void AttackSamePlaceTwice()
     {
-        game.SetupExcludedLocations(1, new Cell(0, 0));
+        game!.SetupExcludedLocations(1, new Cell(0, 0));
 
-        var exception = Assert.Throws<Exception>(() => game.Attack(0, new Cell(0,0)));
+        var exception = Assert.Throws<Exception>(() => game.Attack(0, new Cell(0, 0)))!;
         Assert.That(exception.Message, Is.EqualTo("Location [0,0] is already excluded."));
     }
 
     [Test]
     public void SecondPlayerMisses()
     {
-        game.SetState(GameState.GuestTurn);
+        game!.SetState(GameState.GuestTurn);
 
         game.Attack(0, new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
-        //todo tdd player ship desctruction
+        //todo tdd player ship destruction
         //todo check 3 times
-        game.Host!.Fleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle(); 
+        game.Host.Fleet!.Where(ship => ship.Decks.All(deck => !deck.Value.Destroyed)).AssertSingle();
     }
 
     [Test]
     public void Miss()
     {
-        game.Attack(0, new Cell(0, 0));
+        game!.Attack(0, new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
-        game.Guest!.Fleet!.Where(x => x.Decks.All(x => !x.Value.Destroyed)).AssertSingle();
+        game.Guest!.Fleet!
+            .Where(ship => ship.Decks.All(deck => !deck.Value.Destroyed)).AssertSingle();
     }
 
     //todo does exclusion actually work?
@@ -107,33 +132,35 @@ public class AttackTests
     [Test]
     public void Excluding()
     {
-        game.Attack(0, new Cell(1, 1));
+        game!.Attack(0, new Cell(1, 1));
 
-        Assert.That(game.Host!.ExcludedLocations.AssertSingle(), Is.EqualTo(new Cell(1, 1)));
+        Assert.That(game.Host.ExcludedLocations.AssertSingle(), Is.EqualTo(new Cell(1, 1)));
     }
 
     [Test]
     public void AttackAndWin()
     {
-        game.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1, new[] { new Cell(2, 2) }, 2);
+        game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1,
+            new[] { new Cell(2, 2) }, 2);
 
         game.Attack(1, new Cell(2, 2));
 
-        game.Host!.ExcludedLocations.AssertSingle();
-        Assert.That(Game.IsDestroyed(game.Guest!.Fleet.AssertSingle()));
+        game.Host.ExcludedLocations.AssertSingle();
+        Assert.That(game.Guest!.Fleet.AssertSingle().IsDestroyed);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
     }
 
     [Test]
     public void Player2AttacksAndWins()
     {
-        game.SetupSimpleFleets( new[] { new Cell(0, 0)}, 1, new[] { new Cell(2, 2) }, 2);
+        game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1, 
+            new[] { new Cell(2, 2) }, 2);
         game.SetTurn(false);
 
         game.Attack(0, new Cell(0, 0));
 
         game.Guest!.Fleet.AssertSingle();
-        Assert.That(Game.IsDestroyed(game.Host!.Fleet.AssertSingle()));
+        Assert.That(game.Host.Fleet.AssertSingle().IsDestroyed);
         Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
     }
 }

@@ -12,8 +12,17 @@ public static class MainApi
         builder.Services.AddSingleton<GamePool>();
         builder.Services.AddTransient<Controller>();
         builder.Services.AddTransient<WebResult>();
+        builder.Services.AddTransient<IAi, Ai>();
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
+        MapWebMethods(app);
+        app.Run();
+    }
+
+    private static void MapWebMethods(WebApplication app)
+    {
+        MapPostFunction<NewGameRequestModel, NewGameResponseModel>(app, "newGame",
+            (model, controller) => controller.NewGame(model));
         MapPostFunction<WhatsupRequestModel, WhatsUpResponseModel>(app, "whatsUp",
             (model, controller) => controller.WhatsUp(model));
         MapPostFunction<AttackRequestModel, AttackResponse>(app, "attack",
@@ -21,7 +30,6 @@ public static class MainApi
         MapPostAction<FleetCreationRequestModel>(app, "createFleet",
             (model, controller) => controller.CreateFleet(model));
         MapPostAction<int>(app, "abortGame", (userId, controller) => controller.AbortGame(userId));
-        app.Run();
     }
 
     private static void MapPostAction<TRequestModel>(WebApplication app,
@@ -49,7 +57,7 @@ public static class MainApi
         WebApplication app, string urlWithoutSlash,
         Func<TRequestModel, Controller, TResultModel> function) =>
         app.MapPost($"/{urlWithoutSlash}",
-            async delegate (HttpContext context, Controller controller, WebResult webResult)
+            async delegate (HttpContext context, Controller _, WebResult webResult)
             {
                 var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
                 return webResult.Prepare(function, json);

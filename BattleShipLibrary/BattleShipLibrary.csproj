@@ -8,6 +8,11 @@
 
   <ItemGroup>
     <None Remove="C:\Users\po-mu\.nuget\packages\nlog.schema\5.1.1\contentFiles\any\any\NLog.xsd" />
+    <None Remove="CodeStyle.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="CodeStyle.txt" />
   </ItemGroup>
 
   <ItemGroup>
