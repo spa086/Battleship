@@ -6,6 +6,7 @@ Request object:
 Returns object:
 {
 	gameId - int.
+	secondsLeft - int
 }.
 
 "/whatsUp" 
