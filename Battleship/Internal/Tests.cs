@@ -31,6 +31,14 @@ public class Tests
     }
 
     [Test]
+    public void StartPlayingWhenCancelledGameExists()
+    {
+        game = testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 6, 99);
+
+        Assert.DoesNotThrow(() => gamePool.StartPlaying(6));
+    }
+
+    [Test]
     public void TimerDisposal()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 14, 3);
@@ -61,7 +69,7 @@ public class Tests
     }
 
     [Test]
-    public void StartPlayingWhenThereIsAlreadyAGame()
+    public void StartPlayingWhenThereIsAlreadyGame()
     {
         var existingGame = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 4, 7);
 

@@ -72,10 +72,11 @@ public class GamePool
     public bool StartPlaying(int userId)
     {
         var games = Games.Values;
-        var gamesWithUser = games.Where(x => x.Host.Id == userId || x.Guest?.Id == userId).ToArray();
-        if (gamesWithUser.Any())
+        var ongoingGamesWithUser = games
+            .Where(x => x.Host.Id == userId || x.Guest?.Id == userId).Where(x => x.BattleOngoing).ToArray();
+        if (ongoingGamesWithUser.Any())
             throw new Exception($"Can't start playing: you already participate in " +
-                                $"ongoing game id=[{gamesWithUser.First().Id}].");
+                                $"ongoing game id=[{ongoingGamesWithUser.First().Id}].");
         var gameToJoin = games.FirstOrDefault(x => x.Guest is null);
         //todo tdd ensure id uniqueness
         if (gameToJoin is null)

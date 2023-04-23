@@ -59,23 +59,24 @@ public class TestingEnvironment
                 SimpleCellArray(2), guestId);
             game.SetupBattleTimer(30);
         }
-        else if (game.CreatingFleets) SetupGameInCreatingFleets(hostHasFleet, game);
-        else if (game.ItsOver) SetupGameOver(state, game);
+        else if (game.CreatingFleets) 
+            SetupGameInCreatingFleets(hostHasFleet, game, hostId!.Value, guestId!.Value);
+        else if (game.ItsOver) SetupGameOver(state, game, hostId!.Value, guestId);
         else throw new Exception("Unknown situation.");
     }
 
-    private static void SetupGameInCreatingFleets(bool firstPlayerHasFleet, TestableGame game)
+    private static void SetupGameInCreatingFleets(bool firstPlayerHasFleet, TestableGame game, int hostId, int guestId)
     {
-        game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, 1,
-            firstPlayerHasFleet ? null : SimpleCellArray(2), 2);
+        game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, hostId,
+            firstPlayerHasFleet ? null : SimpleCellArray(2), guestId);
         game.SetupShipsCreationTimer(60);
     }
 
-    private static void SetupGameOver(GameState state, TestableGame game)
+    private static void SetupGameOver(GameState state, TestableGame game, int hostId, int? guestId)
     {
         var guestJoined = game.Guest is not null;
-        game.SetupSimpleFleets(SimpleCellArray(1), 1, 
-            guestJoined ? SimpleCellArray(2) : null, guestJoined ? 2 : null);
+        game.SetupSimpleFleets(SimpleCellArray(1), hostId, 
+            guestJoined ? SimpleCellArray(2) : null, guestJoined ? guestId : null);
         if (state == GameState.HostWon) game.DestroyFleet(2);
         else if (state == GameState.GuestWon) game.DestroyFleet(1);
         else if (state == GameState.Cancelled)
@@ -86,7 +87,7 @@ public class TestingEnvironment
 
     private static Cell[] SimpleCellArray(int content) => new[] { new Cell(content, content) };
 
-    private const int LongTime = 36000;
+    public const int LongTime = 36000;
 }
 
 public static class Extensions
