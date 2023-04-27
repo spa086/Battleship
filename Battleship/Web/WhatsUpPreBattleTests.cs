@@ -140,8 +140,8 @@ public class WhatsUpPreBattleTests
 
         var result = controller.NewGame(new NewGameRequestModel { userId = 1 });
 
-        var gameId = gamePool.Games.Keys.AssertSingle();
-        Assert.That(result.gameId, Is.EqualTo(gameId));
+        var game = gamePool.GetGames().AssertSingle();
+        Assert.That(result.gameId, Is.EqualTo(game.Id));
     }
 
     private static WhatsUpRequestModel CreateWhatsUpRequestModel(int userIdParam = 0) =>

@@ -16,8 +16,7 @@ public class Tests
 
     public Tests()
     {
-        var serviceProvider =
-            TestServiceCollection.Minimal().BuildServiceProvider();
+        var serviceProvider = TestServiceCollection.Minimal().BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
@@ -36,9 +35,9 @@ public class Tests
     public void GameStartSimple()
     {
         var theGame = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 100);
-        
+
         theGame.Start(300);
-        
+
         Assert.That(theGame.TimerSecondsLeft, Is.EqualTo(60));
         Assert.That(theGame.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
         Assert.That(theGame.Guest, Is.Not.Null);
@@ -129,7 +128,7 @@ public class Tests
         gamePool.StartPlaying(1);
 
         TestingEnvironment.SleepMinimalTime();
-        var theGame = gamePool.Games.Values.Single();
+        var theGame = gamePool.GetGames().Single();
         var botUser = theGame.Guest!;
         Assert.That(botUser, Is.Not.Null);
         Assert.That(botUser.IsBot);
@@ -149,7 +148,7 @@ public class Tests
         gamePool.StartPlaying(1);
 
         TestingEnvironment.SleepMinimalTime();
-        var theGame = gamePool.Games.Values.Single();
+        var theGame = gamePool.GetGames().Single();
         Assert.That(theGame.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
         Assert.That(theGame.TimerSecondsLeft, Is.EqualTo(60));
     }
@@ -198,7 +197,7 @@ public class Tests
 
         Assert.That(gamePool.StartPlaying(1), Is.False);
 
-        var theGame = gamePool.Games.Values.AssertSingle();
+        var theGame = gamePool.GetGames().AssertSingle();
         Assert.That(theGame, Is.Not.Null);
         Assert.That(theGame.State, Is.EqualTo(GameState.WaitingForGuest));
     }

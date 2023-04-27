@@ -7,13 +7,11 @@ namespace BattleshipTests;
 
 public static class TestServiceCollection
 {
-    public static IServiceCollection Web() => 
-        Minimal().AddTransient<Controller>().AddTransient<WebResult>();
+    public static IServiceCollection Web() => Minimal().AddTransient<Controller>().AddTransient<WebResult>();
 
-    public static IServiceCollection Minimal() => 
-        new ServiceCollection().AddSingleton<GamePool>()
-            .AddTransient<TestingEnvironment>().AddSingleton<IAi, TestAi>()
-            .AddSingleton<IMatchingTime, TestMatchingTime>();
+    public static IServiceCollection Minimal() => new ServiceCollection().AddSingleton<GamePool>()
+        .AddTransient<TestingEnvironment>().AddSingleton<IAi, TestAi>()
+        .AddSingleton<IMatchingTime, TestMatchingTime>();
 }
 
 public class TestMatchingTime : IMatchingTime

@@ -47,10 +47,12 @@ public class GamePool
         this.matchingTime = matchingTime;
     }
 
+    public Game[] GetGames() => games.Values.ToArray();
+
     public Game? GetGame(int userId)
     {
         var gamesByUserId =
-            Games.Values.Where(x => x.Host.Id == userId || x.Guest?.Id == userId).ToArray();
+            games.Values.Where(x => x.Host.Id == userId || x.Guest?.Id == userId).ToArray();
         var nonFinishedGames = gamesByUserId.Where(x => !x.ItsOver).ToArray();
         if (nonFinishedGames.Length > 1)
             throw new Exception($"User id = [{userId}] participates in several games. Game id's: " +
@@ -58,19 +60,13 @@ public class GamePool
         return nonFinishedGames.Any() ? nonFinishedGames.Single() : gamesByUserId.MaxBy(x => x.StartTime);
     }
 
-    //for testing
-    public void ClearGames() => Games.Clear();
+    public void ClearGames() => games.Clear();
 
-    //todo if null do remove instead of assigning
-    //todo make another method for non-testing purposes
-    //for testing
-#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-    public void AddGame(Game? game) => Games[game.Id] = game;
-#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
+    public void AddGame(Game game) => games[game.Id] = game;
 
     public bool StartPlaying(int userId)
     {
-        var games = Games.Values;
+        var games = this.games.Values;
         var ongoingGamesWithUser = games
             .Where(x => x.Host.Id == userId || x.Guest?.Id == userId).Where(x => !x.ItsOver).ToArray();
         if (ongoingGamesWithUser.Any())
@@ -81,7 +77,7 @@ public class GamePool
         if (gameToJoin is null)
         {
             var newGame = new Game(userId, ai, matchingTime.Seconds());
-            Games[newGame.Id] = newGame;
+            this.games[newGame.Id] = newGame;
             return false;
         }
 
@@ -89,9 +85,7 @@ public class GamePool
         return true;
     }
 
-    //todo make it private, get in tests some other way,
-    //maybe some for-testing method in GamePool or TestGamePool here
-    public Dictionary<int, Game> Games { get; } = new();
+    private readonly Dictionary<int, Game> games = new();
 }
 
 public class MatchingTime : IMatchingTime
