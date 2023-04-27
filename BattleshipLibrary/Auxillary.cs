@@ -35,7 +35,6 @@ public enum AttackResult
     Win
 }
 
-//todo inherit TestableGamePool
 public class GamePool
 {
     private readonly IAi ai;
@@ -73,11 +72,10 @@ public class GamePool
             throw new Exception($"Can't start playing: you already participate in " +
                                 $"ongoing game id=[{ongoingGamesWithUser.First().Id}].");
         var gameToJoin = allGames.FirstOrDefault(x => x.Guest is null);
-        //todo tdd ensure id uniqueness
         if (gameToJoin is null)
         {
             var newGame = new Game(userId, ai, matchingTime.Seconds());
-            this.games[newGame.Id] = newGame;
+            games[newGame.Id] = newGame;
             return false;
         }
 
@@ -133,7 +131,7 @@ public class Deck
     }
 
     public bool Destroyed { get; set; }
-
+    
     public Cell Location { get; }
 }
 
@@ -141,7 +139,6 @@ public class Ship
 {
     public bool IsDestroyed => Decks.Values.All(x => x.Destroyed);
 
-    //todo make it a hashset
     public Dictionary<Cell, Deck> Decks { get; init; } = new();
 
     public override string ToString() => "(" + string.Join(";", Decks.Keys) + ")";
