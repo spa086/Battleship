@@ -15,7 +15,7 @@ public class Tests
 
     public Tests()
     {
-        var serviceProvider = 
+        var serviceProvider =
             TestServiceCollection.Minimal().BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
@@ -31,6 +31,10 @@ public class Tests
     }
 
     [Test]
+    public void GameIdIsGeneratedOnGameCreation() =>
+        Assert.That(new Game(1, new TestAi(), TestingEnvironment.LongTime).Id, Is.Not.Zero);
+
+    [Test]
     public void StartPlayingWhenCancelledGameExists()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 6, 99);
@@ -43,9 +47,9 @@ public class Tests
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 14, 3);
         game.SetupBattleTimer(100);
-        
+
         game.DisposeOfTimer();
-        
+
         Assert.That(game.Timer, Is.Null);
     }
 
@@ -53,9 +57,9 @@ public class Tests
     public void TechnicalVictory()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 35, 70);
-        
+
         game.SetTechnicalWinner(true);
-        
+
         Assert.That(game.Timer, Is.Null);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
     }
@@ -64,7 +68,7 @@ public class Tests
     public void Cancel()
     {
         game.Cancel();
-        
+
         Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
     }
 
@@ -78,7 +82,7 @@ public class Tests
         var existingGame = testingEnvironment.CreateNewTestableGame(state, 4, 7);
 
         var exception = Assert.Throws<Exception>(() => gamePool.StartPlaying(4))!;
-        Assert.That(exception.Message, 
+        Assert.That(exception.Message,
             Is.EqualTo($"Can't start playing: you already participate in ongoing game id=[{existingGame.Id}]."));
     }
 

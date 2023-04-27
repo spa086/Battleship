@@ -20,7 +20,6 @@ public class Game
     //todo tdd this field
     public int Id { get; }
 
-    //todo test
     public GameState State
     {
         get => state;
