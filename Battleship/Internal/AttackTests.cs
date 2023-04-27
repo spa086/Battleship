@@ -29,6 +29,17 @@ public class AttackTests
     }
 
     [Test]
+    public void AttackingInWrongState([Values] GameState state)
+    {
+        if (state is GameState.GuestTurn or GameState.HostTurn) return;
+        var game = testingEnvironment.CreateNewTestableGame(state, 3, 9);
+
+        var exception = Assert.Throws<Exception>(() => game.Attack(3, new Cell(2, 2)));
+        
+        Assert.That(exception.Message, Is.EqualTo($"State not suitable for attack: [{state}]."));
+    }
+
+    [Test]
     public void StoppingTimerWhenLost()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);

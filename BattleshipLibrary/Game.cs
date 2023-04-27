@@ -38,8 +38,7 @@ public class Game
     public bool CreatingFleets =>
         State == GameState.BothPlayersCreateFleets || State == GameState.OnePlayerCreatesFleet;
 
-    public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon ||
-                           State == GameState.Cancelled;
+    public bool ItsOver => State == GameState.HostWon || State == GameState.GuestWon || State == GameState.Cancelled;
 
     public void Cancel() => State = GameState.Cancelled;
 
@@ -68,7 +67,8 @@ public class Game
                            (userId == Guest!.Id && Host.Fleet is not null);
         var newShips = ships.Select(ship => new Ship
         {
-            Decks = ship.Decks.Keys.Select(deckLocation => new Deck(deckLocation.X, deckLocation.Y))
+            Decks = ship.Decks.Keys
+                .Select(deckLocation => new Deck(deckLocation.X, deckLocation.Y))
                 .ToDictionary(x => x.Location)
         }).ToArray();
         UpdateState(userId, newShips);
@@ -79,12 +79,12 @@ public class Game
     public AttackResult Attack(int userId, Cell attackedLocation)
 #pragma warning restore IDE0060 // Удалите неиспользуемый параметр
     {
-        AssertThatShotIsInFieldBorders(attackedLocation);
+        ValidateAttack(attackedLocation);
         var result = PerformAttackByUser(attackedLocation);
-        if (!BattleOngoing) return result; //todo tdd correct result
+        if (!BattleOngoing) return result;
         if (Guest!.IsBot && result != AttackResult.Hit) AiTurn();
         SetBattleTimer();
-        return result; //todo tdd correct result
+        return result;
     }
 
     protected virtual void SetShipsCreationTimer(int secondsLeft = 30) =>
@@ -174,11 +174,11 @@ public class Game
     {
         //todo check for 3 times
         var currentExcluded = State == GameState.HostTurn ? Host.ExcludedLocations : Guest!.ExcludedLocations;
-        if (currentExcluded.Contains(location)) 
+        if (currentExcluded.Contains(location))
             throw new Exception($"Location {location} is already excluded.");
         currentExcluded.Add(location);
     }
-    
+
     private void SetMatchingTimer(int secondsLeft = 30) =>
         SetTimerWithAction(() =>
         {
@@ -201,12 +201,11 @@ public class Game
     private static Ship? GetAttackedShip(Cell attackedLocation, IEnumerable<Ship> attackedShips) =>
         attackedShips.SingleOrDefault(ship => ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
 
-    private static void AssertThatShotIsInFieldBorders(Cell attackedLocation)
+    private void ValidateAttack(Cell attackedLocation)
     {
-        if (attackedLocation.X < 0 || attackedLocation.X > 9 ||
-            attackedLocation.Y < 0 || attackedLocation.Y > 9)
-            throw new Exception(
-                "Target cannot be outside the game field. Available coordinates are 0-9.");
+        if (!BattleOngoing) throw new Exception($"State not suitable for attack: [{state}].");
+        if (attackedLocation.X < 0 || attackedLocation.X > 9 || attackedLocation.Y < 0 || attackedLocation.Y > 9)
+            throw new Exception("Target cannot be outside the game field. Available coordinates are 0-9.");
     }
 
     private void AiTurn()
