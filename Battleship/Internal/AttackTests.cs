@@ -83,10 +83,11 @@ public class AttackTests
         game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) }, 1,
             new[] { new Cell(2, 2) }, 2);
 
-        game.Attack(1, new Cell(0, 1));
+        var result = game.Attack(1, new Cell(0, 1));
 
         Assert.That(game.Host.Fleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
         Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
+        Assert.That(result, Is.EqualTo(AttackResult.Hit));
     }
 
     //todo similar for 2nd player
@@ -115,11 +116,12 @@ public class AttackTests
     [Test]
     public void Miss()
     {
-        game!.Attack(0, new Cell(0, 0));
+        var result = game!.Attack(0, new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));
         game.Guest!.Fleet!
             .Where(ship => ship.Decks.All(deck => !deck.Value.Destroyed)).AssertSingle();
+        Assert.That(result, Is.EqualTo(AttackResult.Missed));
     }
 
     //todo does exclusion actually work?
@@ -138,11 +140,12 @@ public class AttackTests
         game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1,
             new[] { new Cell(2, 2) }, 2);
 
-        game.Attack(1, new Cell(2, 2));
+        var result = game.Attack(1, new Cell(2, 2));
 
         game.Host.ExcludedLocations.AssertSingle();
         Assert.That(game.Guest!.Fleet.AssertSingle().IsDestroyed);
         Assert.That(game.State, Is.EqualTo(GameState.HostWon));
+        Assert.That(result, Is.EqualTo(AttackResult.Win));
     }
 
     [Test]

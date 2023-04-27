@@ -75,7 +75,6 @@ public class Game
         if (battleStarts) SetBattleTimer();
     }
 
-    //todo tdd userId field
 #pragma warning disable IDE0060 // Удалите неиспользуемый параметр
     public AttackResult Attack(int userId, Cell attackedLocation)
 #pragma warning restore IDE0060 // Удалите неиспользуемый параметр
@@ -117,8 +116,7 @@ public class Game
             ? Guest!.Fleet!.Where(x => !x.IsDestroyed).ToArray()
             : Host.Fleet!.Where(x => !x.IsDestroyed).ToArray();
         var result = AttackResult.Missed;
-        if (AttackDeck(attackedLocation, attackedShips))
-            result = AttackResult.Hit;
+        if (AttackDeck(attackedLocation, attackedShips)) result = AttackResult.Hit;
         if (attackedShips.All(x => x.IsDestroyed)) EndGameWithVictory(player1Turn);
         else PassTurn(player1Turn, result);
         if (ItsOver) result = AttackResult.Win;

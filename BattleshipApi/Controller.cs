@@ -159,6 +159,7 @@ public class Controller
         };
     }
 
+    //todo move to Game class
     private static void AssertYourTurn(AttackRequestModel request, Game game)
     {
         if (game.State == GameState.HostTurn && game.Guest!.Id == request.userId ||
