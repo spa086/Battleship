@@ -11,6 +11,7 @@ public class WhatsUpPreBattleTests
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
     private readonly TestAi testRandomFleet;
+    private readonly TestMatchingTime testMatchingTime;
 
     public WhatsUpPreBattleTests()
     {
@@ -20,6 +21,7 @@ public class WhatsUpPreBattleTests
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
         controller = serviceProvider.GetService<Controller>()!;
         testRandomFleet = (serviceProvider.GetService<IAi>() as TestAi)!;
+        testMatchingTime = (serviceProvider.GetService<IMatchingTime>() as TestMatchingTime)!;
     }
 
     [SetUp]
@@ -28,7 +30,7 @@ public class WhatsUpPreBattleTests
     [Test]
     public void WhatsUpOnCancelledGame()
     {
-        var game = testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 33);
+        testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 33);
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(33));
         
@@ -50,7 +52,7 @@ public class WhatsUpPreBattleTests
     public void ReturningMatchingTimerSeconds()
     {
         testRandomFleet.SetupAiShips = Array.Empty<Ship>();
-        gamePool.SetupMatchingTimeSeconds = 100;
+        testMatchingTime.SetupSeconds = 100;
         
         var result = controller.NewGame(new NewGameRequestModel { userId = 1 });
 
@@ -110,7 +112,7 @@ public class WhatsUpPreBattleTests
     }
 
     [Test]
-    public void HostPlayerWhatsupWhileWaitingForGuest()
+    public void HostPlayerWhatsUpWhileWaitingForGuest()
     {
         testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 1);
 

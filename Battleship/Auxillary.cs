@@ -12,7 +12,15 @@ public static class TestServiceCollection
 
     public static IServiceCollection Minimal() => 
         new ServiceCollection().AddSingleton<GamePool>()
-            .AddTransient<TestingEnvironment>().AddSingleton<IAi, TestAi>();
+            .AddTransient<TestingEnvironment>().AddSingleton<IAi, TestAi>()
+            .AddSingleton<IMatchingTime, TestMatchingTime>();
+}
+
+public class TestMatchingTime : IMatchingTime
+{
+    public int? SetupSeconds { get; set; }
+
+    public int Seconds() => SetupSeconds ?? 30;
 }
 
 public class TestAi : IAi

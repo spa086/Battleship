@@ -39,14 +39,13 @@ public enum AttackResult
 public class GamePool
 {
     private readonly IAi ai;
+    private readonly IMatchingTime matchingTime;
 
-    public GamePool(IAi ai)
+    public GamePool(IAi ai, IMatchingTime matchingTime)
     {
         this.ai = ai;
+        this.matchingTime = matchingTime;
     }
-
-    //for testing
-    public int? SetupMatchingTimeSeconds { get; set; }
 
     public Game? GetGame(int userId)
     {
@@ -81,7 +80,7 @@ public class GamePool
         //todo tdd ensure id uniqueness
         if (gameToJoin is null)
         {
-            var newGame = new Game(userId, ai, SetupMatchingTimeSeconds ?? 30);
+            var newGame = new Game(userId, ai, matchingTime.Seconds());
             Games[newGame.Id] = newGame;
             return false;
         }
@@ -93,6 +92,16 @@ public class GamePool
     //todo make it private, get in tests some other way,
     //maybe some for-testing method in GamePool or TestGamePool here
     public Dictionary<int, Game> Games { get; } = new();
+}
+
+public class MatchingTime : IMatchingTime
+{
+    public int Seconds() => 30;
+}
+
+public interface IMatchingTime
+{
+    int Seconds();
 }
 
 public readonly struct Cell

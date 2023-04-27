@@ -12,6 +12,7 @@ public class Tests
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
     private readonly TestAi testAi;
+    private readonly TestMatchingTime testMatchingTime;
 
     public Tests()
     {
@@ -21,6 +22,7 @@ public class Tests
         gamePool = serviceProvider.GetService<GamePool>()!;
         testingEnvironment = serviceProvider.GetService<TestingEnvironment>()!;
         testAi = (serviceProvider.GetService<IAi>() as TestAi)!;
+        testMatchingTime = (serviceProvider.GetService<IMatchingTime>() as TestMatchingTime)!;
     }
 
     [SetUp]
@@ -121,7 +123,7 @@ public class Tests
     [Test]
     public void MatchingTimerCreatesBot()
     {
-        gamePool.SetupMatchingTimeSeconds = 1;
+        testMatchingTime.SetupSeconds = 1;
         testAi.SetupAiShips = CreateSimpleShip(1, 1);
 
         gamePool.StartPlaying(1);
@@ -141,7 +143,7 @@ public class Tests
     [Test]
     public void MatchingTimer()
     {
-        gamePool.SetupMatchingTimeSeconds = 1;
+        testMatchingTime.SetupSeconds = 1;
         testAi.SetupAiShips = CreateSimpleShip(1, 1);
 
         gamePool.StartPlaying(1);

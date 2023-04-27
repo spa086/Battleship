@@ -13,6 +13,7 @@ public static class MainApi
         builder.Services.AddTransient<Controller>();
         builder.Services.AddTransient<WebResult>();
         builder.Services.AddTransient<IAi, Ai>();
+        builder.Services.AddTransient<IMatchingTime, MatchingTime>();
         var app = builder.Build();
         if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
         MapWebMethods(app);

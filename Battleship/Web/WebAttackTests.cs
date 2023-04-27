@@ -13,11 +13,7 @@ public class WebAttackTests
 
     public WebAttackTests()
     {
-        var services = new ServiceCollection();
-        services.AddSingleton<GamePool>();
-        services.AddTransient<TestingEnvironment>();
-        services.AddTransient<Controller>();
-        services.AddSingleton<IAi, TestAi>();
+        var services = TestServiceCollection.Web();
 
         var serviceProvider = services.BuildServiceProvider();
 
