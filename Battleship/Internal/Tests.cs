@@ -31,6 +31,19 @@ public class Tests
     }
 
     [Test]
+    public void GameStartSimple()
+    {
+        var theGame = testingEnvironment.CreateNewTestableGame(GameState.WaitingForGuest, 100);
+        
+        theGame.Start(300);
+        
+        Assert.That(theGame.TimerSecondsLeft, Is.EqualTo(60));
+        Assert.That(theGame.State, Is.EqualTo(GameState.BothPlayersCreateFleets));
+        Assert.That(theGame.Guest, Is.Not.Null);
+        Assert.That(theGame.Guest!.Id, Is.EqualTo(300));
+    }
+
+    [Test]
     public void GameIdIsGeneratedOnGameCreation() =>
         Assert.That(new Game(1, new TestAi(), TestingEnvironment.LongTime).Id, Is.Not.Zero);
 

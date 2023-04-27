@@ -17,7 +17,6 @@ public class Game
     public User Host { get; }
     public User? Guest { get; set; }
 
-    //todo tdd this field
     public int Id { get; }
 
     public GameState State
@@ -44,7 +43,6 @@ public class Game
 
     public void Cancel() => State = GameState.Cancelled;
 
-    //todo tdd
     public void DisposeOfTimer()
     {
         TheTimer?.Dispose();
@@ -57,7 +55,6 @@ public class Game
         State = hostWon ? GameState.HostWon : GameState.GuestWon;
     }
 
-    //todo test
     public void Start(int guestId)
     {
         State = GameState.BothPlayersCreateFleets;
