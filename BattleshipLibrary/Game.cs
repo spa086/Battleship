@@ -108,9 +108,7 @@ public class Game
 
     private AttackResult PerformAttackByUser(Cell attackedLocation)
     {
-        //todo test that we can't get here with playerNShips == null
         Exclude(attackedLocation);
-        //todo check for 3 times
         var player1Turn = State == GameState.HostTurn;
         var attackedShips = player1Turn
             ? Guest!.Fleet!.Where(x => !x.IsDestroyed).ToArray()
@@ -172,7 +170,6 @@ public class Game
 
     private void Exclude(Cell location)
     {
-        //todo check for 3 times
         var currentExcluded = State == GameState.HostTurn ? Host.ExcludedLocations : Guest!.ExcludedLocations;
         if (currentExcluded.Contains(location))
             throw new Exception($"Location {location} is already excluded.");
@@ -192,7 +189,6 @@ public class Game
     private static bool AttackDeck(Cell attackedLocation, Ship[] attackedShips)
     {
         var attackedShip = GetAttackedShip(attackedLocation, attackedShips);
-        //todo tdd throw if null?
         if (attackedShip is null) return false;
         attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
         return true;
