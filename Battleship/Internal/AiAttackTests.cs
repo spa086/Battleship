@@ -31,8 +31,8 @@ public class AiAttackTests
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1), new Cell(1, 2) }, 1,
-            new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1), new Cell(1, 2) },
+            new[] { new Cell(2, 2) });
         game.EnqueueAiAttackLocation(new Cell(1, 1));
         game.EnqueueAiAttackLocation(new Cell(1, 2));
 
@@ -46,8 +46,8 @@ public class AiAttackTests
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(2, 2), new Cell(2, 3) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) },
+            new[] { new Cell(2, 2), new Cell(2, 3) });
         game.EnqueueAiAttackLocation(new Cell(1, 1));
 
         game.Attack(1, new Cell(2, 2));
@@ -60,7 +60,7 @@ public class AiAttackTests
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, new[] { new Cell(2, 2) });
         game.EnqueueAiAttackLocation(new Cell(1, 1));
 
         game.Attack(1, new Cell(5, 5));
@@ -75,7 +75,7 @@ public class AiAttackTests
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, new[] { new Cell(2, 2) });
         game.EnqueueAiAttackLocation(new Cell(6, 6));
         game.SetupBattleTimer(100);
 
@@ -108,7 +108,7 @@ public class AiAttackTests
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
         SetAi(game);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, new[] { new Cell(2, 2) });
         game.EnqueueAiAttackLocation(new Cell(6, 6));
 
         game.Attack(1, new Cell(5, 5));

@@ -48,12 +48,11 @@ public class TestingEnvironment
     {
         var game = new TestableGame(hostId ?? 1, matchingSeconds).SetState(state);
         gamePool.AddGame(game);
-        MutateGame(game, state, hostId, guestId, hostHasFleet);
+        MutateGame(game, state, guestId, hostHasFleet);
         return game;
     }
 
-    private static void MutateGame(
-        TestableGame game, GameState state, int? hostId, int? guestId, bool hostHasFleet)
+    private static void MutateGame(TestableGame game, GameState state, int? guestId, bool hostHasFleet)
     {
         if (game.State != GameState.WaitingForGuest) game.CreateGuest(guestId);
         if (game.State == GameState.WaitingForGuest)
@@ -61,28 +60,27 @@ public class TestingEnvironment
         }
         else if (game.BattleOngoing)
         {
-            game.SetupSimpleFleets(SimpleCellArray(1), hostId,
-                SimpleCellArray(2), guestId);
+            game.SetupSimpleFleets(SimpleCellArray(1), SimpleCellArray(2));
             game.SetupBattleTimer(30);
         }
         else if (game.CreatingFleets) 
-            SetupGameInCreatingFleets(hostHasFleet, game, hostId!.Value, guestId!.Value);
-        else if (game.ItsOver) SetupGameOver(state, game, hostId!.Value, guestId);
+            SetupGameInCreatingFleets(hostHasFleet, game);
+        else if (game.ItsOver) SetupGameOver(state, game);
         else throw new Exception("Unknown situation.");
     }
 
-    private static void SetupGameInCreatingFleets(bool firstPlayerHasFleet, TestableGame game, int hostId, int guestId)
+    private static void SetupGameInCreatingFleets(bool firstPlayerHasFleet, TestableGame game)
     {
-        game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null, hostId,
-            firstPlayerHasFleet ? null : SimpleCellArray(2), guestId);
+        game.SetupSimpleFleets(firstPlayerHasFleet ? SimpleCellArray(1) : null,
+            firstPlayerHasFleet ? null : SimpleCellArray(2));
         game.SetupShipsCreationTimer(60);
     }
 
-    private static void SetupGameOver(GameState state, TestableGame game, int hostId, int? guestId)
+    private static void SetupGameOver(GameState state, TestableGame game)
     {
         var guestJoined = game.Guest is not null;
-        game.SetupSimpleFleets(SimpleCellArray(1), hostId, 
-            guestJoined ? SimpleCellArray(2) : null, guestJoined ? guestId : null);
+        game.SetupSimpleFleets(SimpleCellArray(1), 
+            guestJoined ? SimpleCellArray(2) : null);
         if (state == GameState.HostWon) game.DestroyFleet(2);
         else if (state == GameState.GuestWon) game.DestroyFleet(1);
         else if (state == GameState.Cancelled)

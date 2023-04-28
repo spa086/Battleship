@@ -42,7 +42,7 @@ public class ShipCreationTests
     {
         game = testingEnvironment.CreateNewTestableGame(
             GameState.OnePlayerCreatesFleet, 1, 2, false);
-        game.SetupSimpleFleets(null, 1, new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(null, new[] { new Cell(2, 2) });
 
         game.CreateAndSaveShips(1, CreateSimpleShip(1, 1));
 
@@ -64,7 +64,7 @@ public class ShipCreationTests
     [Test]
     public void Player2CreatesShips()
     {
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1, null, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) });
 
         game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
 
@@ -80,7 +80,7 @@ public class ShipCreationTests
     public void CreateShipsSimple()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
-        game.SetupSimpleFleets(null, 1, null, 2);
+        game.SetupSimpleFleets(null);
         var decks = new[] { new Deck(1, 1), new Deck(1, 2) }.ToDictionary(x => x.Location);
 
         game.CreateAndSaveShips(1, new[] { new Ship { Decks = decks } });

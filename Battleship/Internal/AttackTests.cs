@@ -33,7 +33,7 @@ public class AttackTests
     {
         testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
 
-        var exception = Assert.Throws<Exception>(() => game!.Attack(2, new Cell(5, 6)));
+        var exception = Assert.Throws<Exception>(() => game!.Attack(2, new Cell(5, 6)))!;
 
         Assert.That(exception.Message, Is.EqualTo("Not your turn."));
     }
@@ -53,8 +53,8 @@ public class AttackTests
     public void StoppingTimerWhenLost()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 
+            new[] { new Cell(2, 2) });
         game.SetupBattleTimer(100);
 
         game.Attack(1, new Cell(2, 2));
@@ -101,8 +101,8 @@ public class AttackTests
     public void DamagingAMultideckShip()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) }, 1,
-            new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) }, 
+            new[] { new Cell(2, 2) });
 
         var result = game.Attack(2, new Cell(0, 1));
 
@@ -158,8 +158,8 @@ public class AttackTests
     [Test]
     public void AttackAndWin()
     {
-        game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1,
-            new[] { new Cell(2, 2) }, 2);
+        game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 
+            new[] { new Cell(2, 2) });
 
         var result = game.Attack(1, new Cell(2, 2));
 
@@ -172,8 +172,8 @@ public class AttackTests
     [Test]
     public void Player2AttacksAndWins()
     {
-        game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 1,
-            new[] { new Cell(2, 2) }, 2);
+        game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 
+            new[] { new Cell(2, 2) });
         game.SetTurn(false);
 
         game.Attack(0, new Cell(0, 0));

@@ -70,8 +70,8 @@ public class WebAttackTests
     public void AttackMissed()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(3, 3) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) },
+            new[] { new Cell(3, 3) });
 
         var result = controller.Attack(new AttackRequestModel
             { location = new LocationModel { x = 2, y = 2 }, userId = 1 });
@@ -84,8 +84,8 @@ public class WebAttackTests
     public void AttackHitsAShip()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(2, 2), new Cell(2, 3) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 
+            new[] { new Cell(2, 2), new Cell(2, 3) });
         var request = new AttackRequestModel { location = new LocationModel { x = 2, y = 2 }, userId = 1 };
 
         var result = controller.Attack(request);
@@ -102,8 +102,8 @@ public class WebAttackTests
     public void Player21AttacksAndWins()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) },
+            new[] { new Cell(2, 2) });
 
         var result = controller.Attack(new AttackRequestModel
             { location = new LocationModel { x = 1, y = 1 }, userId = 2 });
@@ -118,8 +118,8 @@ public class WebAttackTests
     public void Player1AttacksAndWins()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(2, 2) }, 2);
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) },
+            new[] { new Cell(2, 2) });
 
         var result = controller.Attack(new AttackRequestModel
             { location = new LocationModel { x = 2, y = 2 }, userId = 1 });

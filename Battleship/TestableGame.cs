@@ -4,7 +4,7 @@ namespace BattleshipTests;
 
 public class TestableGame : Game
 {
-    public TestableGame(int hostId, int matchingSeconds = TestingEnvironment.LongTime) : 
+    public TestableGame(int hostId, int matchingSeconds = TestingEnvironment.LongTime) :
         base(hostId, new TestAi(), matchingSeconds)
     {
     }
@@ -50,8 +50,8 @@ public class TestableGame : Game
         Guest = new User { ExcludedLocations = CreateLocationList() };
         State = GameState.HostTurn;
         SetupTurnTime = 30;
-        SetupSimpleFleets(new[] { new Cell(1, 1) }, 1,
-            new[] { new Cell(3, 3) }, 2);
+        SetupUsers(1, 2);
+        SetupSimpleFleets(new[] { new Cell(1, 1) }, new[] { new Cell(3, 3) });
     }
 
     public void SetupFleets(IEnumerable<Ship>? hostFleet, IEnumerable<Ship>? guestFleet)
@@ -78,15 +78,17 @@ public class TestableGame : Game
         else throw new Exception($"User [{userId}] is not found.");
     }
 
-    //todo move id setups to different method/property
-    public void SetupSimpleFleets(Cell[]? hostDeckLocations, int? hostId = null, Cell[]? guestDeckLocations = null, 
-        int? guestId = null)
+    public void SetupUsers(int? hostId = null, int? guestId = null)
     {
-        Host.Fleet = CreateSimpleFleet(hostDeckLocations);
         Host.Id = hostId ?? Host.Id;
-        if(guestDeckLocations is not null) Guest!.Fleet = CreateSimpleFleet(guestDeckLocations);
         if (guestId is null) Guest = null;
         else Guest!.Id = guestId.Value;
+    }
+
+    public void SetupSimpleFleets(Cell[]? hostDeckLocations, Cell[]? guestDeckLocations = null)
+    {
+        Host.Fleet = CreateSimpleFleet(hostDeckLocations);
+        if (guestDeckLocations is not null) Guest!.Fleet = CreateSimpleFleet(guestDeckLocations);
     }
 
     protected override void SetBattleTimer(int secondsLeft = 30) =>
