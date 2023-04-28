@@ -12,7 +12,7 @@ public class AttackTests
 
     public AttackTests()
     {
-        var serviceProvider = 
+        var serviceProvider =
             TestServiceCollection.Minimal().BuildServiceProvider();
 
         gamePool = serviceProvider.GetService<GamePool>()!;
@@ -27,24 +27,32 @@ public class AttackTests
     }
 
     [Test]
+    public void GuestFleetExistenceValidation()
+    {
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 44, 55);
+        game.SetupSimpleFleets(new[] { new Cell(5, 5) });
+
+        testingEnvironment.AssertException(() => game.Attack(44, new Cell(7, 8)), 
+            $"Oops, guest fleet is null.");
+    }
+
+    [Test]
     public void HostFleetExistenceValidation()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 44, 55);
-        game.SetupSimpleFleets(null, new []{new Cell(5, 5)});
+        game.SetupSimpleFleets(null, new[] { new Cell(5, 5) });
 
-        var exception = Assert.Throws<Exception>(() => game.Attack(44, new Cell(7, 8)))!;
-        
-        Assert.That(exception.Message, Is.EqualTo($"Oops, host fleet is null."));
+        testingEnvironment.AssertException(() => game.Attack(44, new Cell(7, 8)), 
+            $"Oops, host fleet is null.");
     }
-    
+
     [Test]
     public void AttackingInOpponentsTurn()
     {
         testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-
-        var exception = Assert.Throws<Exception>(() => game!.Attack(2, new Cell(5, 6)))!;
-
-        Assert.That(exception.Message, Is.EqualTo("Not your turn."));
+        
+        testingEnvironment.AssertException(() => game!.Attack(2, new Cell(5, 6)), 
+            $"Not your turn.");
     }
 
     [Test]
@@ -53,16 +61,15 @@ public class AttackTests
         if (state is GameState.GuestTurn or GameState.HostTurn) return;
         game = testingEnvironment.CreateNewTestableGame(state, 3, 9);
 
-        var exception = Assert.Throws<Exception>(() => game.Attack(3, new Cell(2, 2)))!;
-        
-        Assert.That(exception.Message, Is.EqualTo($"State not suitable for attack: [{state}]."));
+        testingEnvironment.AssertException(() => game.Attack(2, new Cell(5, 6)), 
+            $"State not suitable for attack: [{state}].");
     }
 
     [Test]
     public void StoppingTimerWhenLost()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(1, 1) }, 
+        game.SetupSimpleFleets(new[] { new Cell(1, 1) },
             new[] { new Cell(2, 2) });
         game.SetupBattleTimer(100);
 
@@ -87,13 +94,9 @@ public class AttackTests
     }
 
     [Test]
-    public void ShotOutsideTheField()
-    {
-        var exception = Assert.Throws<Exception>(() => game!.Attack(1, new Cell(11, 0)))!;
-
-        Assert.That(exception.Message,
-            Is.EqualTo("Target cannot be outside the game field. Available coordinates are 0-9."));
-    }
+    public void ShotOutsideTheField() =>
+        testingEnvironment.AssertException(() => game!.Attack(1, new Cell(11, 0)), 
+            "Target cannot be outside the game field. Available coordinates are 0-9.");
 
     [Test]
     public void TimerRenewal()
@@ -110,7 +113,7 @@ public class AttackTests
     public void DamagingAMultideckShip()
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.GuestTurn, 1, 2);
-        game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) }, 
+        game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) },
             new[] { new Cell(2, 2) });
 
         var result = game.Attack(2, new Cell(0, 1));
@@ -120,14 +123,13 @@ public class AttackTests
         Assert.That(result, Is.EqualTo(AttackResult.Hit));
     }
 
-    //todo similar for 2nd player
     [Test]
     public void AttackSamePlaceTwice()
     {
         game!.SetupExcludedLocations(1, new Cell(0, 0));
 
-        var exception = Assert.Throws<Exception>(() => game.Attack(0, new Cell(0, 0)))!;
-        Assert.That(exception.Message, Is.EqualTo("Location [0,0] is already excluded."));
+        testingEnvironment.AssertException(() => game.Attack(0, new Cell(0, 0)), 
+            "Location [0,0] is already excluded.");
     }
 
     [Test]
@@ -154,8 +156,6 @@ public class AttackTests
         Assert.That(result, Is.EqualTo(AttackResult.Missed));
     }
 
-    //todo does exclusion actually work?
-
     [Test]
     public void Excluding()
     {
@@ -167,7 +167,7 @@ public class AttackTests
     [Test]
     public void AttackAndWin()
     {
-        game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 
+        game!.SetupSimpleFleets(new[] { new Cell(0, 0) },
             new[] { new Cell(2, 2) });
 
         var result = game.Attack(1, new Cell(2, 2));
@@ -181,7 +181,7 @@ public class AttackTests
     [Test]
     public void Player2AttacksAndWins()
     {
-        game!.SetupSimpleFleets(new[] { new Cell(0, 0) }, 
+        game!.SetupSimpleFleets(new[] { new Cell(0, 0) },
             new[] { new Cell(2, 2) });
         game.SetTurn(false);
 

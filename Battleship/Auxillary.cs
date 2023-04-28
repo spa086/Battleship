@@ -40,6 +40,9 @@ public class TestingEnvironment
     {
         this.gamePool = gamePool;
     }
+    
+    public void AssertException(Action code, string expectedMessage) => 
+        Assert.That(Assert.Throws<Exception>(() => code())!.Message, Is.EqualTo(expectedMessage));
 
     public static void SleepMinimalTime() => Thread.Sleep(1100);
 

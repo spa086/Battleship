@@ -87,7 +87,7 @@ public class TestableGame : Game
     public void SetupSimpleFleets(Cell[]? hostDeckLocations, Cell[]? guestDeckLocations = null)
     {
         Host.Fleet = CreateSimpleFleet(hostDeckLocations);
-        if (guestDeckLocations is not null) Guest!.Fleet = CreateSimpleFleet(guestDeckLocations);
+        if(Guest is not null) Guest!.Fleet = guestDeckLocations is null ? null : CreateSimpleFleet(guestDeckLocations);
     }
 
     protected override void SetBattleTimer(int secondsLeft = 30) =>
