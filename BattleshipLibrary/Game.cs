@@ -75,11 +75,9 @@ public class Game
         if (battleStarts) SetBattleTimer();
     }
 
-#pragma warning disable IDE0060 // Удалите неиспользуемый параметр
     public AttackResult Attack(int userId, Cell attackedLocation)
-#pragma warning restore IDE0060 // Удалите неиспользуемый параметр
     {
-        ValidateAttack(attackedLocation);
+        ValidateAttack(attackedLocation, userId);
         var result = PerformAttackByUser(attackedLocation);
         if (!BattleOngoing) return result;
         if (Guest!.IsBot && result != AttackResult.Hit) AiTurn();
@@ -184,21 +182,10 @@ public class Game
             SetShipsCreationTimer(60);
         }, secondsLeft);
 
-    private GameState state;
-
-    private static bool AttackDeck(Cell attackedLocation, Ship[] attackedShips)
+    private void ValidateAttack(Cell attackedLocation, int userId)
     {
-        var attackedShip = GetAttackedShip(attackedLocation, attackedShips);
-        if (attackedShip is null) return false;
-        attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
-        return true;
-    }
-
-    private static Ship? GetAttackedShip(Cell attackedLocation, IEnumerable<Ship> attackedShips) =>
-        attackedShips.SingleOrDefault(ship => ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
-
-    private void ValidateAttack(Cell attackedLocation)
-    {
+        if (State == GameState.HostTurn && Guest!.Id == userId || State == GameState.GuestTurn && Host.Id == userId)
+            throw new Exception("Not your turn.");
         if (!BattleOngoing) throw new Exception($"State not suitable for attack: [{state}].");
         if (attackedLocation.X < 0 || attackedLocation.X > 9 || attackedLocation.Y < 0 || attackedLocation.Y > 9)
             throw new Exception("Target cannot be outside the game field. Available coordinates are 0-9.");
@@ -213,4 +200,17 @@ public class Game
 
         if (BattleOngoing) State = GameState.HostTurn;
     }
+
+    private GameState state;
+
+    private static bool AttackDeck(Cell attackedLocation, Ship[] attackedShips)
+    {
+        var attackedShip = GetAttackedShip(attackedLocation, attackedShips);
+        if (attackedShip is null) return false;
+        attackedShip.Decks.Values.Single(x => x.Location == attackedLocation).Destroyed = true;
+        return true;
+    }
+
+    private static Ship? GetAttackedShip(Cell attackedLocation, IEnumerable<Ship> attackedShips) =>
+        attackedShips.SingleOrDefault(ship => ship.Decks.Values.Any(deck => deck.Location == attackedLocation));
 }

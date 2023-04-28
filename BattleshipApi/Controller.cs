@@ -71,7 +71,6 @@ public class Controller
         var game = gamePool.GetGame(request.userId);
         if (game is null) throw new Exception($"Could not find game for user id=[{request.userId}].");
         var userName = game.State == GameState.HostTurn ? game.Host.Name : game.Guest!.Name;
-        AssertYourTurn(request, game);
         var attackResult = game.Attack(request.userId, ToCell(request.location));
         Log.ger.Info($"User id=[{request.userId}] performed attack at " +
                      $"[{request.location.x},{request.location.y}].");
@@ -147,14 +146,6 @@ public class Controller
         var eventDescription = secondPlayerJoined ? "joined" : "started";
         Log.ger.Info($"User with id [{userId}] {eventDescription} a game with id [{game.Id}].");
         return new() { gameId = game.Id, secondsLeft = game.TimerSecondsLeft!.Value };
-    }
-
-    //todo move to Game class
-    private static void AssertYourTurn(AttackRequestModel request, Game game)
-    {
-        if (game.State == GameState.HostTurn && game.Guest!.Id == request.userId ||
-            game.State == GameState.GuestTurn && game.Host.Id == request.userId)
-            throw new Exception("Not your turn.");
     }
 
     private static Cell ToCell(LocationModel model) => new(model.x, model.y);

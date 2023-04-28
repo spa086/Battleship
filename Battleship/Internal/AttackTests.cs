@@ -27,6 +27,16 @@ public class AttackTests
         gamePool.ClearGames();
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
     }
+    
+    [Test]
+    public void AttackingInOpponentsTurn()
+    {
+        testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+
+        var exception = Assert.Throws<Exception>(() => game!.Attack(2, new Cell(5, 6)));
+
+        Assert.That(exception.Message, Is.EqualTo("Not your turn."));
+    }
 
     [Test]
     public void AttackingInWrongState([Values] GameState state)
@@ -94,7 +104,7 @@ public class AttackTests
         game.SetupSimpleFleets(new[] { new Cell(0, 1), new Cell(0, 0) }, 1,
             new[] { new Cell(2, 2) }, 2);
 
-        var result = game.Attack(1, new Cell(0, 1));
+        var result = game.Attack(2, new Cell(0, 1));
 
         Assert.That(game.Host.Fleet!.AssertSingle().Decks[new Cell(0, 1)].Destroyed);
         Assert.That(game.State, Is.EqualTo(GameState.GuestTurn));

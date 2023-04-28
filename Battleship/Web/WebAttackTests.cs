@@ -47,17 +47,6 @@ public class WebAttackTests
     }
 
     [Test]
-    public void AttackingInOpponentsTurn()
-    {
-        testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
-
-        var exception = Assert.Throws<Exception>(() => controller.Attack(
-            new AttackRequestModel { location = new LocationModel { x = 5, y = 6 }, userId = 2 }))!;
-
-        Assert.That(exception.Message, Is.EqualTo("Not your turn."));
-    }
-
-    [Test]
     public void ReturningExcludedLocationsFor([Values] bool firstPlayer)
     {
         testingEnvironment.CreateNewTestableGame(
