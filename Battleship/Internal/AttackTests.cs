@@ -4,10 +4,8 @@ using NUnit.Framework;
 
 namespace BattleshipTests.Internal;
 
-//todo refactor long file
 public class AttackTests
 {
-    //todo tdd throw if any location list is uninitialized
     private TestableGame? game;
     private readonly GamePool gamePool;
     private readonly TestingEnvironment testingEnvironment;
@@ -26,6 +24,17 @@ public class AttackTests
     {
         gamePool.ClearGames();
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
+    }
+
+    [Test]
+    public void HostFleetExistenceValidation()
+    {
+        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 44, 55);
+        game.SetupSimpleFleets(null, new []{new Cell(5, 5)});
+
+        var exception = Assert.Throws<Exception>(() => game.Attack(44, new Cell(7, 8)))!;
+        
+        Assert.That(exception.Message, Is.EqualTo($"Oops, host fleet is null."));
     }
     
     [Test]

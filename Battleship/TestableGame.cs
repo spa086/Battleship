@@ -40,7 +40,6 @@ public class TestableGame : Game
         else throw new Exception("Incorrect userId");
     }
 
-    //todo check for 3 times
     public void SetTurn(bool setPlayer1Turn) =>
         State = setPlayer1Turn ? GameState.HostTurn : GameState.GuestTurn;
 

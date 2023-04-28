@@ -189,6 +189,7 @@ public class Game
         if (!BattleOngoing) throw new Exception($"State not suitable for attack: [{state}].");
         if (attackedLocation.X < 0 || attackedLocation.X > 9 || attackedLocation.Y < 0 || attackedLocation.Y > 9)
             throw new Exception("Target cannot be outside the game field. Available coordinates are 0-9.");
+        if (Host.Fleet is null) throw new Exception("Oops, host fleet is null.");
     }
 
     private void AiTurn()
