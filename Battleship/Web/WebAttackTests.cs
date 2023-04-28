@@ -26,6 +26,16 @@ public class WebAttackTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
+    public void DidNotFindGame()
+    {
+        gamePool.ClearGames();
+
+        var exception = Assert.Throws<Exception>(() => controller.Attack(new AttackRequestModel{userId = 113}))!;
+        
+        Assert.That(exception.Message, Is.EqualTo($"Could not find game for user id=[113]."));
+    }
+
+    [Test]
     public void AttackReturnsUserName()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);

@@ -32,14 +32,13 @@ public class Controller
         var game = gamePool.GetGame(userId);
         if (game is null) return new WhatsUpResponseModel { gameState = GameStateModel.NoGame };
         WhatsUpResponseModel? result;
-        if (game.State == GameState.Cancelled && game.Guest is null || game.State == GameState.WaitingForGuest)
+        if (game is { State: GameState.Cancelled, Guest: null } || game.State == GameState.WaitingForGuest)
             result = BasicResponseModel(
                 game.State == GameState.Cancelled ? GameStateModel.Cancelled : GameStateModel.WaitingForStart);
         else if (game.Guest is not null && (game.Host.Fleet is null || game.Guest!.Fleet is null))
             result = WhatsUpBeforeBattle(userId, game);
         else if (game.Host.Fleet is not null && game.Guest!.Fleet is not null)
             result = WhatsUpInBattle(userId, game);
-        //todo tdd this exception
         else throw new Exception("Unknown situation.");
         result.userName = userId == game.Host.Id ? game.Guest?.Name : game.Host.Name;
         result.secondsLeft = game.TimerSecondsLeft;
@@ -58,7 +57,7 @@ public class Controller
                 .FirstOrDefault(x => x.Count() > 1);
         if (firstGroupWithDuplicates is not null)
             throw new Exception($"Two decks are at the same place: {firstGroupWithDuplicates.Key}.");
-        if (request.userId == game!.Host.Id) game.Host.Name = request.userName;
+        if (request.userId == game.Host.Id) game.Host.Name = request.userName;
         else if (request.userId == game.Guest!.Id) game.Guest!.Name = request.userName;
         game.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());
         Log.ger.Info($"Ships were created for user [{request.userId}|{request.userName}].");
@@ -69,9 +68,9 @@ public class Controller
     {
         Log.ger.Info($"User id=[{request.userId}] wants to attack at " +
                      $"[{request.location.x},{request.location.y}].");
-        //todo tdd throw if game is in inappropriate state
         //todo tdd what if did not find game
-        var game = gamePool.GetGame(request.userId)!;
+        var game = gamePool.GetGame(request.userId);
+        if (game is null) throw new Exception($"Could not find game for user id=[{request.userId}].");
         var userName = game.State == GameState.HostTurn ? game.Host.Name : game.Guest!.Name;
         AssertYourTurn(request, game);
         var attackResult = game.Attack(request.userId, ToCell(request.location));
@@ -152,11 +151,7 @@ public class Controller
         var game = gamePool.GetGame(userId)!;
         var eventDescription = secondPlayerJoined ? "joined" : "started";
         Log.ger.Info($"User with id [{userId}] {eventDescription} a game with id [{game.Id}].");
-        return new()
-        {
-            gameId = game.Id,
-            secondsLeft = game.TimerSecondsLeft!.Value
-        };
+        return new() { gameId = game.Id, secondsLeft = game.TimerSecondsLeft!.Value };
     }
 
     //todo move to Game class
@@ -169,8 +164,7 @@ public class Controller
 
     private static Cell ToCell(LocationModel model) => new(model.x, model.y);
 
-    private static LocationModel ToLocationModel(Cell location) =>
-        new() { x = location.X, y = location.Y };
+    private static LocationModel ToLocationModel(Cell location) => new() { x = location.X, y = location.Y };
 
     private static AttackResultTransportModel ToAttackResultModel(AttackResult attackResult) =>
         attackResult switch
