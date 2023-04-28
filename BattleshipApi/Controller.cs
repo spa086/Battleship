@@ -68,7 +68,6 @@ public class Controller
     {
         Log.ger.Info($"User id=[{request.userId}] wants to attack at " +
                      $"[{request.location.x},{request.location.y}].");
-        //todo tdd what if did not find game
         var game = gamePool.GetGame(request.userId);
         if (game is null) throw new Exception($"Could not find game for user id=[{request.userId}].");
         var userName = game.State == GameState.HostTurn ? game.Host.Name : game.Guest!.Name;
@@ -119,22 +118,19 @@ public class Controller
         return result;
     }
 
-    //todo refactor long method
     private static GameStateModel GetStateModel(int userId, Game game)
     {
+        var isHost = game.Host.Id == userId;
+        var isGuest = game.Guest!.Id == userId;
         if (game.State == GameState.BothPlayersCreateFleets || game.State == GameState.OnePlayerCreatesFleet)
             return GameStateModel.CreatingFleet;
-        if (game.State == GameState.HostTurn && game.Host.Id == userId ||
-            game.State == GameState.GuestTurn && game.Guest!.Id == userId)
+        if (game.State == GameState.HostTurn && isHost || game.State == GameState.GuestTurn && isGuest)
             return GameStateModel.YourTurn;
-        if (game.State == GameState.HostTurn && game.Guest!.Id == userId ||
-            game.State == GameState.GuestTurn && game.Host.Id == userId)
+        if (game.State == GameState.HostTurn && isGuest || game.State == GameState.GuestTurn && isHost)
             return GameStateModel.OpponentsTurn;
-        if (game.State == GameState.HostWon && game.Host.Id == userId ||
-            game.State == GameState.GuestWon && game.Guest!.Id == userId)
+        if (game.State == GameState.HostWon && isHost || game.State == GameState.GuestWon && isGuest)
             return GameStateModel.YouWon;
-        if (game.State == GameState.HostWon && game.Guest!.Id == userId ||
-            game.State == GameState.GuestWon && game.Host.Id == userId)
+        if (game.State == GameState.HostWon && isGuest || game.State == GameState.GuestWon && isHost)
             return GameStateModel.OpponentWon;
         if (game.State == GameState.Cancelled) return GameStateModel.Cancelled;
         throw new Exception($"Unknown situation. State = [{game.State}], " +
@@ -142,8 +138,7 @@ public class Controller
                             $"requester user id = [{userId}].");
     }
 
-    private static WhatsUpResponseModel BasicResponseModel(GameStateModel state) =>
-        new() { gameState = state };
+    private static WhatsUpResponseModel BasicResponseModel(GameStateModel state) => new() { gameState = state };
 
     private NewGameResponseModel StartPlaying(int userId)
     {
