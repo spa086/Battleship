@@ -26,24 +26,22 @@ public class AttackTests
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 1, 2);
     }
 
-    [Test]
-    public void GuestFleetExistenceValidation()
+    [TestCase(null, 5, 5, 5, "host fleet")]
+    [TestCase(5, null, 5, 5, "guest fleet")]
+    public void GuestFleetExistenceValidation(int? hostShipCoordinate, int? guestShipCoordinate, 
+        int? hostExcludedCoordinate, int? guestExcludedCoordinate, string missingItem)
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 44, 55);
-        game.SetupSimpleFleets(new[] { new Cell(5, 5) });
+        var hostDecks = hostShipCoordinate.HasValue
+            ? new[] { new Cell(hostShipCoordinate.Value, hostShipCoordinate.Value) }
+            : null;
+        var guestDecks = guestShipCoordinate.HasValue
+            ? new[] { new Cell(guestShipCoordinate.Value, guestShipCoordinate.Value) }
+            : null;
+        game.SetupSimpleFleets(hostDecks, guestDecks);
 
         testingEnvironment.AssertException(() => game.Attack(44, new Cell(7, 8)), 
-            $"Oops, guest fleet is null.");
-    }
-
-    [Test]
-    public void HostFleetExistenceValidation()
-    {
-        game = testingEnvironment.CreateNewTestableGame(GameState.HostTurn, 44, 55);
-        game.SetupSimpleFleets(null, new[] { new Cell(5, 5) });
-
-        testingEnvironment.AssertException(() => game.Attack(44, new Cell(7, 8)), 
-            $"Oops, host fleet is null.");
+            $"Oops, {missingItem} is null.");
     }
 
     [Test]
