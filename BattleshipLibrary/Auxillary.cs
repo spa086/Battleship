@@ -3,6 +3,13 @@ using NLog;
 
 namespace BattleshipLibrary;
 
+public static class Constants
+{
+    public const int StandardMatchingTIme = 15;
+    public const int StandardFleetCreationTIme = 60;
+    public const int StandardTurnTime = 30;
+}
+
 public interface IAi
 {
     Ship[] GenerateShips();
@@ -88,7 +95,7 @@ public class GamePool
 
 public class MatchingTime : IMatchingTime
 {
-    public int Seconds() => 30;
+    public int Seconds() => Constants.StandardMatchingTIme;
 }
 
 public interface IMatchingTime
@@ -131,7 +138,7 @@ public class Deck
     }
 
     public bool Destroyed { get; set; }
-    
+
     public Cell Location { get; }
 }
 

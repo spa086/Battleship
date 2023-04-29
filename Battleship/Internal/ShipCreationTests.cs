@@ -69,7 +69,7 @@ public class ShipCreationTests
         game.SaveShips(2, CreateSimpleShip(2, 2));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
-        Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(Constants.StandardTurnTime));
         var deck = game.Guest!.Fleet.AssertSingle().Decks.AssertSingle();
         Assert.That(deck.Key, Is.EqualTo(new Cell(2, 2)));
         Assert.That(deck.Value.Destroyed, Is.False);

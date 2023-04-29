@@ -41,7 +41,7 @@ public class WhatsUpBattleTests
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(1));
 
-        Assert.That(result.secondsLeft, Is.EqualTo(30));
+        Assert.That(result.secondsLeft, Is.EqualTo(Constants.StandardTurnTime));
     }
 
     [TestCase(GameState.HostWon, GameStateModel.YouWon)]

@@ -3,7 +3,7 @@
 public class Game
 {
     //todo timer 15 secs, also make it a constant
-    public Game(int user1Id, IAi ai, int matchingTimeSeconds = 30)
+    public Game(int user1Id, IAi ai, int matchingTimeSeconds = Constants.StandardMatchingTIme)
     {
         Host = new User { Id = user1Id };
         Id = new Random().Next();
@@ -85,7 +85,7 @@ public class Game
         return result;
     }
 
-    protected virtual void SetShipsCreationTimer(int secondsLeft = 30) =>
+    protected virtual void SetShipsCreationTimer(int secondsLeft = Constants.StandardFleetCreationTIme) =>
         SetTimerWithAction(() =>
         {
             if (Host.Fleet is not null && Guest!.Fleet is null) SetTechnicalWinner(true);

@@ -104,7 +104,7 @@ public class AttackTests
 
         game.Attack(2, new Cell(0, 0));
 
-        Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(Constants.StandardTurnTime));
     }
 
     [Test]

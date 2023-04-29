@@ -48,7 +48,7 @@ public class TestableGame : Game
         Host.ExcludedLocations = CreateLocationList();
         Guest = new User { ExcludedLocations = CreateLocationList() };
         State = GameState.HostTurn;
-        SetupTurnTime = 30;
+        SetupTurnTime = Constants.StandardTurnTime;
         SetupUsers(1, 2);
         SetupSimpleFleets(new[] { new Cell(1, 1) }, new[] { new Cell(3, 3) });
     }
@@ -90,10 +90,10 @@ public class TestableGame : Game
         if(Guest is not null) Guest!.Fleet = guestDeckLocations is null ? null : CreateSimpleFleet(guestDeckLocations);
     }
 
-    protected override void SetBattleTimer(int secondsLeft = 30) =>
+    protected override void SetBattleTimer(int secondsLeft = Constants.StandardTurnTime) =>
         base.SetBattleTimer(SetupTurnTime ?? secondsLeft);
 
-    protected override void SetShipsCreationTimer(int secondsLeft = 30) =>
+    protected override void SetShipsCreationTimer(int secondsLeft = Constants.StandardFleetCreationTIme) =>
         base.SetShipsCreationTimer(SetupTurnTime ?? secondsLeft);
 
     private static Ship[]? CreateSimpleFleet(Cell[]? deckLocations)

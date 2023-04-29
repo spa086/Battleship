@@ -65,7 +65,7 @@ public class AiAttackTests
 
         game.Attack(1, new Cell(5, 5));
 
-        Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(Constants.StandardTurnTime));
         Assert.That(game.Host.Fleet.AssertSingle().IsDestroyed);
         Assert.That(game.State, Is.EqualTo(GameState.GuestWon));
     }
@@ -81,7 +81,7 @@ public class AiAttackTests
 
         game.Attack(1, new Cell(5, 5));
 
-        Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
+        Assert.That(game.TimerSecondsLeft, Is.EqualTo(Constants.StandardTurnTime));
     }
 
     [Test]

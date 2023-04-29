@@ -18,7 +18,7 @@ public class TestMatchingTime : IMatchingTime
 {
     public int? SetupSeconds { get; set; }
 
-    public int Seconds() => SetupSeconds ?? 30;
+    public int Seconds() => SetupSeconds ?? Constants.StandardMatchingTIme;
 }
 
 public class TestAi : IAi
@@ -64,7 +64,7 @@ public class TestingEnvironment
         else if (game.BattleOngoing)
         {
             game.SetupSimpleFleets(SimpleCellArray(1), SimpleCellArray(2));
-            game.SetupBattleTimer(30);
+            game.SetupBattleTimer(Constants.StandardTurnTime);
         }
         else if (game.CreatingFleets) 
             SetupGameInCreatingFleets(hostHasFleet, game);
