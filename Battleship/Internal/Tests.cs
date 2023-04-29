@@ -31,13 +31,10 @@ public class Tests
     }
 
     [Test]
-    public void ChooseAttackLocationSimple()
-    {
-        var ai = new Ai();
-        
-        testingEnvironment.AssertException(() => ai.ChooseAttackLocation(Array.Empty<Ship>(), Array.Empty<Cell>()), 
+    public void ChooseAttackLocationSimple() =>
+        testingEnvironment.AssertException(
+            () => new Ai().ChooseAttackLocation(Array.Empty<Ship>(), Array.Empty<Cell>()), 
             "No ships provided for choosing attack location.");
-    }
 
     [Test]
     public void GameStartSimple()
