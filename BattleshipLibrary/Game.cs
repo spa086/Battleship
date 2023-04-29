@@ -2,6 +2,7 @@
 
 public class Game
 {
+    //todo timer 15 secs, also make it a constant
     public Game(int user1Id, IAi ai, int matchingTimeSeconds = 30)
     {
         Host = new User { Id = user1Id };
