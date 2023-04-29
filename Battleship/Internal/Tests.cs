@@ -31,6 +31,25 @@ public class Tests
     }
 
     [Test]
+    public void OnlyOneChoiceForAttack()
+    {
+        var ai = new Ai();
+        var excludedLocations = (from x in Enumerable.Range(0, 10)
+            join y in Enumerable.Range(0, 10) on true equals true
+            select new Cell(x, y)).ToList();
+        excludedLocations.Remove(new Cell(8, 3));
+        for (int i = 0; i < 100; i++)
+        {
+            var result = ai.ChooseAttackLocation(
+                new[] { new Ship { Decks = new[] { new Deck(7, 4) }.ToDictionary(x => x.Location) } }, 
+                excludedLocations);
+            
+            Assert.That(result.X, Is.EqualTo(8));
+            Assert.That(result.Y, Is.EqualTo(3));
+        }
+    }
+
+    [Test]
     public void ChooseAttackLocationSimple()
     {
         var ai = new Ai();
