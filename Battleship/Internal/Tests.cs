@@ -27,19 +27,40 @@ public class Tests
     }
 
     [Test]
+    public void FleetGenerationSimple()
+    {
+        var ai = new Ai();
+
+        for (int i = 0; i < 100; i++)
+        {
+            var result = ai.GenerateShips();
+
+            Assert.That(result.Length, Is.EqualTo(6));
+            var fourDecker = result.Where(x => x.Decks.Values.Count == 4).AssertSingle();
+            TestShip(fourDecker, 4);
+            var tripleDeckers = result.Where(x => x.Decks.Values.Count == 3).ToArray();
+            Assert.That(tripleDeckers.Length, Is.EqualTo(2));
+            TestShips(tripleDeckers, 3);
+            var doubleDeckers = result.Where(x => x.Decks.Values.Count == 2).ToArray();
+            Assert.That(doubleDeckers.Length, Is.EqualTo(3));
+            TestShips(doubleDeckers, 2);
+        }
+    }
+
+    [Test]
     public void NoChoiceForAttackBecauseAllDestroyed()
     {
         var ai = new Ai();
         var ships = (from x in Enumerable.Range(0, 10)
-            join y in Enumerable.Range(0, 10) on true equals true
-            select new Ship { Decks = new[] { new Deck(x, y, true) }.ToDictionary(deck => deck.Location) })
+                join y in Enumerable.Range(0, 10) on true equals true
+                select new Ship { Decks = new[] { new Deck(x, y, true) }.ToDictionary(deck => deck.Location) })
             .ToList();
-        ships.RemoveAll(ship => ship.Decks.Values.Single().Location.X == 5 && 
+        ships.RemoveAll(ship => ship.Decks.Values.Single().Location.X == 5 &&
                                 ship.Decks.Values.Single().Location.Y == 6);
         for (int i = 0; i < 100; i++)
         {
             var result = ai.ChooseAttackLocation(ships.ToArray(), Array.Empty<Cell>());
-            
+
             Assert.That(result.X, Is.EqualTo(5));
             Assert.That(result.Y, Is.EqualTo(6));
         }
@@ -56,9 +77,9 @@ public class Tests
         for (int i = 0; i < 100; i++)
         {
             var result = ai.ChooseAttackLocation(
-                new[] { new Ship { Decks = new[] { new Deck(7, 4) }.ToDictionary(x => x.Location) } }, 
+                new[] { new Ship { Decks = new[] { new Deck(7, 4) }.ToDictionary(x => x.Location) } },
                 excludedLocations);
-            
+
             Assert.That(result.X, Is.EqualTo(8));
             Assert.That(result.Y, Is.EqualTo(3));
         }
@@ -71,7 +92,7 @@ public class Tests
         for (int i = 0; i < 100; i++)
         {
             var result = ai.ChooseAttackLocation(
-                new[] { new Ship { Decks = new[] { new Deck(7, 5) }.ToDictionary(x => x.Location) } }, 
+                new[] { new Ship { Decks = new[] { new Deck(7, 5) }.ToDictionary(x => x.Location) } },
                 Array.Empty<Cell>());
 
             Assert.That(result.X, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(9));
@@ -82,7 +103,7 @@ public class Tests
     [Test]
     public void ChooseAttackLocationWithoutShipLocations() =>
         testingEnvironment.AssertException(
-            () => new Ai().ChooseAttackLocation(Array.Empty<Ship>(), Array.Empty<Cell>()), 
+            () => new Ai().ChooseAttackLocation(Array.Empty<Ship>(), Array.Empty<Cell>()),
             "No ships provided for choosing attack location.");
 
     [Test]
@@ -138,5 +159,25 @@ public class Tests
         game.Cancel();
 
         Assert.That(game.State, Is.EqualTo(GameState.Cancelled));
+    }
+
+    private static void TestShips(Ship[] ships, int size)
+    {
+        foreach (var ship in ships) TestShip(ship, size);
+    }
+
+    private static void TestShip(Ship ship, int size)
+    {
+        var decks = ship.Decks.Values;
+        var xDistinctCount = decks.DistinctBy(x => x.Location.X).Count();
+        var yDistinctCount = decks.DistinctBy(x => x.Location.Y).Count();
+        Assert.That(xDistinctCount == 1 || yDistinctCount == 1);
+        var verticalShip = xDistinctCount == 1;
+        var minPoint = verticalShip ? decks.Min(deck => deck.Location.Y) : decks.Min(deck => deck.Location.X);
+        var expectedShip = Enumerable.Range(minPoint, size);
+        var mutableCoordinates =
+            verticalShip ? decks.Select(deck => deck.Location.Y) : decks.Select(deck => deck.Location.X);
+        var difference = expectedShip.Except(mutableCoordinates);
+        Assert.That(difference, Is.Empty);
     }
 }

@@ -17,7 +17,6 @@ public class Ai : IAi
         return choice;
     }
 
-    //todo test
     public Ship[] GenerateShips()
     {
         var result = new List<Ship>();
