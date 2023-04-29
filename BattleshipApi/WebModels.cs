@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+
 // ReSharper disable PropertyCanBeMadeInitOnly.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
@@ -25,9 +26,11 @@ public class AttackRequestModel
 
 public class WhatsUpResponseModel
 {
-    public WhatsUpResponseModel() { }
+    public WhatsUpResponseModel()
+    {
+    }
 
-    public WhatsUpResponseModel(int gameId, GameStateModel gameState, ShipStateModel[]? myFleet, 
+    public WhatsUpResponseModel(int gameId, GameStateModel gameState, ShipStateModel[]? myFleet,
         ShipStateModel[]? opponentFleet, LocationModel[]? myExcludedLocations,
         LocationModel[]? opponentExcludedLocations)
     {
@@ -90,15 +93,11 @@ public class AttackResponse
 {
     public string? opponentName { get; set; }
     public AttackResultTransportModel result { get; set; }
-    //todo RETURN FLEETS
     public LocationModel[] excludedLocations1 { get; set; } = Array.Empty<LocationModel>();
     public LocationModel[] excludedLocations2 { get; set; } = Array.Empty<LocationModel>();
 }
 
-
 #pragma warning restore IDE1006 // Стили именования
-
-
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AttackResultTransportModel

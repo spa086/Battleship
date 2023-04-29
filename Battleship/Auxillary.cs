@@ -26,7 +26,7 @@ public class TestAi : IAi
     public Ship[]? SetupAiShips { get; set; }
     public Queue<Cell> AttackLocationsQueue { get; set; } = new();
 
-    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations) =>
+    public Cell ChooseAttackLocation(Ship[] enemyShips, IEnumerable<Cell> excludedLocations) =>
         AttackLocationsQueue.Dequeue();
 
     public Ship[] GenerateShips() => SetupAiShips ?? throw new Exception($"Ships are not set up.");

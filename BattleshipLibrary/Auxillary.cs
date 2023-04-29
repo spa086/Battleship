@@ -7,7 +7,7 @@ public interface IAi
 {
     Ship[] GenerateShips();
 
-    Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations);
+    Cell ChooseAttackLocation(Ship[] enemyShips, IEnumerable<Cell> excludedLocations);
 }
 
 public static class Log

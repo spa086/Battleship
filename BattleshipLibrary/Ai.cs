@@ -2,9 +2,9 @@
 
 public class Ai : IAi
 {
-    //todo test
-    public Cell ChooseAttackLocation(IEnumerable<Ship> enemyShips, IEnumerable<Cell> excludedLocations)
+    public Cell ChooseAttackLocation(Ship[] enemyShips, IEnumerable<Cell> excludedLocations)
     {
+        if (!enemyShips.Any()) throw new Exception("No ships provided for choosing attack location.");
         var shotDeckLocations =
             enemyShips.SelectMany(x => x.Decks.Values).Where(x => x.Destroyed).Select(x => x.Location);
         var unavailableLocations = shotDeckLocations.Concat(excludedLocations);
@@ -62,6 +62,7 @@ public class Ai : IAi
     private static Cell[] GetSurroundingCells(Cell cell) =>
         new[]
         {
+            //todo use Enumerable.Range() here
             new Cell(cell.X, cell.Y + 1),
             new Cell(cell.X + 1, cell.Y + 1),
             new Cell(cell.X + 1, cell.Y),

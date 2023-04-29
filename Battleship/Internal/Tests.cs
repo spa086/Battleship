@@ -6,7 +6,6 @@ namespace BattleshipTests.Internal;
 
 public class Tests
 {
-    //todo tdd throw if any location list is uninitialized
     //todo tdd throw if ships are adjacent
     private TestableGame game = new(0);
     private readonly GamePool gamePool;
@@ -29,6 +28,15 @@ public class Tests
     {
         gamePool.ClearGames();
         game.StandardSetup();
+    }
+
+    [Test]
+    public void ChooseAttackLocationSimple()
+    {
+        var ai = new Ai();
+        
+        testingEnvironment.AssertException(() => ai.ChooseAttackLocation(Array.Empty<Ship>(), Array.Empty<Cell>()), 
+            "No ships provided for choosing attack location.");
     }
 
     [Test]
