@@ -87,7 +87,7 @@ public class Controller
     {
         var isHost = userId == game.Host.Id;
         var myFleet = isHost ? game.Host.Fleet : game.Guest!.Fleet;
-        var opponentFleet = isHost ? game.Guest.Fleet : game.Guest.Fleet;
+        var opponentFleet = isHost ? game.Guest.Fleet : game.Host.Fleet;
         return new WhatsUpResponseModel(game.Id, GetStateModel(userId, game), ToFleetStateModel(myFleet),
             ToFleetStateModel(opponentFleet), null, null);
     }

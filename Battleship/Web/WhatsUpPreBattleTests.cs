@@ -31,12 +31,12 @@ public class WhatsUpPreBattleTests
     public void GuestGetsFleetOnFleetsCreation()
     {
         var game = testingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 31, 32);
-        game.SetupFleets(null, 
-            new[] { new Ship { Decks = new[] { new Deck(4, 6) }.ToDictionary(x => x.Location) } });
+        game.SetupFleets(null, Array.Empty<Ship>());
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(32));
         
         Assert.That(result.myFleet, Is.Not.Null);
+        Assert.That(result.opponentFleet, Is.Null);
     }
 
     [Test]
