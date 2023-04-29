@@ -138,8 +138,6 @@ public class AttackTests
         game.Attack(0, new Cell(0, 0));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
-        //todo tdd player ship destruction
-        //todo check 3 times
         game.Host.Fleet!.Where(ship => ship.Decks.All(deck => !deck.Value.Destroyed)).AssertSingle();
     }
 

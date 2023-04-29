@@ -85,7 +85,6 @@ public class ShipCreationTests
 
         game.CreateAndSaveShips(1, new[] { new Ship { Decks = decks } });
 
-        //todo use separate collection
         game.Host.Fleet!.AssertSingle();
         Assert.That(decks, Has.Count.EqualTo(2));
         var orderedDecks = decks.Values.OrderBy(x => x.Location.Y).ToArray();

@@ -55,8 +55,6 @@ public class WhatsUpBattleTests
         Assert.That(result.gameState, Is.EqualTo(expectedModel));
     }
 
-    //todo make Host-Guest enum??
-
     [Test]
     public void OpponentExcludedLocations()
     {
