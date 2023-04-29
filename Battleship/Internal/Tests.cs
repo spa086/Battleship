@@ -33,12 +33,16 @@ public class Tests
     [Test]
     public void ChooseAttackLocationSimple()
     {
-        var result = new Ai().ChooseAttackLocation(
-            new[] { new Ship { Decks = new[] { new Deck(7, 5) }.ToDictionary(x => x.Location) } }, 
-            Array.Empty<Cell>());
+        var ai = new Ai();
+        for (int i = 0; i < 100; i++)
+        {
+            var result = ai.ChooseAttackLocation(
+                new[] { new Ship { Decks = new[] { new Deck(7, 5) }.ToDictionary(x => x.Location) } }, 
+                Array.Empty<Cell>());
 
-        Assert.That(result.X, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(9));
-        Assert.That(result.Y, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(9));
+            Assert.That(result.X, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(9));
+            Assert.That(result.Y, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(9));
+        }
     }
 
     [Test]
