@@ -31,7 +31,7 @@ public class ShipCreationTests
     {
         game = testingEnvironment.CreateNewTestableGame(GameState.BothPlayersCreateFleets, 1, 2);
 
-        game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
+        game.SaveShips(2, CreateSimpleShip(2, 2));
 
         TestingEnvironment.SleepMinimalTime();
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(29));
@@ -44,7 +44,7 @@ public class ShipCreationTests
             GameState.OnePlayerCreatesFleet, 1, 2, false);
         game.SetupSimpleFleets(null, new[] { new Cell(2, 2) });
 
-        game.CreateAndSaveShips(1, CreateSimpleShip(1, 1));
+        game.SaveShips(1, CreateSimpleShip(1, 1));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
     }
@@ -55,7 +55,7 @@ public class ShipCreationTests
         game = testingEnvironment.CreateNewTestableGame(
             GameState.BothPlayersCreateFleets, 1, 2, false);
 
-        game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
+        game.SaveShips(2, CreateSimpleShip(2, 2));
 
 
         Assert.That(game.State, Is.EqualTo(GameState.OnePlayerCreatesFleet));
@@ -66,7 +66,7 @@ public class ShipCreationTests
     {
         game.SetupSimpleFleets(new[] { new Cell(1, 1) });
 
-        game.CreateAndSaveShips(2, CreateSimpleShip(2, 2));
+        game.SaveShips(2, CreateSimpleShip(2, 2));
 
         Assert.That(game.State, Is.EqualTo(GameState.HostTurn));
         Assert.That(game.TimerSecondsLeft, Is.EqualTo(30));
@@ -83,7 +83,7 @@ public class ShipCreationTests
         game.SetupSimpleFleets(null);
         var decks = new[] { new Deck(1, 1), new Deck(1, 2) }.ToDictionary(x => x.Location);
 
-        game.CreateAndSaveShips(1, new[] { new Ship { Decks = decks } });
+        game.SaveShips(1, new[] { new Ship { Decks = decks } });
 
         game.Host.Fleet!.AssertSingle();
         Assert.That(decks, Has.Count.EqualTo(2));

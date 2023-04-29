@@ -28,12 +28,24 @@ public class WhatsUpPreBattleTests
     public void SetUp() => gamePool.ClearGames();
 
     [Test]
+    public void GuestGetsFleetOnFleetsCreation()
+    {
+        var game = testingEnvironment.CreateNewTestableGame(GameState.OnePlayerCreatesFleet, 31, 32);
+        game.SetupFleets(null, 
+            new[] { new Ship { Decks = new[] { new Deck(4, 6) }.ToDictionary(x => x.Location) } });
+
+        var result = controller.WhatsUp(CreateWhatsUpRequestModel(32));
+        
+        Assert.That(result.myFleet, Is.Not.Null);
+    }
+
+    [Test]
     public void WhatsUpOnCancelledGame()
     {
         testingEnvironment.CreateNewTestableGame(GameState.Cancelled, 33);
 
         var result = controller.WhatsUp(CreateWhatsUpRequestModel(33));
-        
+
         Assert.That(result.gameState, Is.EqualTo(GameStateModel.Cancelled));
     }
 
@@ -53,7 +65,7 @@ public class WhatsUpPreBattleTests
     {
         testRandomFleet.SetupAiShips = Array.Empty<Ship>();
         testMatchingTime.SetupSeconds = 100;
-        
+
         var result = controller.NewGame(new NewGameRequestModel { userId = 1 });
 
         Assert.That(result.secondsLeft, Is.EqualTo(100));

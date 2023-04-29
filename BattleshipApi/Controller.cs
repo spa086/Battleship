@@ -59,7 +59,7 @@ public class Controller
             throw new Exception($"Two decks are at the same place: {firstGroupWithDuplicates.Key}.");
         if (request.userId == game.Host.Id) game.Host.Name = request.userName;
         else if (request.userId == game.Guest!.Id) game.Guest!.Name = request.userName;
-        game.CreateAndSaveShips(request.userId, request.ships.Select(ToShip).ToArray());
+        game.SaveShips(request.userId, request.ships.Select(ToShip).ToArray());
         Log.ger.Info($"Ships were created for user [{request.userId}|{request.userName}].");
         return game.Host.Id == request.userId;
     }
@@ -83,9 +83,14 @@ public class Controller
         };
     }
 
-    private static WhatsUpResponseModel WhatsUpBeforeBattle(int userId, Game game) =>
-        new(game.Id, GetStateModel(userId, game), ToFleetStateModel(game.Host.Fleet),
-            ToFleetStateModel(game.Guest!.Fleet), null, null);
+    private static WhatsUpResponseModel WhatsUpBeforeBattle(int userId, Game game)
+    {
+        var isHost = userId == game.Host.Id;
+        var myFleet = isHost ? game.Host.Fleet : game.Guest!.Fleet;
+        var opponentFleet = isHost ? game.Guest.Fleet : game.Guest.Fleet;
+        return new WhatsUpResponseModel(game.Id, GetStateModel(userId, game), ToFleetStateModel(myFleet),
+            ToFleetStateModel(opponentFleet), null, null);
+    }
 
     private static LocationModel[] GetMyExcludedLocations(Game game, bool forFirstUser) =>
         forFirstUser

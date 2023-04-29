@@ -62,10 +62,8 @@ public class Game
         SetShipsCreationTimer(60);
     }
 
-    public void CreateAndSaveShips(int userId, IEnumerable<Ship> ships)
+    public void SaveShips(int userId, IEnumerable<Ship> ships)
     {
-        var battleStarts = (userId == Host.Id && Guest!.Fleet is not null) ||
-                           (userId == Guest!.Id && Host.Fleet is not null);
         var newShips = ships.Select(ship => new Ship
         {
             Decks = ship.Decks.Keys
@@ -73,7 +71,8 @@ public class Game
                 .ToDictionary(x => x.Location)
         }).ToArray();
         UpdateState(userId, newShips);
-        if (battleStarts) SetBattleTimer();
+        if ((userId == Host.Id && Guest!.Fleet is not null) || (userId == Guest!.Id && Host.Fleet is not null)) 
+            SetBattleTimer();
     }
 
     public AttackResult Attack(int userId, Cell attackedLocation)
