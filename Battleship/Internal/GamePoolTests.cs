@@ -28,6 +28,16 @@ public class GamePoolTests
         gamePool.ClearGames();
         game.StandardSetup();
     }
+
+    [TestCase(GameState.GuestWon)]
+    [TestCase(GameState.HostWon)]
+    [TestCase(GameState.Cancelled)]
+    public void CantJoinFinishedGame(GameState state)
+    {
+        var game = testingEnvironment.CreateNewTestableGame(state, 4);
+
+        Assert.False(gamePool.StartPlaying(4));
+    }
     
     [TestCase(GameState.HostTurn)]
     [TestCase(GameState.GuestTurn)]

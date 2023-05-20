@@ -73,21 +73,21 @@ public class GamePool
     public bool StartPlaying(int userId)
     {
         var allGames = games.Values;
-        var ongoingGamesWithUser = allGames
-            .Where(x => x.Host.Id == userId || x.Guest?.Id == userId).Where(x => !x.ItsOver).ToArray();
+        var ongoingGamesWithUser = allGames.Where(x => x.Host.Id == userId || x.Guest?.Id == userId)
+            .Where(x => !x.ItsOver).ToArray();
         if (ongoingGamesWithUser.Any())
             throw new Exception($"Can't start playing: you already participate in " +
                                 $"ongoing game id=[{ongoingGamesWithUser.First().Id}].");
-        var gameToJoin = allGames.FirstOrDefault(x => x.Guest is null);
-        if (gameToJoin is null)
+        var gameToJoin = allGames.FirstOrDefault(x => x.Guest is null && !x.ItsOver);
+        if (gameToJoin is not null)
         {
-            var newGame = new Game(userId, ai, matchingTime.Seconds());
-            games[newGame.Id] = newGame;
-            return false;
+            gameToJoin.Start(userId);
+            return true;
         }
 
-        gameToJoin.Start(userId);
-        return true;
+        var newGame = new Game(userId, ai, matchingTime.Seconds());
+        games[newGame.Id] = newGame;
+        return false;
     }
 
     private readonly Dictionary<int, Game> games = new();
