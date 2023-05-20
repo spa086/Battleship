@@ -59,10 +59,9 @@ public class Ai : IAi
     }
 
     private static Cell[] GetSurroundingCells(Cell cell) =>
-        (from x in Enumerable.Range(-1, 3)
-            join y in Enumerable.Range(-1, 3) on true equals true
-            where x != 0 || y != 0
-            select new Cell(x, y)).ToArray();
+        (from dx in Enumerable.Range(-1, 3)
+           join dy in Enumerable.Range(-1, 3) on true equals true
+            select new Cell(cell.X + dx, cell.Y + dy)).ToArray();
 
     private static List<Direction> GetAvailableDirections(Cell initialLocation, int decksCount)
     {

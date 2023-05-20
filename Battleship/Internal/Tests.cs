@@ -27,6 +27,21 @@ public class Tests
     }
 
     [Test]
+    public void GeneratedDecksContainNoDuplicates()
+    {
+        var ai = new Ai();
+
+        for (int i = 0; i < 100; i++)
+        {
+            var result = ai.GenerateShips();
+
+            var groupsWithDuplicates = result.SelectMany(x => x.Decks.Keys)
+                .GroupBy(deck => new Cell(deck.X, deck.Y)).Where(x => x.Count() > 1).ToArray();
+            Assert.That(groupsWithDuplicates, Is.Empty);
+        }
+    }
+
+    [Test]
     public void FleetGenerationSimple()
     {
         var ai = new Ai();
@@ -35,14 +50,14 @@ public class Tests
         {
             var result = ai.GenerateShips();
 
-            Assert.That(result.Length, Is.EqualTo(6));
+            Assert.That(result, Has.Length.EqualTo(6));
             var fourDecker = result.Where(x => x.Decks.Values.Count == 4).AssertSingle();
             TestShip(fourDecker, 4);
             var tripleDeckers = result.Where(x => x.Decks.Values.Count == 3).ToArray();
-            Assert.That(tripleDeckers.Length, Is.EqualTo(2));
+            Assert.That(tripleDeckers, Has.Length.EqualTo(2));
             TestShips(tripleDeckers, 3);
             var doubleDeckers = result.Where(x => x.Decks.Values.Count == 2).ToArray();
-            Assert.That(doubleDeckers.Length, Is.EqualTo(3));
+            Assert.That(doubleDeckers, Has.Length.EqualTo(3));
             TestShips(doubleDeckers, 2);
         }
     }
